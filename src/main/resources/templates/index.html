@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Складской учёт — Нефтегаз</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <h3>Складской учёт</h3>
+        <nav>
+            <a th:href="@{/}">Главная</a>
+            <a th:href="@{/warehouses}">Склады</a>
+            <a th:href="@{/nomenclature}">Номенклатура</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <h1>Панель управления складским учётом</h1>
+        <p>Выберите раздел в меню слева, чтобы начать работу.</p>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Склады</h3>
+                <p>Управление складами: центральные и удалённые площадки.</p>
+                <a th:href="@{/warehouses}" class="btn">Перейти</a>
+            </div>
+            <div class="card">
+                <h3>Номенклатура</h3>
+                <p>Справочник материалов, оборудования и инструментов.</p>
+                <a th:href="@{/nomenclature}" class="btn">Перейти</a>
+            </div>
+            <div class="card">
+                <h3>Отчёты</h3>
+                <p>Остатки, движение, неликвиды, оборачиваемость.</p>
+                <span class="btn" style="opacity:0.5; pointer-events:none;">Скоро</span>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
