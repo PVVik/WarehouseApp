@@ -1,7 +1,9 @@
-CREATE TABLE IF NOT EXISTS warehouse (
+CREATE TABLE warehouse (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    address TEXT,
-    type VARCHAR(50) NOT NULL CHECK (type IN ('CENTRAL', 'REMOTE')),
-    active BOOLEAN NOT NULL DEFAULT TRUE
+    name VARCHAR(100) NOT NULL,
+    address VARCHAR(255),
+    type VARCHAR(20) NOT NULL CHECK (type IN ('CENTRAL', 'REMOTE')),
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
 );

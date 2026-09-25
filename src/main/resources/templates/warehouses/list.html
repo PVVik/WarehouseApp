@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Склады</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 960px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f5f5f5; }
+        tr:hover { background-color: #fafafa; }
+        .active { color: green; font-weight: bold; }
+        .inactive { color: #999; }
+        .btn { padding: 6px 14px; text-decoration: none; color: white; border-radius: 4px; font-size: 14px; }
+        .btn-create { background-color: #28a745; display: inline-block; margin-bottom: 15px; padding: 8px 16px; }
+        .btn-edit { background-color: #007bff; }
+        .btn-delete { background-color: #dc3545; border: none; cursor: pointer; }
+        .btn-view { background-color: #6c757d; }
+    </style>
+</head>
+<body>
+
+<h1>Склады</h1>
+
+<a th:href="@{/warehouse/new}" class="btn btn-create">+ Добавить склад</a>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Название</th>
+        <th>Адрес</th>
+        <th>Тип</th>
+        <th>Статус</th>
+        <th>Действия</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="w : ${warehouses}">
+        <td th:text="${w.id}"></td>
+        <td th:text="${w.name}"></td>
+        <td th:text="${w.address}"></td>
+        <td th:text="${w.type}"></td>
+        <td>
+            <span th:if="${w.active}" class="active">Активен</span>
+            <span th:unless="${w.active}" class="inactive">Неактивен</span>
+        </td>
+        <td>
+            <a th:href="@{/warehouse/{id}(id=${w.id})}" class="btn btn-view">Просмотр</a>
+            <a th:href="@{/warehouse/{id}/edit(id=${w.id})}" class="btn btn-edit">Редактировать</a>
+            <form th:action="@{/warehouse/{id}/delete(id=${w.id})}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-delete"
+                        onclick="return confirm('Удалить склад?')">Удалить</button>
+            </form>
+        </td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(warehouses)}">
+        <td colspan="6" style="text-align:center;">Складов пока нет</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
