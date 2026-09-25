@@ -1,0 +1,389 @@
+{
+  "info": {
+    "_postman_id": "warehouse-sprint1-api-v2",
+    "name": "WarehouseApp — Sprint 1: Warehouses API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Success",
+      "item": [
+        {
+          "name": "POST /warehouse/api — создать склад",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"warehouseId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Центральный склад\",\n  \"address\": \"г. Москва, ул. Промышленная, д. 15\",\n  \"type\": \"CENTRAL\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api"]
+            }
+          }
+        },
+        {
+          "name": "GET /warehouse/api — список всех складов",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is an array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api"]
+            }
+          }
+        },
+        {
+          "name": "GET /warehouse/api/{id} — получить склад по ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has name\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('name');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api/{{warehouseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api", "{{warehouseId}}"]
+            }
+          }
+        },
+        {
+          "name": "PATCH /warehouse/api — обновить склад",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has updated name\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('name');",
+                  "    pm.expect(jsonData.name).to.eql('Центральный склад (обновлён)');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{warehouseId}},\n  \"name\": \"Центральный склад (обновлён)\",\n  \"address\": \"г. Москва, ул. Новая, д. 20\",\n  \"type\": \"REMOTE\",\n  \"active\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api"]
+            }
+          }
+        },
+        {
+          "name": "DELETE /warehouse/api/{id} — удалить склад",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api/{{warehouseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api", "{{warehouseId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors",
+      "item": [
+        {
+          "name": "POST /warehouse/api — 400 (пустое имя)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"address\": \"г. Москва, ул. Тестовая, д. 1\",\n  \"type\": \"CENTRAL\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api"]
+            }
+          }
+        },
+        {
+          "name": "POST /warehouse/api — 400 (пустой адрес)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Склад без адреса\",\n  \"address\": \"\",\n  \"type\": \"CENTRAL\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api"]
+            }
+          }
+        },
+        {
+          "name": "POST /warehouse/api — 400 (невалидный type)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Склад с плохим типом\",\n  \"address\": \"г. Москва, ул. Ошибка, д. 1\",\n  \"type\": \"INVALID_TYPE\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api"]
+            }
+          }
+        },
+        {
+          "name": "POST /warehouse/api — 400 (пустое тело)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api"]
+            }
+          }
+        },
+        {
+          "name": "GET /warehouse/api/99999 — 404 (склад не найден)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test(\"Response contains error message\", function () {",
+                  "    var body = pm.response.text();",
+                  "    pm.expect(body).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api/99999",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api", "99999"]
+            }
+          }
+        },
+        {
+          "name": "PATCH /warehouse/api — 404 (склад не найден)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 99999,\n  \"name\": \"Несуществующий склад\",\n  \"address\": \"г. Москва, ул. Нигде, д. 0\",\n  \"type\": \"CENTRAL\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api"]
+            }
+          }
+        },
+        {
+          "name": "DELETE /warehouse/api/99999 — 404 (склад не найден)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api/99999",
+              "host": ["{{baseUrl}}"],
+              "path": ["warehouse", "api", "99999"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "warehouseId",
+      "value": "1"
+    }
+  ]
+}

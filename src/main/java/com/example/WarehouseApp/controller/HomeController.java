@@ -8,6 +8,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String index() {
-        return "index"; // Thymeleaf автоматически добавит .html и найдёт в templates/
+        return "index";
     }
 }

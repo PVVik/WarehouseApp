@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Склад</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .field { margin-top: 15px; }
+        .field strong { display: inline-block; width: 120px; }
+        .active { color: green; font-weight: bold; }
+        .inactive { color: #999; font-weight: bold; }
+        .actions { margin-top: 30px; }
+        .btn { padding: 8px 16px; text-decoration: none; border-radius: 4px; color: white; font-size: 14px; }
+        .btn-edit { background-color: #007bff; }
+        .btn-back { background-color: #6c757d; margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+<h1 th:text="${warehouse.name}">Склад</h1>
+
+<div class="field"><strong>ID:</strong> <span th:text="${warehouse.id}"></span></div>
+<div class="field"><strong>Адрес:</strong> <span th:text="${warehouse.address}"></span></div>
+<div class="field"><strong>Тип:</strong> <span th:text="${warehouse.type}"></span></div>
+<div class="field">
+    <strong>Статус:</strong>
+    <span th:if="${warehouse.active}" class="active">Активен</span>
+    <span th:unless="${warehouse.active}" class="inactive">Неактивен</span>
+</div>
+
+<div class="actions">
+    <a th:href="@{/warehouse/{id}/edit(id=${warehouse.id})}" class="btn btn-edit">Редактировать</a>
+    <a th:href="@{/warehouse}" class="btn btn-back">Назад к списку</a>
+</div>
+
+</body>
+</html>
