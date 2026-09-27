@@ -1,0 +1,9 @@
+CREATE TABLE nomenclature (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    sku VARCHAR(100) NOT NULL UNIQUE,
+    category VARCHAR NOT NULL CHECK (category IN ('MATERIAL', 'EQUIPMENT', 'TOOL', 'SIZ', 'FUEL')),
+    unit VARCHAR NOT NULL CHECK (unit IN ('METER', 'LITER', 'KILOGRAM', 'PIECE')),
+    type VARCHAR NOT NULL CHECK (type IN ('BATCH', 'SERIAL', 'QUANTITY')),
+    active BOOLEAN NOT NULL
+);

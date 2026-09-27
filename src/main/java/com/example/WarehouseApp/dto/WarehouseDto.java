@@ -1,6 +1,6 @@
 package com.example.WarehouseApp.dto;
 
-import com.example.WarehouseApp.model.Type;
+import com.example.WarehouseApp.model.WarehouseType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -21,7 +21,7 @@ public class WarehouseDto {
     private String address;
 
     @NotNull(message = "Тип склада обязателен")
-    private Type type;
+    private WarehouseType type;
 
     private Boolean active;
 

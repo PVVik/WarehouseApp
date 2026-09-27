@@ -1,4 +1,4 @@
-package com.example.WarehouseApp.service;
+package com.example.WarehouseApp.service.warehouse;
 
 import com.example.WarehouseApp.dto.WarehouseDto;
 

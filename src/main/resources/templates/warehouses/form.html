@@ -35,7 +35,7 @@
     <label for="type">Тип склада</label>
     <select id="type" th:field="*{type}">
         <option value="" selected disabled>Выберите тип</option>
-        <option th:each="t : ${T(com.example.WarehouseApp.model.Type).values()}"
+        <option th:each="t : ${T(com.example.WarehouseApp.model.WarehouseType).values()}"
                 th:value="${t}" th:text="${t}"></option>
     </select>
     <span class="error" th:if="${#fields.hasErrors('type')}" th:errors="*{type}"></span>

@@ -1,7 +1,7 @@
 package com.example.WarehouseApp.controller;
 
 import com.example.WarehouseApp.dto.WarehouseDto;
-import com.example.WarehouseApp.service.WarehouseService;
+import com.example.WarehouseApp.service.warehouse.WarehouseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

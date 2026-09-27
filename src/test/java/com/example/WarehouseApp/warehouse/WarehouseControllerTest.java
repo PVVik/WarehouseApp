@@ -3,8 +3,8 @@ package com.example.WarehouseApp.warehouse;
 import com.example.WarehouseApp.controller.WarehouseController;
 import com.example.WarehouseApp.dto.WarehouseDto;
 import com.example.WarehouseApp.exception.NotFoundException;
-import com.example.WarehouseApp.model.Type;
-import com.example.WarehouseApp.service.WarehouseService;
+import com.example.WarehouseApp.model.WarehouseType;
+import com.example.WarehouseApp.service.warehouse.WarehouseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +40,14 @@ class WarehouseControllerTest {
         WarehouseDto request = new WarehouseDto();
         request.setName("Склад 1");
         request.setAddress("г. Москва, ул. Ленина, 1");
-        request.setType(Type.CENTRAL);
+        request.setType(WarehouseType.CENTRAL);
         request.setActive(true);
 
         WarehouseDto response = new WarehouseDto();
         response.setId(1L);
         response.setName("Склад 1");
         response.setAddress("г. Москва, ул. Ленина, 1");
-        response.setType(Type.CENTRAL);
+        response.setType(WarehouseType.CENTRAL);
         response.setActive(true);
 
         when(warehouseService.addWarehouse(any(WarehouseDto.class))).thenReturn(response);
@@ -67,7 +67,7 @@ class WarehouseControllerTest {
         WarehouseDto request = new WarehouseDto();
         request.setName("");
         request.setAddress("г. Москва");
-        request.setType(Type.REMOTE);
+        request.setType(WarehouseType.REMOTE);
         request.setActive(true);
 
         mockMvc.perform(post("/warehouse/api")
@@ -83,7 +83,7 @@ class WarehouseControllerTest {
         WarehouseDto request = new WarehouseDto();
         request.setName("Склад");
         request.setAddress("");
-        request.setType(Type.REMOTE);
+        request.setType(WarehouseType.REMOTE);
         request.setActive(true);
 
         mockMvc.perform(post("/warehouse/api")
@@ -99,13 +99,13 @@ class WarehouseControllerTest {
         WarehouseDto dto1 = new WarehouseDto();
         dto1.setId(1L);
         dto1.setName("Склад A");
-        dto1.setType(Type.CENTRAL);
+        dto1.setType(WarehouseType.CENTRAL);
         dto1.setActive(true);
 
         WarehouseDto dto2 = new WarehouseDto();
         dto2.setId(2L);
         dto2.setName("Склад B");
-        dto2.setType(Type.REMOTE);
+        dto2.setType(WarehouseType.REMOTE);
         dto2.setActive(false);
 
         when(warehouseService.getWarehouses()).thenReturn(List.of(dto1, dto2));
@@ -123,7 +123,7 @@ class WarehouseControllerTest {
         dto.setId(1L);
         dto.setName("Склад 1");
         dto.setAddress("Адрес 1");
-        dto.setType(Type.CENTRAL);
+        dto.setType(WarehouseType.CENTRAL);
         dto.setActive(true);
 
         when(warehouseService.getWarehouseById(1L)).thenReturn(dto);
@@ -154,14 +154,14 @@ class WarehouseControllerTest {
         request.setId(1L);
         request.setName("Обновлённый склад");
         request.setAddress("Новый адрес");
-        request.setType(Type.REMOTE);
+        request.setType(WarehouseType.REMOTE);
         request.setActive(false);
 
         WarehouseDto response = new WarehouseDto();
         response.setId(1L);
         response.setName("Обновлённый склад");
         response.setAddress("Новый адрес");
-        response.setType(Type.REMOTE);
+        response.setType(WarehouseType.REMOTE);
         response.setActive(false);
 
         when(warehouseService.updateWarehouse(any(WarehouseDto.class))).thenReturn(response);
@@ -181,7 +181,7 @@ class WarehouseControllerTest {
         request.setId(999L);
         request.setName("Несуществующий склад");
         request.setAddress("Нигде");
-        request.setType(Type.CENTRAL);
+        request.setType(WarehouseType.CENTRAL);
         request.setActive(true);
 
         when(warehouseService.updateWarehouse(any(WarehouseDto.class)))

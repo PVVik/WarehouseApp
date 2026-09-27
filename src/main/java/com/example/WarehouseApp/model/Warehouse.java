@@ -26,19 +26,19 @@ public class Warehouse {
     private String address;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type")
-    private Type type;
+    @Column(name = "type", nullable = false)
+    private WarehouseType type;
 
-    @Column(name = "active")
+    @Column(name = "active", nullable = false)
     private boolean isActive;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public Warehouse(String name, String address, Type type, boolean isActive, LocalDateTime createdAt,
+    public Warehouse(String name, String address, WarehouseType type, boolean isActive, LocalDateTime createdAt,
                      LocalDateTime updatedAt) {
         this.name = name;
         this.address = address;
