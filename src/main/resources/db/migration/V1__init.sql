@@ -1,7 +1,7 @@
 CREATE TABLE warehouse (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    address VARCHAR(255),
+    address VARCHAR(255) NOT NULL,
     type VARCHAR(20) NOT NULL CHECK (type IN ('CENTRAL', 'REMOTE')),
     active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL,

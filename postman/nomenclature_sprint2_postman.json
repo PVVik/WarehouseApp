@@ -1,0 +1,938 @@
+{
+  "info": {
+    "_postman_id": "nomenclature-sprint2-api-updated",
+    "name": "WarehouseApp — Sprint 2: Nomenclature API (updated)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Success",
+      "item": [
+        {
+          "name": "POST /nomenclature/api — создать позицию",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"nomenclatureId\", jsonData.id);",
+                  "});",
+                  "pm.test(\"Response has sku\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('sku');",
+                  "    pm.collectionVariables.set(\"nomenclatureSku\", jsonData.sku);",
+                  "});",
+                  "pm.test(\"Response has name\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('name');",
+                  "    pm.expect(jsonData.name).to.eql('Болт М8 оцинкованный');",
+                  "});",
+                  "pm.test(\"Response has stuffCategory\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('stuffCategory');",
+                  "    pm.expect(jsonData.stuffCategory).to.eql('MATERIAL');",
+                  "});",
+                  "pm.test(\"Response has unitOfMeasure\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('unitOfMeasure');",
+                  "    pm.expect(jsonData.unitOfMeasure).to.eql('PIECE');",
+                  "});",
+                  "pm.test(\"Response has inventoryType\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('inventoryType');",
+                  "    pm.expect(jsonData.inventoryType).to.eql('QUANTITY');",
+                  "});",
+                  "pm.test(\"Response has active\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('active');",
+                  "    pm.expect(jsonData.active).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Болт М8 оцинкованный\",\n  \"sku\": \"BLT-M8-ZN-001\",\n  \"stuffCategory\": \"MATERIAL\",\n  \"unitOfMeasure\": \"PIECE\",\n  \"inventoryType\": \"QUANTITY\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /nomenclature/api — пагинация по умолчанию",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has content array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('content');",
+                  "    pm.expect(jsonData.content).to.be.an('array');",
+                  "});",
+                  "pm.test(\"Default page size is 20\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('size');",
+                  "    pm.expect(jsonData.size).to.eql(20);",
+                  "});",
+                  "pm.test(\"Default page number is 0\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('number');",
+                  "    pm.expect(jsonData.number).to.eql(0);",
+                  "});",
+                  "pm.test(\"Has totalElements\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('totalElements');",
+                  "});",
+                  "pm.test(\"Has totalPages\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('totalPages');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /nomenclature/api?page=1&size=5 — кастомная страница",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Page size is 5\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.size).to.eql(5);",
+                  "});",
+                  "pm.test(\"Page number is 1\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.number).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api?page=1&size=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /nomenclature/api?sort=name,asc — сортировка по имени",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Content is sorted by name ascending\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var content = jsonData.content;",
+                  "    if (content.length > 1) {",
+                  "        for (var i = 1; i < content.length; i++) {",
+                  "            pm.expect(content[i].name >= content[i-1].name,",
+                  "                'names should be in ascending order').to.be.true;",
+                  "        }",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api?sort=name,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "name,asc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /nomenclature/api?sort=stuffCategory,desc&sort=name,asc — составная сортировка",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Content is sorted by category desc then name asc\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var content = jsonData.content;",
+                  "    if (content.length > 1) {",
+                  "        for (var i = 1; i < content.length; i++) {",
+                  "            var catCompare = content[i].stuffCategory.localeCompare(content[i-1].stuffCategory);",
+                  "            if (catCompare === 0) {",
+                  "                pm.expect(content[i].name >= content[i-1].name,",
+                  "                    'within same category names should be ascending').to.be.true;",
+                  "            } else {",
+                  "                pm.expect(catCompare <= 0,",
+                  "                    'categories should be descending').to.be.true;",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api?sort=stuffCategory,desc&sort=name,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "stuffCategory,desc"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /nomenclature/api?search=name:Болт — поиск по имени",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has content\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('content');",
+                  "    pm.expect(jsonData.content).to.be.an('array');",
+                  "    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+                  "});",
+                  "pm.test(\"All results contain 'болт' in name (case-insensitive)\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var content = jsonData.content;",
+                  "    for (var i = 0; i < content.length; i++) {",
+                  "        pm.expect(content[i].name.toLowerCase()).to.include('болт');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api?search=name:Болт",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "name:Болт"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /nomenclature/api?search=name:болт,stuffCategory:MATERIAL — составной поиск",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has content\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('content');",
+                  "    pm.expect(jsonData.content).to.be.an('array');",
+                  "});",
+                  "pm.test(\"All results are MATERIAL\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var content = jsonData.content;",
+                  "    for (var i = 0; i < content.length; i++) {",
+                  "        pm.expect(content[i].stuffCategory).to.eql('MATERIAL');",
+                  "    }",
+                  "});",
+                  "pm.test(\"All results contain 'болт' in name (case-insensitive)\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var content = jsonData.content;",
+                  "    for (var i = 0; i < content.length; i++) {",
+                  "        pm.expect(content[i].name.toLowerCase()).to.include('болт');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api?search=name:болт,stuffCategory:MATERIAL",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "name:болт,stuffCategory:MATERIAL"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /nomenclature/api/by-id/{id} — получить по ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has name\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('name');",
+                  "    pm.expect(jsonData.name).to.eql('Болт М8 оцинкованный');",
+                  "});",
+                  "pm.test(\"Response has sku\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('sku');",
+                  "    pm.expect(jsonData.sku).to.eql('BLT-M8-ZN-001');",
+                  "});",
+                  "pm.test(\"Response has stuffCategory\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('stuffCategory');",
+                  "    pm.expect(jsonData.stuffCategory).to.eql('MATERIAL');",
+                  "});",
+                  "pm.test(\"Response has unitOfMeasure\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('unitOfMeasure');",
+                  "    pm.expect(jsonData.unitOfMeasure).to.eql('PIECE');",
+                  "});",
+                  "pm.test(\"Response has inventoryType\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('inventoryType');",
+                  "    pm.expect(jsonData.inventoryType).to.eql('QUANTITY');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api/by-id/{{nomenclatureId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api",
+                "by-id",
+                "{{nomenclatureId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /nomenclature/api/by-sku/{sku} — получить по SKU",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has matching sku\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('sku');",
+                  "    pm.expect(jsonData.sku).to.eql('BLT-M8-ZN-001');",
+                  "});",
+                  "pm.test(\"Response has name\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('name');",
+                  "    pm.expect(jsonData.name).to.eql('Болт М8 оцинкованный');",
+                  "});",
+                  "pm.test(\"Response has stuffCategory\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('stuffCategory');",
+                  "    pm.expect(jsonData.stuffCategory).to.eql('MATERIAL');",
+                  "});",
+                  "pm.test(\"Response has unitOfMeasure\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('unitOfMeasure');",
+                  "    pm.expect(jsonData.unitOfMeasure).to.eql('PIECE');",
+                  "});",
+                  "pm.test(\"Response has inventoryType\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('inventoryType');",
+                  "    pm.expect(jsonData.inventoryType).to.eql('QUANTITY');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api/by-sku/{{nomenclatureSku}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api",
+                "by-sku",
+                "{{nomenclatureSku}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /nomenclature/api — обновить позицию",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has updated name\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('name');",
+                  "    pm.expect(jsonData.name).to.eql('Болт М8 оцинкованный (обновлён)');",
+                  "});",
+                  "pm.test(\"Response has same sku\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('sku');",
+                  "    pm.expect(jsonData.sku).to.eql('BLT-M8-ZN-001');",
+                  "});",
+                  "pm.test(\"Response has updated stuffCategory\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('stuffCategory');",
+                  "    pm.expect(jsonData.stuffCategory).to.eql('EQUIPMENT');",
+                  "});",
+                  "pm.test(\"Response has updated unitOfMeasure\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('unitOfMeasure');",
+                  "    pm.expect(jsonData.unitOfMeasure).to.eql('KILOGRAM');",
+                  "});",
+                  "pm.test(\"Response has updated inventoryType\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('inventoryType');",
+                  "    pm.expect(jsonData.inventoryType).to.eql('BATCH');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{nomenclatureId}},\n  \"name\": \"Болт М8 оцинкованный (обновлён)\",\n  \"sku\": \"BLT-M8-ZN-001\",\n  \"stuffCategory\": \"EQUIPMENT\",\n  \"unitOfMeasure\": \"KILOGRAM\",\n  \"inventoryType\": \"BATCH\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors",
+      "item": [
+        {
+          "name": "POST /nomenclature/api — 400 (пустое имя)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"sku\": \"EMPTY-NAME-001\",\n  \"stuffCategory\": \"MATERIAL\",\n  \"unitOfMeasure\": \"PIECE\",\n  \"inventoryType\": \"QUANTITY\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — 400 (пустой SKU)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Перчатки защитные\",\n  \"sku\": \"\",\n  \"stuffCategory\": \"SIZ\",\n  \"unitOfMeasure\": \"PIECE\",\n  \"inventoryType\": \"QUANTITY\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — 400 (null stuffCategory)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Дизельное топливо\",\n  \"sku\": \"FUEL-DIESEL-001\",\n  \"stuffCategory\": null,\n  \"unitOfMeasure\": \"LITER\",\n  \"inventoryType\": \"BATCH\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — 400 (null unitOfMeasure)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Кабель медный\",\n  \"sku\": \"CAB-CU-001\",\n  \"stuffCategory\": \"EQUIPMENT\",\n  \"unitOfMeasure\": null,\n  \"inventoryType\": \"QUANTITY\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — 400 (null inventoryType)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Отвёртка крестовая\",\n  \"sku\": \"TOOL-SCEW-001\",\n  \"stuffCategory\": \"TOOL\",\n  \"unitOfMeasure\": \"PIECE\",\n  \"inventoryType\": null,\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — 400 (пустое тело)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /nomenclature/api/by-id/99999 — 404 (не найдено по ID)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test(\"Response contains error message\", function () {",
+                  "    var body = pm.response.text();",
+                  "    pm.expect(body).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api/by-id/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api",
+                "by-id",
+                "99999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /nomenclature/api/by-sku/NOT-EXIST-999 — 404 (не найдено по SKU)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test(\"Response contains error message\", function () {",
+                  "    var body = pm.response.text();",
+                  "    pm.expect(body).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api/by-sku/NOT-EXIST-999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api",
+                "by-sku",
+                "NOT-EXIST-999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /nomenclature/api — 404 (несуществующий ID)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 99999,\n  \"name\": \"Несуществующая позиция\",\n  \"sku\": \"GHOST-999\",\n  \"stuffCategory\": \"MATERIAL\",\n  \"unitOfMeasure\": \"PIECE\",\n  \"inventoryType\": \"QUANTITY\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "nomenclatureId",
+      "value": "1"
+    },
+    {
+      "key": "nomenclatureSku",
+      "value": "BLT-M8-ZN-001"
+    }
+  ]
+}

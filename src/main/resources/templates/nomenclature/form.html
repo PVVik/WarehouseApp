@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${isEditMode} ? 'Редактировать позицию' : 'Создать позицию'">Форма</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f6f9; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #555; font-weight: 600; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        input:focus, select:focus { border-color: #3498db; outline: none; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background-color: #3498db; color: white; }
+        .btn-secondary { background-color: #95a5a6; color: white; margin-left: 10px; }
+        .error { color: #e74c3c; font-size: 0.85rem; margin-top: 5px; display: block; }
+        .flash-message { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .flash-error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 th:text="${isEditMode} ? 'Редактировать позицию' : 'Создать позицию'">Форма</h1>
+
+    <form th:action="@{/nomenclature/form}" th:object="${nomenclature}" method="post">
+
+        <input type="hidden" th:field="*{id}" />
+
+        <div class="form-group">
+            <label for="name">Название *</label>
+            <input type="text" id="name" th:field="*{name}" placeholder="Например: Болт М8 оцинкованный" required />
+            <span class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="sku">Артикул (SKU) *</label>
+            <input type="text" id="sku" th:field="*{sku}" placeholder="Например: BLT-M8-ZN-001" required />
+            <span class="error" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="stuffCategory">Категория</label>
+            <select id="stuffCategory" th:field="*{stuffCategory}">
+                <option value="MATERIAL">Материал</option>
+                <option value="EQUIPMENT">Оборудование</option>
+                <option value="TOOL">Инструмент</option>
+                <option value="SIZ">СИЗ</option>
+                <option value="FUEL">Топливо</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="unitOfMeasure">Единица измерения</label>
+            <select id="unitOfMeasure" th:field="*{unitOfMeasure}">
+                <option value="PIECE">Штука</option>
+                <option value="KILOGRAM">Килограмм</option>
+                <option value="LITER">Литр</option>
+                <option value="METER">Метр</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="inventoryType">Тип учета</label>
+            <select id="inventoryType" th:field="*{inventoryType}">
+                <option value="QUANTITY">Количественный</option>
+                <option value="BATCH">Партионный</option>
+                <option value="SERIAL">Серийный</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" th:field="*{active}" /> Активен
+            </label>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="/nomenclature" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

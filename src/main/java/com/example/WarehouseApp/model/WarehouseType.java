@@ -1,6 +1,6 @@
 package com.example.WarehouseApp.model;
 
-public enum Type {
+public enum WarehouseType {
     CENTRAL,
     REMOTE
 }
