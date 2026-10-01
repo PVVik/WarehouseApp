@@ -5,12 +5,11 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum InventoryType {
-    BATCH("Партионный"),
-    SERIAL("Серийный"),
-    QUANTITY("Количественный");
+public enum CounterpartyType {
+
+    SUPPLIER("Поставщик"),
+    CUSTOMER("Заказчик");
 
     private final String label;
 
 }
-

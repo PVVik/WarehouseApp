@@ -1,0 +1,431 @@
+{
+  "info": {
+    "_postman_id": "counterparty-sprint3-api-v2",
+    "name": "WarehouseApp — Sprint 3: Counterparty API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Success",
+      "item": [
+        {
+          "name": "POST /counterparty/api — создать контрагента",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"counterpartyId\", jsonData.id);",
+                  "});",
+                  "pm.test(\"Response has name and inn\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('name');",
+                  "    pm.expect(jsonData).to.have.property('inn');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ООО «Поставщик №1»\",\n  \"inn\": \"7701234567\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"SUPPLIER\",\n  \"phone\": \"+79991234567\",\n  \"contact\": \"Иванов И.И.\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api"]
+            }
+          }
+        },
+        {
+          "name": "GET /counterparty/api/{id} — получить контрагента по ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has name\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('name');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api/{{counterpartyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api", "{{counterpartyId}}"]
+            }
+          }
+        },
+        {
+          "name": "PATCH /counterparty/api — обновить контрагента",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has updated contact\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.contact).to.eql(\"Петров П.П.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{counterpartyId}},\n  \"name\": \"ООО «Поставщик №1 (обновлён)»\",\n  \"inn\": \"7701234567\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"SUPPLIER\",\n  \"phone\": \"+79991234567\",\n  \"contact\": \"Петров П.П.\",\n  \"isActive\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api"]
+            }
+          }
+        },
+        {
+          "name": "GET /counterparty/api — список всех контрагентов (с пагинацией)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is a page object\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('content');",
+                  "    pm.expect(jsonData).to.have.property('totalElements');",
+                  "    pm.expect(jsonData).to.have.property('totalPages');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api?page=0&size=10&sort=id,asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "sort", "value": "id,asc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /counterparty/api — поиск по параметру search",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response contains search results\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.content).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api?search=name:Поставщик&page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api"],
+              "query": [
+                { "key": "search", "value": "name:Поставщик" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /counterparty/api/{id} — удалить контрагента",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api/{{counterpartyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api", "{{counterpartyId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors",
+      "item": [
+        {
+          "name": "POST /counterparty/api — 400 (пустое название)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"inn\": \"7701234568\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"CUSTOMER\",\n  \"phone\": \"+79997654321\",\n  \"contact\": \"Сидоров С.С.\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api"]
+            }
+          }
+        },
+        {
+          "name": "POST /counterparty/api — 400 (невалидный ИНН)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ООО «Плохой ИНН»\",\n  \"inn\": \"123\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"CUSTOMER\",\n  \"phone\": \"+79997654321\",\n  \"contact\": \"Кузнецов К.К.\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api"]
+            }
+          }
+        },
+        {
+          "name": "POST /counterparty/api — 400 (неверный формат телефона)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ООО «Плохой телефон»\",\n  \"inn\": \"7701234569\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"CUSTOMER\",\n  \"phone\": \"123\",\n  \"contact\": \"Морозов М.М.\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api"]
+            }
+          }
+        },
+        {
+          "name": "POST /counterparty/api — 409 (дубликат ИНН)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.sendRequest({",
+                  "    url: pm.collectionVariables.get(\"baseUrl\") + \"/counterparty/api\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\" },",
+                  "    body: {",
+                  "        mode: \"raw\",",
+                  "        raw: JSON.stringify({",
+                  "            name: \"ООО «Оригинал для дубликата»\",",
+                  "            inn: \"7701234567\",",
+                  "            kpp: \"770101001\",",
+                  "            counterpartyType: \"SUPPLIER\",",
+                  "            phone: \"+79991234567\",",
+                  "            contact: \"Оригиналов О.О.\",",
+                  "            isActive: true",
+                  "        })",
+                  "    }",
+                  "}, function (err, response) {",
+                  "    if (response.code === 201) {",
+                  "        console.log(\"Подготовка: контрагент для дубликата создан\");",
+                  "    } else if (response.code === 409) {",
+                  "        console.log(\"Контрагент с таким ИНН уже существует — отлично\");",
+                  "    }",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test(\"Response mentions duplicate INN\", function () {",
+                  "    var body = pm.response.text();",
+                  "    pm.expect(body).to.contain(\"ИНН\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ООО «Дубликат»\",\n  \"inn\": \"7701234567\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"CUSTOMER\",\n  \"phone\": \"+79990000000\",\n  \"contact\": \"Дубликатов Д.Д.\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api"]
+            }
+          }
+        },
+        {
+          "name": "GET /counterparty/api/99999 — 404 (контрагент не найден)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api/99999",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api", "99999"]
+            }
+          }
+        },
+        {
+          "name": "PATCH /counterparty/api — 404 (обновление несуществующего контрагента)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 99999,\n  \"name\": \"Несуществующий контрагент\",\n  \"inn\": \"0000000000\",\n  \"kpp\": \"000000000\",\n  \"counterpartyType\": \"SUPPLIER\",\n  \"phone\": \"+70000000000\",\n  \"contact\": \"Никто Никтович\",\n  \"isActive\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["counterparty", "api"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "counterpartyId",
+      "value": "1"
+    }
+  ]
+}

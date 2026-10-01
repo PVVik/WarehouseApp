@@ -5,12 +5,11 @@ import lombok.Getter;
 @Getter
 public class SpecSearchCriteria {
 
-    private String key;
-    private SearchOperation operation;
-    private Object value;
+    private final String key;
+    private final SearchOperation operation;
+    private final Object value;
 
     public SpecSearchCriteria(String key, SearchOperation operation, Object value) {
-        super();
         this.key = key;
         this.operation = operation;
         this.value = value;

@@ -3,23 +3,28 @@ package com.example.WarehouseApp.service.warehouse;
 import com.example.WarehouseApp.dto.WarehouseDto;
 import com.example.WarehouseApp.exception.NotFoundException;
 import com.example.WarehouseApp.mapper.WarehouseMapper;
+import com.example.WarehouseApp.model.Warehouse;
 import com.example.WarehouseApp.repository.WarehouseRepository;
+import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.specification.warehouse.WarehouseSpecificationBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.List;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class WarehouseServiceImpl implements WarehouseService {
+public class WarehouseServiceImpl implements BaseService<WarehouseDto> {
 
     private final WarehouseRepository warehouseRepository;
 
-    public WarehouseDto addWarehouse(WarehouseDto warehouseDto) {
+    @Override
+    public WarehouseDto create(WarehouseDto warehouseDto) {
         var warehouse = warehouseRepository.save(WarehouseMapper.mapToEntity(warehouseDto));
         log.info("Создали склад с id {}", warehouse.getId());
 
@@ -27,7 +32,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public WarehouseDto updateWarehouse(WarehouseDto warehouseDto) {
+    public WarehouseDto update(WarehouseDto warehouseDto) {
         var warehouse = warehouseRepository.findById(warehouseDto.getId()).orElseThrow(() ->
                 new NotFoundException(String.format("Склад с id %d не найден", warehouseDto.getId())));
         log.info(warehouse.toString());
@@ -40,7 +45,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public WarehouseDto getWarehouseById(long id) {
+    public WarehouseDto getById(long id) {
         var warehouse = warehouseRepository.findById(id).orElseThrow(() ->
                 new NotFoundException(String.format("Склад с id %d не найден", id)));
 
@@ -50,17 +55,35 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public List<WarehouseDto> getWarehouses() {
-        log.info("Получили список всех складов");
+    public Page<WarehouseDto> getAll(Pageable pageable, String search) {
+        Page<Warehouse> page;
 
-        return warehouseRepository.findAll().stream()
+        if (search == null || search.isBlank()) {
+            page = warehouseRepository.findAll(pageable);
+        } else {
+            var builder = new WarehouseSpecificationBuilder();
+            var pattern = Pattern.compile("(\\w+?)([:<>])(\\w+?),", Pattern.UNICODE_CHARACTER_CLASS);
+            var matcher = pattern.matcher(search + ",");
+
+            while (matcher.find()) {
+                builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
+            }
+
+            var spec = builder.build();
+            page = warehouseRepository.findAll(spec, pageable);
+        }
+        var warehouses = page.stream()
                 .map(WarehouseMapper::mapToDto)
+                .sorted(WarehouseDto::compareTo)
                 .toList();
+
+        log.info("Получили выгрузку складов");
+
+        return new PageImpl<>(warehouses, pageable, page.getTotalElements());
     }
 
     @Override
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteWarehouse(long id) {
+    public void delete(long id) {
         var warehouse = warehouseRepository.findById(id).orElseThrow(() ->
                 new NotFoundException(String.format("Склад с id %d не найден", id)));
 

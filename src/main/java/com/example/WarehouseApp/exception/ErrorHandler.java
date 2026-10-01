@@ -28,6 +28,12 @@ public class ErrorHandler {
         return new ErrorResponse(ex.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ErrorResponse handleValidationExceptions(AlreadyExistsException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(RuntimeException.class)
     public ErrorResponse handleValidationExceptions(RuntimeException ex) {

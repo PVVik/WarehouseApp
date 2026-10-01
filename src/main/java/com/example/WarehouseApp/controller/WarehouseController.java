@@ -1,27 +1,51 @@
 package com.example.WarehouseApp.controller;
 
+import com.example.WarehouseApp.dto.StorageLocationDto;
 import com.example.WarehouseApp.dto.WarehouseDto;
-import com.example.WarehouseApp.service.warehouse.WarehouseService;
+import com.example.WarehouseApp.service.BaseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Controller
 @RequestMapping("/warehouse")
 @RequiredArgsConstructor
+@Slf4j
 public class WarehouseController {
 
-    private final WarehouseService warehouseService;
+    private final BaseService<WarehouseDto> warehouseService;
+    private final BaseService<StorageLocationDto> storageLocationService;
 
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("warehouses", warehouseService.getWarehouses());
+    public String list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+                       @RequestParam(required = false) String name, Model model) {
+
+        var search = new StringBuilder();
+        if (name != null && !name.isBlank()) {
+            search.append("name:").append(name).append(",");
+        }
+
+        var pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        var result = warehouseService.getAll(pageable, search.toString());
+
+        model.addAttribute("warehouses", result.getContent());
+        model.addAttribute("currentPage", result.getNumber());
+        model.addAttribute("totalPages", result.getTotalPages());
+        model.addAttribute("totalElements", result.getTotalElements());
+        model.addAttribute("pageSize", result.getSize());
+
+        model.addAttribute("filterName", name != null ? name : "");
+
         return "warehouses/list";
     }
 
@@ -33,65 +57,103 @@ public class WarehouseController {
 
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
-        model.addAttribute("warehouseDto", warehouseService.getWarehouseById(id));
+        model.addAttribute("warehouseDto", warehouseService.getById(id));
         return "warehouses/form";
     }
 
     @PostMapping
-    public String save(@ModelAttribute @Valid WarehouseDto warehouseDto,
-                       BindingResult bindingResult) {
+    public String save(@ModelAttribute @Valid WarehouseDto warehouseDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "warehouses/form";
         }
         if (warehouseDto.getId() != null) {
-            warehouseService.updateWarehouse(warehouseDto);
+            warehouseService.update(warehouseDto);
         } else {
-            warehouseService.addWarehouse(warehouseDto);
+            warehouseService.create(warehouseDto);
         }
         return "redirect:/warehouse";
     }
 
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id) {
-        warehouseService.deleteWarehouse(id);
+        warehouseService.delete(id);
         return "redirect:/warehouse";
     }
 
     @GetMapping("/{id}")
-    public String view(@PathVariable Long id, Model model) {
-        model.addAttribute("warehouse", warehouseService.getWarehouseById(id));
+    public String viewWarehouse(@PathVariable long id,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "10") int size,
+                                @RequestParam(required = false) String zone,
+                                @RequestParam(required = false) String rack,
+                                @RequestParam(required = false) String shelf,
+                                @RequestParam(required = false) Boolean used,
+                                Model model) {
+
+        model.addAttribute("warehouse", warehouseService.getById(id));
+
+        StringBuilder search = new StringBuilder();
+        search.append("warehouseId:").append(id).append(",");
+        if (zone != null && !zone.isBlank()) {
+            search.append("zone:").append(zone).append(",");
+        }
+        if (rack != null && !rack.isBlank()) {
+            search.append("rack:").append(rack).append(",");
+        }
+        if (shelf != null && !shelf.isBlank()) {
+            search.append("shelf:").append(shelf).append(",");
+        }
+        if (used != null) {
+            search.append("used:").append(used).append(",");
+        }
+
+        var pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        var result = storageLocationService.getAll(pageable, search.toString());
+
+        model.addAttribute("storageLocations", result.getContent());
+        model.addAttribute("currentPage", result.getNumber());
+        model.addAttribute("totalPages", result.getTotalPages());
+        model.addAttribute("totalElements", result.getTotalElements());
+        model.addAttribute("pageSize", result.getSize());
+
+        model.addAttribute("filterZone", zone != null ? zone : "");
+        model.addAttribute("filterRack", rack != null ? rack : "");
+        model.addAttribute("filterShelf", shelf != null ? shelf : "");
+        model.addAttribute("filterUsed", used);
+
         return "warehouses/view";
     }
 
     @GetMapping("/api")
     @ResponseBody
-    public List<WarehouseDto> getWarehousesApi() {
-        return warehouseService.getWarehouses();
+    public Page<WarehouseDto> getWarehousesApi(@PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
+                                               @RequestParam(value = "search", required = false) String search) {
+        return warehouseService.getAll(pageable, search);
     }
 
     @GetMapping("/api/{id}")
     @ResponseBody
     public WarehouseDto getWarehouseByIdApi(@PathVariable long id) {
-        return warehouseService.getWarehouseById(id);
+        return warehouseService.getById(id);
     }
 
     @PostMapping("/api")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     public WarehouseDto addWarehouseApi(@Valid @RequestBody WarehouseDto warehouseDto) {
-        return warehouseService.addWarehouse(warehouseDto);
+        return warehouseService.create(warehouseDto);
     }
 
     @PatchMapping("/api")
     @ResponseBody
     public WarehouseDto updateWarehouseApi(@RequestBody WarehouseDto warehouseDto) {
-        return warehouseService.updateWarehouse(warehouseDto);
+        return warehouseService.update(warehouseDto);
     }
 
     @DeleteMapping("/api/{id}")
     @ResponseBody
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteWarehouseApi(@PathVariable long id) {
-        warehouseService.deleteWarehouse(id);
+        warehouseService.delete(id);
     }
 }

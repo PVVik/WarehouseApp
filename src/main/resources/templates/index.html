@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>Панель управления - Складская система</title>
@@ -10,10 +10,12 @@
             margin: 0;
             padding: 0 20px;
         }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
+
         h1 {
             text-align: center;
             color: #2c3e50;
@@ -25,14 +27,16 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             margin-bottom: 40px;
             border-left: 5px solid #3498db;
         }
+
         .org-info h3 {
             margin-top: 0;
             color: #2c3e50;
         }
+
         .org-info p {
             margin: 5px 0;
             color: #555;
@@ -44,29 +48,34 @@
             gap: 20px;
             margin-bottom: 40px;
         }
+
         .card {
             background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             padding: 30px;
             text-align: center;
             transition: transform 0.2s, box-shadow 0.2s;
         }
+
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
         }
+
         .card h2 {
             color: #2c3e50;
             margin-bottom: 15px;
             font-size: 1.2rem;
         }
+
         .card p {
             color: #7f8c8d;
             margin-bottom: 25px;
             line-height: 1.5;
             font-size: 0.95rem;
         }
+
         .btn {
             display: inline-block;
             padding: 10px 20px;
@@ -76,21 +85,26 @@
             cursor: pointer;
             transition: all 0.2s;
         }
+
         .btn-primary {
             background-color: #3498db;
             color: white;
         }
+
         .btn-primary:hover {
             background-color: #2980b9;
         }
+
         .btn-secondary {
             background-color: #bdc3c7;
             color: #333;
         }
+
         .btn-secondary:hover {
             background-color: #95a5a6;
             color: white;
         }
+
         .btn-disabled {
             background-color: #e0e0e0;
             color: #999;
@@ -98,6 +112,7 @@
             text-decoration: none;
         }
     </style>
+
 </head>
 <body>
 
@@ -126,6 +141,12 @@
             <h2>Отчеты</h2>
             <p style="color: #95a5a6;">Функционал в разработке.<br>Здесь будут графики остатков и аналитика.</p>
             <a href="#" class="btn btn-secondary btn-disabled">Перейти (заглушка)</a>
+        </div>
+
+        <div class="card">
+            <h2>Контрагенты</h2>
+            <p style="color: #95a5a6;">Список поставщиков, клиентов и перевозчиков, управление реквизитами и договорами.</p>
+            <a href="/counterparty" class="btn btn-primary">Перейти к контрагентам</a>
         </div>
 
     </div>

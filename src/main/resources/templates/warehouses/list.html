@@ -16,6 +16,14 @@
         .btn-edit { background-color: #007bff; }
         .btn-delete { background-color: #dc3545; border: none; cursor: pointer; }
         .btn-view { background-color: #6c757d; }
+        .pagination { display: flex; gap: 8px; margin-top: 20px; list-style: none; padding: 0; }
+        .pagination a, .pagination span { padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333; }
+        .pagination .current { background-color: #007bff; color: white; border-color: #007bff; }
+        .search-form { margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .search-form input[type="text"] { padding: 6px 10px; width: 200px; }
+        .search-form select { padding: 6px 10px; }
+        .search-form button { padding: 6px 14px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .search-form a { padding: 6px 14px; background-color: #6c757d; color: white; border-radius: 4px; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -23,6 +31,13 @@
 <h1>Склады</h1>
 
 <a th:href="@{/warehouse/new}" class="btn btn-create">+ Добавить склад</a>
+
+<form th:action="@{/warehouse}" method="get" class="search-form">
+    <input type="text" name="name" th:value="${filterName}" placeholder="Название"/>
+
+    <button type="submit">Искать</button>
+    <a th:href="@{/warehouse}">Сбросить</a>
+</form>
 
 <table>
     <thead>
@@ -59,6 +74,23 @@
     </tr>
     </tbody>
 </table>
+
+<div th:if="${totalPages > 1}">
+    <ul class="pagination">
+        <li th:if="${currentPage > 0}">
+            <a th:href="@{/warehouse(page=${currentPage - 1}, size=${pageSize}, name=${filterName}, type=${filterType}, active=${filterActive})}">&laquo; Назад</a>
+        </li>
+        <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <a th:if="${i != currentPage}"
+               th:href="@{/warehouse(page=${i}, size=${pageSize}, name=${filterName}, type=${filterType}, active=${filterActive})}"
+               th:text="${i + 1}"></a>
+            <span th:unless="${i != currentPage}" class="current" th:text="${i + 1}"></span>
+        </li>
+        <li th:if="${currentPage < totalPages - 1}">
+            <a th:href="@{/warehouse(page=${currentPage + 1}, size=${pageSize}, name=${filterName}, type=${filterType}, active=${filterActive})}">Вперёд &raquo;</a>
+        </li>
+    </ul>
+</div>
 
 </body>
 </html>

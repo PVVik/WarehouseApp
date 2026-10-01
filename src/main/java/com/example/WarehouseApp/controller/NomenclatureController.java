@@ -1,7 +1,7 @@
 package com.example.WarehouseApp.controller;
 
 import com.example.WarehouseApp.dto.NomenclatureDto;
-import com.example.WarehouseApp.service.nomenclature.NomenclatureService;
+import com.example.WarehouseApp.service.BaseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,19 +21,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class NomenclatureController {
 
-    private final NomenclatureService nomenclatureService;
+    private final BaseService<NomenclatureDto> nomenclatureService;
 
     @GetMapping
-    public String nomenclaturePage(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String sku,
-            @RequestParam(required = false) String stuffCategory,
-            @RequestParam(required = false) Boolean active,
-            Model model) {
+    public String nomenclaturePage(@RequestParam(defaultValue = "0") int page,
+                                   @RequestParam(defaultValue = "10") int size,
+                                   @RequestParam(required = false) String name,
+                                   @RequestParam(required = false) String sku,
+                                   @RequestParam(required = false) String stuffCategory,
+                                   @RequestParam(required = false) Boolean active,
+                                   Model model) {
 
-        StringBuilder search = new StringBuilder();
+        var search = new StringBuilder();
         if (name != null && !name.isBlank()) {
             search.append("name:").append(name).append(",");
         }
@@ -47,8 +46,8 @@ public class NomenclatureController {
             search.append("isActive:").append(active).append(",");
         }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
-        Page<NomenclatureDto> result = nomenclatureService.getAll(pageable, search.toString());
+        var pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+        var result = nomenclatureService.getAll(pageable, search.toString());
 
         model.addAttribute("nomenclatureList", result.getContent());
         model.addAttribute("currentPage", result.getNumber());
@@ -65,9 +64,7 @@ public class NomenclatureController {
     }
 
     @GetMapping("/form")
-    public String nomenclatureForm(
-            @RequestParam(required = false) Long id,
-            Model model) {
+    public String nomenclatureForm(@RequestParam(required = false) Long id, Model model) {
 
         NomenclatureDto dto;
         if (id != null) {
@@ -83,21 +80,18 @@ public class NomenclatureController {
     }
 
     @PostMapping("/form")
-    public String saveNomenclature(
-            @ModelAttribute("nomenclature") @Valid NomenclatureDto dto,
-            BindingResult result,
-            RedirectAttributes redirectAttributes) {
-
+    public String saveNomenclature(@ModelAttribute("nomenclature") @Valid NomenclatureDto dto,
+                                   BindingResult result, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "nomenclature/form";
         }
 
         try {
             if (dto.getId() == null) {
-                nomenclatureService.addNomenclature(dto);
+                nomenclatureService.create(dto);
                 redirectAttributes.addFlashAttribute("successMessage", "Позиция успешно создана!");
             } else {
-                nomenclatureService.updateNomenclature(dto);
+                nomenclatureService.update(dto);
                 redirectAttributes.addFlashAttribute("successMessage", "Позиция успешно обновлена!");
             }
             return "redirect:/nomenclature";
@@ -110,12 +104,12 @@ public class NomenclatureController {
     @PostMapping("/api")
     @ResponseStatus(HttpStatus.CREATED)
     public NomenclatureDto addNomenclature(@RequestBody @Valid NomenclatureDto nomenclatureDto) {
-        return nomenclatureService.addNomenclature(nomenclatureDto);
+        return nomenclatureService.create(nomenclatureDto);
     }
 
     @PatchMapping("/api")
     public NomenclatureDto updateNomenclature(@RequestBody NomenclatureDto nomenclatureDto) {
-        return nomenclatureService.updateNomenclature(nomenclatureDto);
+        return nomenclatureService.update(nomenclatureDto);
     }
 
     @GetMapping("/api")
@@ -124,14 +118,14 @@ public class NomenclatureController {
         return nomenclatureService.getAll(pageable, search);
     }
 
-    @GetMapping("/api/by-id/{id}")
+    @GetMapping("/api/{id}")
     public NomenclatureDto getNomenclatureById(@PathVariable long id) {
         return nomenclatureService.getById(id);
     }
 
-    @GetMapping("/api/by-sku/{sku}")
-    public NomenclatureDto getNomenclatureBySku(@PathVariable String sku) {
-        return nomenclatureService.getBySku(sku);
+    @DeleteMapping("/api/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteNomenclature(@PathVariable long id) {
+        nomenclatureService.delete(id);
     }
-
 }
