@@ -1,0 +1,516 @@
+{
+  "info": {
+    "_postman_id": "storage-location-api-v1",
+    "name": "WarehouseApp — Sprint 3: Storage Locations API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Success",
+      "item": [
+        {
+          "name": "POST /storageLocation/api — создать ячейку",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"storageLocationId\", jsonData.id);",
+                  "});",
+                  "pm.test(\"Response has warehouseName\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('warehouseName');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": {{warehouseId}},\n  \"zone\": \"A\",\n  \"rack\": \"01\",\n  \"shelf\": \"02\",\n  \"used\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api"]
+            }
+          }
+        },
+        {
+          "name": "GET /storageLocation/api — список всех ячеек (пагинация)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is a page object\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('content');",
+                  "    pm.expect(jsonData.content).to.be.an('array');",
+                  "    pm.expect(jsonData).to.have.property('totalElements');",
+                  "    pm.expect(jsonData).to.have.property('totalPages');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /storageLocation/api — поиск по складу (search)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is a page object\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('content');",
+                  "    pm.expect(jsonData.content).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api?search=warehouseId:{{warehouseId}},zone:A,",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api"],
+              "query": [
+                { "key": "search", "value": "warehouseId:{{warehouseId}},zone:A," }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /storageLocation/api/{id} — получить ячейку по ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has zone\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('zone');",
+                  "});",
+                  "pm.test(\"Response has warehouseName\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('warehouseName');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api/{{storageLocationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api", "{{storageLocationId}}"]
+            }
+          }
+        },
+        {
+          "name": "PATCH /storageLocation/api — обновить ячейку",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has updated rack\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('rack');",
+                  "    pm.expect(jsonData.rack).to.eql('05');",
+                  "});",
+                  "pm.test(\"Response has updated used\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.used).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{storageLocationId}},\n  \"warehouseId\": {{warehouseId}},\n  \"zone\": \"A\",\n  \"rack\": \"05\",\n  \"shelf\": \"03\",\n  \"used\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api"]
+            }
+          }
+        },
+        {
+          "name": "DELETE /storageLocation/api/{id} — удалить ячейку",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api/{{storageLocationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api", "{{storageLocationId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors",
+      "item": [
+        {
+          "name": "POST /storageLocation/api — 400 (пустая зона)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": {{warehouseId}},\n  \"zone\": \"\",\n  \"rack\": \"01\",\n  \"shelf\": \"02\",\n  \"used\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api"]
+            }
+          }
+        },
+        {
+          "name": "POST /storageLocation/api — 400 (пустой стеллаж)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": {{warehouseId}},\n  \"zone\": \"A\",\n  \"rack\": \"\",\n  \"shelf\": \"02\",\n  \"used\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api"]
+            }
+          }
+        },
+        {
+          "name": "POST /storageLocation/api — 400 (пустая полка)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": {{warehouseId}},\n  \"zone\": \"A\",\n  \"rack\": \"01\",\n  \"shelf\": \"\",\n  \"used\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api"]
+            }
+          }
+        },
+        {
+          "name": "POST /storageLocation/api — 400 (не указан warehouseId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"zone\": \"A\",\n  \"rack\": \"01\",\n  \"shelf\": \"02\",\n  \"used\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api"]
+            }
+          }
+        },
+        {
+          "name": "POST /storageLocation/api — 400 (не указан used)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Response contains validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": {{warehouseId}},\n  \"zone\": \"A\",\n  \"rack\": \"01\",\n  \"shelf\": \"02\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api"]
+            }
+          }
+        },
+        {
+          "name": "POST /storageLocation/api — 400 (пустое тело)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api"]
+            }
+          }
+        },
+        {
+          "name": "GET /storageLocation/api/99999 — 404 (ячейка не найдена)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test(\"Response contains error message\", function () {",
+                  "    var body = pm.response.text();",
+                  "    pm.expect(body).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api/99999",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api", "99999"]
+            }
+          }
+        },
+        {
+          "name": "PATCH /storageLocation/api — 404 (ячейка не найдена)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 99999,\n  \"warehouseId\": {{warehouseId}},\n  \"zone\": \"X\",\n  \"rack\": \"99\",\n  \"shelf\": \"99\",\n  \"used\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api"]
+            }
+          }
+        },
+        {
+          "name": "DELETE /storageLocation/api/99999 — 404 (ячейка не найдена)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api/99999",
+              "host": ["{{baseUrl}}"],
+              "path": ["storageLocation", "api", "99999"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "warehouseId",
+      "value": "1"
+    },
+    {
+      "key": "storageLocationId",
+      "value": "1"
+    }
+  ]
+}

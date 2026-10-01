@@ -16,7 +16,7 @@ public class NomenclatureMapper {
         return new NomenclatureDto(nomenclature.getId(), nomenclature.getName(), nomenclature.getSku(),
                 nomenclature.getStuffCategory(), nomenclature.getUnitOfMeasure(), nomenclature.getInventoryType(),
                 nomenclature.isActive(), nomenclature.getStuffCategory().getLabel(),
-                nomenclature.getUnitOfMeasure().getFullName(), nomenclature.getInventoryType().getLabel());
+                nomenclature.getUnitOfMeasure().getLabel(), nomenclature.getInventoryType().getLabel());
     }
 
     public static Nomenclature mapToUpdateEntity(Nomenclature nomenclature, NomenclatureDto nomenclatureDto) {

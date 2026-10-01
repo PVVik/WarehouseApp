@@ -4,11 +4,14 @@ import com.example.WarehouseApp.controller.WarehouseController;
 import com.example.WarehouseApp.dto.WarehouseDto;
 import com.example.WarehouseApp.exception.NotFoundException;
 import com.example.WarehouseApp.model.WarehouseType;
-import com.example.WarehouseApp.service.warehouse.WarehouseService;
+import com.example.WarehouseApp.service.BaseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,7 +36,7 @@ class WarehouseControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private WarehouseService warehouseService;
+    private BaseService<WarehouseDto> warehouseService;
 
     @Test
     void addWarehouseApi_shouldReturn201_andJsonBody() throws Exception {
@@ -50,7 +53,7 @@ class WarehouseControllerTest {
         response.setType(WarehouseType.CENTRAL);
         response.setActive(true);
 
-        when(warehouseService.addWarehouse(any(WarehouseDto.class))).thenReturn(response);
+        when(warehouseService.create(any(WarehouseDto.class))).thenReturn(response);
 
         mockMvc.perform(post("/warehouse/api")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,7 +78,7 @@ class WarehouseControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        verify(warehouseService, never()).addWarehouse(any());
+        verify(warehouseService, never()).create(any());
     }
 
     @Test
@@ -91,8 +94,9 @@ class WarehouseControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        verify(warehouseService, never()).addWarehouse(any());
+        verify(warehouseService, never()).create(any());
     }
+
 
     @Test
     void getWarehousesApi_shouldReturn200_andList() throws Exception {
@@ -108,13 +112,17 @@ class WarehouseControllerTest {
         dto2.setType(WarehouseType.REMOTE);
         dto2.setActive(false);
 
-        when(warehouseService.getWarehouses()).thenReturn(List.of(dto1, dto2));
+        Page<WarehouseDto> page = new PageImpl<>(List.of(dto1, dto2));
+
+        when(warehouseService.getAll(any(Pageable.class), eq(null))).thenReturn(page);
 
         mockMvc.perform(get("/warehouse/api"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2))
-                .andExpect(jsonPath("$[0].name").value("Склад A"))
-                .andExpect(jsonPath("$[1].name").value("Склад B"));
+                .andExpect(jsonPath("$.content.size()").value(2))
+                .andExpect(jsonPath("$.content[0].name").value("Склад A"))
+                .andExpect(jsonPath("$.content[1].name").value("Склад B"))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1));
     }
 
     @Test
@@ -126,7 +134,7 @@ class WarehouseControllerTest {
         dto.setType(WarehouseType.CENTRAL);
         dto.setActive(true);
 
-        when(warehouseService.getWarehouseById(1L)).thenReturn(dto);
+        when(warehouseService.getById(1L)).thenReturn(dto);
 
         mockMvc.perform(get("/warehouse/api/1"))
                 .andExpect(status().isOk())
@@ -139,13 +147,13 @@ class WarehouseControllerTest {
     void getWarehouseByIdApi_shouldReturn404_whenNotExists() throws Exception {
         Long id = 999L;
 
-        when(warehouseService.getWarehouseById(anyLong()))
+        when(warehouseService.getById(anyLong()))
                 .thenThrow(new NotFoundException(String.format("Склад с id %d не найден", id)));
 
         mockMvc.perform(get("/warehouse/api/" + id))
                 .andExpect(status().isNotFound());
 
-        verify(warehouseService).getWarehouseById(eq(id));
+        verify(warehouseService).getById(eq(id));
     }
 
     @Test
@@ -164,7 +172,7 @@ class WarehouseControllerTest {
         response.setType(WarehouseType.REMOTE);
         response.setActive(false);
 
-        when(warehouseService.updateWarehouse(any(WarehouseDto.class))).thenReturn(response);
+        when(warehouseService.update(any(WarehouseDto.class))).thenReturn(response);
 
         mockMvc.perform(patch("/warehouse/api")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -184,7 +192,7 @@ class WarehouseControllerTest {
         request.setType(WarehouseType.CENTRAL);
         request.setActive(true);
 
-        when(warehouseService.updateWarehouse(any(WarehouseDto.class)))
+        when(warehouseService.update(any(WarehouseDto.class)))
                 .thenThrow(new NotFoundException("Склад с id 999 не найден"));
 
         mockMvc.perform(patch("/warehouse/api")
@@ -197,12 +205,12 @@ class WarehouseControllerTest {
     void deleteWarehouseApi_shouldReturn204_whenExists() throws Exception {
         long id = 1L;
 
-        doNothing().when(warehouseService).deleteWarehouse(id);
+        doNothing().when(warehouseService).delete(id);
 
         mockMvc.perform(delete("/warehouse/api/" + id))
                 .andExpect(status().isNoContent());
 
-        verify(warehouseService).deleteWarehouse(eq(id));
+        verify(warehouseService).delete(eq(id));
     }
 
     @Test
@@ -210,11 +218,11 @@ class WarehouseControllerTest {
         long id = 999L;
 
         doThrow(new NotFoundException("Склад с id 999 не найден"))
-                .when(warehouseService).deleteWarehouse(id);
+                .when(warehouseService).delete(id);
 
         mockMvc.perform(delete("/warehouse/api/" + id))
                 .andExpect(status().isNotFound());
 
-        verify(warehouseService).deleteWarehouse(eq(id));
+        verify(warehouseService).delete(eq(id));
     }
 }

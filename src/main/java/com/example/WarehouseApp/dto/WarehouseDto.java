@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WarehouseDto {
+public class WarehouseDto implements Comparable<WarehouseDto> {
 
     private Long id;
 
@@ -25,4 +25,8 @@ public class WarehouseDto {
 
     private Boolean active;
 
+    @Override
+    public int compareTo(WarehouseDto o) {
+        return Math.toIntExact(this.getId() - o.getId());
+    }
 }

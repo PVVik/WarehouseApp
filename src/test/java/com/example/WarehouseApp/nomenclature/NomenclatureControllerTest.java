@@ -7,7 +7,7 @@ import com.example.WarehouseApp.exception.NotFoundException;
 import com.example.WarehouseApp.model.InventoryType;
 import com.example.WarehouseApp.model.StuffCategory;
 import com.example.WarehouseApp.model.UnitOfMeasure;
-import com.example.WarehouseApp.service.nomenclature.NomenclatureService;
+import com.example.WarehouseApp.service.BaseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class NomenclatureControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private NomenclatureService nomenclatureService;
+    private BaseService<NomenclatureDto> nomenclatureService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -58,7 +58,7 @@ class NomenclatureControllerTest {
 
     @Test
     void addNomenclature_shouldReturn201AndDto() throws Exception {
-        when(nomenclatureService.addNomenclature(any(NomenclatureDto.class)))
+        when(nomenclatureService.create(any(NomenclatureDto.class)))
                 .thenReturn(sampleDto);
 
         mockMvc.perform(post("/nomenclature/api")
@@ -134,7 +134,7 @@ class NomenclatureControllerTest {
     void updateNomenclature_shouldReturn200AndUpdatedDto() throws Exception {
         sampleDto.setName("Болт М8 (обновлён)");
         sampleDto.setStuffCategory(StuffCategory.EQUIPMENT);
-        when(nomenclatureService.updateNomenclature(any(NomenclatureDto.class)))
+        when(nomenclatureService.update(any(NomenclatureDto.class)))
                 .thenReturn(sampleDto);
 
         mockMvc.perform(patch("/nomenclature/api")
@@ -147,7 +147,7 @@ class NomenclatureControllerTest {
 
     @Test
     void updateNomenclature_shouldReturn404_whenIdNotFound() throws Exception {
-        when(nomenclatureService.updateNomenclature(any(NomenclatureDto.class)))
+        when(nomenclatureService.update(any(NomenclatureDto.class)))
                 .thenThrow(new NotFoundException("Позиция с id 99999 не найдена"));
 
         mockMvc.perform(patch("/nomenclature/api")
@@ -222,7 +222,7 @@ class NomenclatureControllerTest {
     void getNomenclatureById_shouldReturn200AndDto() throws Exception {
         when(nomenclatureService.getById(1L)).thenReturn(sampleDto);
 
-        mockMvc.perform(get("/nomenclature/api/by-id/1"))
+        mockMvc.perform(get("/nomenclature/api/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Болт М8 оцинкованный"))
@@ -235,25 +235,6 @@ class NomenclatureControllerTest {
                 .thenThrow(new NotFoundException("Позиция с id 99999 не найдена"));
 
         mockMvc.perform(get("/nomenclature/api/by-id/99999"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void getNomenclatureBySku_shouldReturn200AndDto() throws Exception {
-        when(nomenclatureService.getBySku("BLT-M8-ZN-001")).thenReturn(sampleDto);
-
-        mockMvc.perform(get("/nomenclature/api/by-sku/BLT-M8-ZN-001"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.sku").value("BLT-M8-ZN-001"))
-                .andExpect(jsonPath("$.name").value("Болт М8 оцинкованный"));
-    }
-
-    @Test
-    void getNomenclatureBySku_shouldReturn404_whenNotFound() throws Exception {
-        when(nomenclatureService.getBySku("NOT-EXIST-999"))
-                .thenThrow(new NotFoundException("Не найдено позиции с артикулом NOT-EXIST-999"));
-
-        mockMvc.perform(get("/nomenclature/api/by-sku/NOT-EXIST-999"))
                 .andExpect(status().isNotFound());
     }
 }

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${storageLocationDto.id != null ? 'Редактировать' : 'Создать'} + ' ячейку'">Ячейка</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f4f6f9; }
+        h1 { text-align: center; color: #2c3e50; margin-top: 40px; margin-bottom: 30px; }
+        .form-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .field { margin-bottom: 20px; }
+        .field label { display: block; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
+        .field input[type="text"] { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        .field input[type="checkbox"] { width: auto; }
+        .error { color: #dc3545; font-size: 0.85rem; display: block; margin-top: 4px; }
+        .checkbox-field { display: flex; align-items: center; gap: 10px; }
+        .checkbox-field label { margin-bottom: 0; }
+        .actions { margin-top: 30px; display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; text-decoration: none; color: white; border-radius: 4px; font-size: 14px; border: none; cursor: pointer; display: inline-block; }
+        .btn-save { background-color: #28a745; }
+        .btn-back { background-color: #6c757d; }
+        .hint { color: #95a5a6; font-size: 0.85rem; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<h1 th:text="${storageLocationDto.id != null ? 'Редактировать' : 'Создать'} + ' ячейку'"></h1>
+
+<div class="form-card">
+    <form th:action="@{/storageLocation/save}" method="post" th:object="${storageLocationDto}">
+        <input type="hidden" th:field="*{id}">
+        <input type="hidden" th:field="*{warehouseId}">
+
+        <div class="field">
+            <label>Зона</label>
+            <input type="text" th:field="*{zone}" placeholder="например, A" required>
+            <span th:if="${#fields.hasErrors('zone')}" th:errors="*{zone}" class="error"></span>
+        </div>
+
+        <div class="field">
+            <label>Стеллаж</label>
+            <input type="text" th:field="*{rack}" placeholder="например, 01" required>
+            <span th:if="${#fields.hasErrors('rack')}" th:errors="*{rack}" class="error"></span>
+        </div>
+
+        <div class="field">
+            <label>Полка</label>
+            <input type="text" th:field="*{shelf}" placeholder="например, 02" required>
+            <span th:if="${#fields.hasErrors('shelf')}" th:errors="*{shelf}" class="error"></span>
+        </div>
+
+        <div class="field checkbox-field">
+            <input type="checkbox" th:field="*{used}" th:checked="${storageLocationDto.used}">
+            <label>Занята</label>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-save">Сохранить</button>
+            <a th:href="@{/warehouse/{id}(id=${storageLocationDto.warehouseId})}" class="btn btn-back">Отмена</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

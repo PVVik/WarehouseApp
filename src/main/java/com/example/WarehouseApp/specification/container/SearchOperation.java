@@ -4,10 +4,7 @@ public enum SearchOperation {
 
     EQUALITY,
     GREATER_THAN,
-    LESS_THAN,
-    CONTAINS,
-    STARTS_WITH,
-    ENDS_WITH;
+    LESS_THAN;
 
     public static SearchOperation getSimpleOperation(char ch) {
         return switch (ch) {

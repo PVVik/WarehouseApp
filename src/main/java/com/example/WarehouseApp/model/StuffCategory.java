@@ -1,8 +1,10 @@
 package com.example.WarehouseApp.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum StuffCategory {
     MATERIAL("Материал"),
     EQUIPMENT("Оборудование"),
@@ -12,17 +14,4 @@ public enum StuffCategory {
 
     private final String label;
 
-    StuffCategory(String label) {
-        this.label = label;
-    }
-
-    public static StuffCategory fromCode(String code) {
-        if (code == null) return null;
-        for (StuffCategory s : values()) {
-            if (s.name().equalsIgnoreCase(code)) {
-                return s;
-            }
-        }
-        throw new IllegalArgumentException("Неизвестная категория: " + code);
-    }
 }

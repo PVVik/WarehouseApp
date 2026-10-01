@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${counterpartyDto.id != null ? 'Редактировать' : 'Создать'} + ' контрагента'">Контрагент</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f4f6f9; }
+        h1 { text-align: center; color: #2c3e50; margin-top: 40px; margin-bottom: 30px; }
+        .form-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .field { margin-bottom: 20px; }
+        .field label { display: block; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
+        .field input[type="text"], .field select { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        .field input[type="checkbox"] { width: auto; }
+        .error { color: #dc3545; font-size: 0.85rem; display: block; margin-top: 4px; }
+        .actions { margin-top: 30px; display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; text-decoration: none; color: white; border-radius: 4px; font-size: 14px; border: none; cursor: pointer; display: inline-block; }
+        .btn-save { background-color: #28a745; }
+        .btn-back { background-color: #6c757d; }
+        .checkbox-field { display: flex; align-items: center; gap: 10px; }
+        .checkbox-field label { margin-bottom: 0; }
+    </style>
+</head>
+<body>
+
+<h1 th:text="${counterpartyDto.id != null ? 'Редактировать' : 'Создать'} + ' контрагента'"></h1>
+
+<div class="form-card">
+    <form th:action="@{/counterparty/save}" method="post" th:object="${counterpartyDto}">
+        <input type="hidden" th:field="*{id}">
+
+        <div class="field">
+            <label>Название организации</label>
+            <input type="text" th:field="*{name}" required>
+            <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error"></span>
+        </div>
+
+        <div class="field">
+            <label>ИНН</label>
+            <input type="text" th:field="*{inn}" required>
+            <span th:if="${#fields.hasErrors('inn')}" th:errors="*{inn}" class="error"></span>
+        </div>
+
+        <div class="field">
+            <label>КПП</label>
+            <input type="text" th:field="*{kpp}" required>
+            <span th:if="${#fields.hasErrors('kpp')}" th:errors="*{kpp}" class="error"></span>
+        </div>
+
+        <div class="field">
+            <label>Тип контрагента</label>
+            <select th:field="*{counterpartyType}" required>
+                <option value="" disabled>— Выберите тип —</option>
+                <option th:each="t : ${types}"
+                        th:value="${t}"
+                        th:text="${t.label}"
+                        th:selected="${t == counterpartyDto.counterpartyType}">
+                </option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Телефон</label>
+            <input type="text" th:field="*{phone}" placeholder="+7XXXXXXXXXX" required>
+            <span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="error"></span>
+        </div>
+
+        <div class="field">
+            <label>Контактное лицо</label>
+            <input type="text" th:field="*{contact}" required>
+            <span th:if="${#fields.hasErrors('contact')}" th:errors="*{contact}" class="error"></span>
+        </div>
+
+        <div class="field checkbox-field">
+            <input type="checkbox" th:field="*{isActive}" th:checked="${counterpartyDto.isActive}">
+            <label>Активен</label>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-save">Сохранить</button>
+            <a th:href="@{/counterparty}" class="btn btn-back">Отмена</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
+

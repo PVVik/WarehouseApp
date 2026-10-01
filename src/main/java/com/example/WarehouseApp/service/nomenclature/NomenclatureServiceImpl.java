@@ -1,11 +1,13 @@
 package com.example.WarehouseApp.service.nomenclature;
 
 import com.example.WarehouseApp.dto.NomenclatureDto;
+import com.example.WarehouseApp.exception.AlreadyExistsException;
 import com.example.WarehouseApp.exception.NotFoundException;
 import com.example.WarehouseApp.mapper.NomenclatureMapper;
 import com.example.WarehouseApp.model.Nomenclature;
 import com.example.WarehouseApp.repository.NomenclatureRepository;
-import com.example.WarehouseApp.specification.NomenclatureSpecificationsBuilder;
+import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.specification.nomenclature.NomenclatureSpecificationsBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,12 +20,14 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class NomenclatureServiceImpl implements NomenclatureService {
+public class NomenclatureServiceImpl implements BaseService<NomenclatureDto> {
 
     private final NomenclatureRepository nomenclatureRepository;
 
     @Override
-    public NomenclatureDto addNomenclature(NomenclatureDto nomenclatureDto) {
+    public NomenclatureDto create(NomenclatureDto nomenclatureDto) {
+        checkUniqueSku(nomenclatureDto.getSku());
+
         var nomenclature = nomenclatureRepository.save(NomenclatureMapper.mapToEntity(nomenclatureDto));
 
         log.info("Сохранили позицию под id {}", nomenclature.getId());
@@ -32,9 +36,8 @@ public class NomenclatureServiceImpl implements NomenclatureService {
     }
 
     @Override
-    public NomenclatureDto updateNomenclature(NomenclatureDto nomenclatureDto) {
-        var nomenclature = nomenclatureRepository.findById(nomenclatureDto.getId()).orElseThrow(() ->
-                new NotFoundException(String.format("Позиция с id %d не найдена", nomenclatureDto.getId())));
+    public NomenclatureDto update(NomenclatureDto nomenclatureDto) {
+        var nomenclature = getEntityById(nomenclatureDto.getId());
         var updated = NomenclatureMapper.mapToUpdateEntity(nomenclature, nomenclatureDto);
         var saved = nomenclatureRepository.save(updated);
 
@@ -72,23 +75,35 @@ public class NomenclatureServiceImpl implements NomenclatureService {
     }
 
     @Override
+    public void delete(long id) {
+        var nomenclature = getEntityById(id);
+
+        log.info("Удалили позицию с id {}", nomenclature.getId());
+
+        nomenclatureRepository.deleteById(nomenclature.getId());
+    }
+
+    @Override
     public NomenclatureDto getById(long id) {
-        var nomenclature = nomenclatureRepository.findById(id).orElseThrow(() ->
-                new NotFoundException(String.format("Позиция с id %d не найдена", id)));
+        var nomenclature = getEntityById(id);
 
         log.info("Нашли позицию по id {}", nomenclature.getId());
 
         return NomenclatureMapper.mapToDto(nomenclature);
     }
 
-    @Override
-    public NomenclatureDto getBySku(String sku) {
-        var nomenclature = nomenclatureRepository.findBySku(sku).orElseThrow(() ->
-                new NotFoundException(String.format("Не найдено позиции с артикулом %s", sku)));
+    private void checkUniqueSku(String sku) {
+        if (nomenclatureRepository.existsBySku(sku)) {
+            log.warn("Проверка на уникальность sku провалилась");
+            throw new AlreadyExistsException("Позиция с переданным артикулом уже существует");
+        }
+    }
 
-        log.info("Нашли позицию по sku {}", sku);
-
-        return NomenclatureMapper.mapToDto(nomenclature);
+    private Nomenclature getEntityById(long id) {
+        return nomenclatureRepository.findById(id).orElseGet(() -> {
+            log.warn("Не найдена позиция с id: {}", id);
+            throw new NotFoundException(String.format("Не найдено позиции с артикулом %d", id));
+        });
     }
 
 }
