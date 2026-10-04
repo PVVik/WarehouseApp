@@ -1,16 +1,12 @@
-package com.example.WarehouseApp.controller;
+package com.example.WarehouseApp.controller.counterparty;
 
 import com.example.WarehouseApp.dto.CounterpartyDto;
 import com.example.WarehouseApp.model.CounterpartyType;
 import com.example.WarehouseApp.service.BaseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -55,8 +51,7 @@ public class CounterpartyController {
         model.addAttribute("filterName", name != null ? name : "");
         model.addAttribute("filterInn", inn != null ? inn : "");
         model.addAttribute("filterType", counterpartyType != null ? counterpartyType : "");
-
-        model.addAttribute("counterpartyTypes", CounterpartyType.values());
+        model.addAttribute("types", CounterpartyType.values());
 
         return "counterparty/list";
     }
@@ -64,7 +59,7 @@ public class CounterpartyController {
     @GetMapping("/create")
     public String createForm(Model model) {
         model.addAttribute("counterpartyDto", new CounterpartyDto());
-        model.addAttribute("types", java.util.Arrays.asList(CounterpartyType.values()));
+        model.addAttribute("types", CounterpartyType.values());
         return "counterparty/form";
     }
 
@@ -72,17 +67,23 @@ public class CounterpartyController {
     public String editForm(@PathVariable long id, Model model) {
         CounterpartyDto dto = counterpartyService.getById(id);
         model.addAttribute("counterpartyDto", dto);
-        model.addAttribute("types", java.util.Arrays.asList(CounterpartyType.values()));
+        model.addAttribute("types", CounterpartyType.values());
         return "counterparty/form";
     }
+
 
     @PostMapping("/save")
     public String save(@ModelAttribute("counterpartyDto") @Valid CounterpartyDto dto,
                        BindingResult result,
+                       Model model,
                        RedirectAttributes redirectAttributes) {
+
         if (result.hasErrors()) {
+            model.addAttribute("types", CounterpartyType.values());
+            model.addAttribute("counterpartyDto", dto);
             return "counterparty/form";
         }
+
         if (dto.getId() == null) {
             counterpartyService.create(dto);
             redirectAttributes.addFlashAttribute("message", "Контрагент успешно добавлен");
@@ -103,32 +104,6 @@ public class CounterpartyController {
         }
         return "redirect:/counterparty";
     }
-
-    @PostMapping("/api")
-    @ResponseStatus(HttpStatus.CREATED)
-    public CounterpartyDto addCounterparty(@RequestBody @Valid CounterpartyDto counterpartyDto) {
-        return counterpartyService.create(counterpartyDto);
-    }
-
-    @GetMapping("/api/{id}")
-    public CounterpartyDto getCounterpartyById(@PathVariable long id) {
-        return counterpartyService.getById(id);
-    }
-
-    @PatchMapping("/api")
-    public CounterpartyDto updateCounterparty(@RequestBody CounterpartyDto counterpartyDto) {
-        return counterpartyService.update(counterpartyDto);
-    }
-
-    @GetMapping("/api")
-    public Page<CounterpartyDto> getAll(@PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
-                                        @RequestParam(value = "search", required = false) String search) {
-        return counterpartyService.getAll(pageable, search);
-    }
-
-    @DeleteMapping("/api/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCounterparty(@PathVariable long id) {
-        counterpartyService.delete(id);
-    }
 }
+
+

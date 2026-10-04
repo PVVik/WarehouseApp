@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${serialItem.id > 0} ? 'Редактирование серийной единицы' : 'Новая серийная единица'">
+        Серийная единица - WarehouseApp</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 25px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .error-text {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 9px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+        }
+
+        .btn-primary { background-color: #3498db; color: white; }
+        .btn-primary:hover { background-color: #2980b9; }
+        .btn-secondary { background-color: #ecf0f1; color: #2c3e50; }
+
+        .hint {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 th:text="${serialItem.id > 0} ? 'Редактирование серийной единицы' : 'Новая серийная единица'"></h1>
+
+    <div class="form-card">
+        <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
+
+        <form th:action="@{/serial-item/form}" th:object="${serialItem}" method="post">
+
+            <!-- id нужен, чтобы контроллер отличил обновление от создания -->
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="form-group">
+                <label for="nomenclatureId" class="required">Позиция номенклатуры</label>
+                <select id="nomenclatureId" th:field="*{nomenclatureId}">
+                    <option value="">— выберите позицию —</option>
+                    <option th:each="nom : ${nomenclatureList}"
+                            th:value="${nom.id}"
+                            th:text="${nom.name + ' (' + nom.sku + ')'}">
+                    </option>
+                </select>
+                <div class="hint">В списке только позиции с серийным учётом</div>
+                <div th:if="${#fields.hasErrors('nomenclatureId')}"
+                     class="error-text" th:errors="*{nomenclatureId}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="serialNumber" class="required">Серийный номер</label>
+                <input type="text" id="serialNumber" th:field="*{serialNumber}"
+                       placeholder="Например, SN20240001" />
+                <div class="hint">Уникальный заводской номер единицы</div>
+                <div th:if="${#fields.hasErrors('serialNumber')}"
+                     class="error-text" th:errors="*{serialNumber}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="status" class="required">Статус</label>
+                <select id="status" th:field="*{status}">
+                    <option th:each="st : ${statuses}"
+                            th:value="${st.name()}"
+                            th:text="${st.label}"></option>
+                </select>
+                <div th:if="${#fields.hasErrors('status')}"
+                     class="error-text" th:errors="*{status}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="passportNumber" class="required">Номер паспорта</label>
+                <input type="text" id="passportNumber" th:field="*{passportNumber}"
+                       placeholder="Например, П-2024-001" />
+                <div th:if="${#fields.hasErrors('passportNumber')}"
+                     class="error-text" th:errors="*{passportNumber}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="batchId">Партия</label>
+                <input type="text" id="batchId" th:field="*{batchId}"
+                       placeholder="ID партии (необязательно)" />
+                <div class="hint">Можно указать позже — например, при приходе</div>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Примечание</label>
+                <textarea id="notes" th:field="*{notes}"
+                          placeholder="Дополнительная информация о единице"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"
+                        th:text="${serialItem.id > 0} ? 'Сохранить изменения' : 'Добавить единицу'"></button>
+                <a th:href="@{/serial-item/list}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

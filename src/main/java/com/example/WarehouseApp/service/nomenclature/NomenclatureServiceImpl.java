@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.regex.Pattern;
 
@@ -25,6 +26,7 @@ public class NomenclatureServiceImpl implements BaseService<NomenclatureDto> {
     private final NomenclatureRepository nomenclatureRepository;
 
     @Override
+    @Transactional
     public NomenclatureDto create(NomenclatureDto nomenclatureDto) {
         checkUniqueSku(nomenclatureDto.getSku());
 
@@ -36,6 +38,7 @@ public class NomenclatureServiceImpl implements BaseService<NomenclatureDto> {
     }
 
     @Override
+    @Transactional
     public NomenclatureDto update(NomenclatureDto nomenclatureDto) {
         var nomenclature = getEntityById(nomenclatureDto.getId());
         var updated = NomenclatureMapper.mapToUpdateEntity(nomenclature, nomenclatureDto);

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.regex.Pattern;
 
@@ -26,6 +27,7 @@ public class StorageLocationServiceImpl implements BaseService<StorageLocationDt
     private final BaseService<WarehouseDto> warehouseService;
 
     @Override
+    @Transactional
     public StorageLocationDto create(StorageLocationDto storageLocationDto) {
         var storageLocation = storageLocationRepository.save(StorageLocationMapper.mapToEntity(storageLocationDto));
         var newLocation = StorageLocationMapper.mapToDto(storageLocation);
@@ -37,6 +39,7 @@ public class StorageLocationServiceImpl implements BaseService<StorageLocationDt
     }
 
     @Override
+    @Transactional
     public StorageLocationDto update(StorageLocationDto storageLocationDto) {
         var savedLocation = getEntityById(storageLocationDto.getId());
         var updatedLocation = StorageLocationMapper.mapToUpdateEntity(savedLocation, storageLocationDto);

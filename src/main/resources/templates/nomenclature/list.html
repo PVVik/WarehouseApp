@@ -163,6 +163,15 @@
                 </option>
             </select>
 
+            <select name="inventoryType">
+                <option value="">Любой тип учёта</option>
+                <option th:each="type : ${T(com.example.WarehouseApp.model.InventoryType).values()}"
+                        th:value="${type.name()}"
+                        th:text="${type.label}"
+                        th:selected="${type.name() == filterInventoryType}">
+                </option>
+            </select>
+
             <select name="active">
                 <option value="">Любой статус</option>
                 <option value="true" th:selected="${filterActive == true}">Активен</option>
@@ -211,10 +220,12 @@
             <td>
                 <a th:href="@{/nomenclature/form(id=${item.id})}"
                    class="btn btn-sm"
-                   style="background:none; color:#3498db; text-decoration:underline; padding:0;">
+                   style="background:none; color:#3498db; text-decoration:underline; padding:0; margin-right: 8px;">
                     Редактировать
                 </a>
+
             </td>
+
         </tr>
         <tr th:if="${#lists.isEmpty(nomenclatureList)}">
             <td colspan="8" style="text-align:center; color:#7f8c8d;">Список пуст</td>
@@ -225,17 +236,19 @@
     <div class="pagination" th:if="${totalPages > 1}">
         <a th:if="${currentPage > 0}"
            th:href="@{/nomenclature(page=${currentPage - 1}, size=${pageSize},
-               name=${filterName}, sku=${filterSku},
-               stuffCategory=${filterStuffCategory}, active=${filterActive})}">
+       name=${filterName}, sku=${filterSku},
+       stuffCategory=${filterStuffCategory},
+       inventoryType=${filterInventoryType},
+       active=${filterActive})}">
             ← Назад
         </a>
 
-        <span class="active" th:text="${currentPage + 1}"></span> из <span th:text="${totalPages}"></span>
-
         <a th:if="${currentPage < totalPages - 1}"
            th:href="@{/nomenclature(page=${currentPage + 1}, size=${pageSize},
-               name=${filterName}, sku=${filterSku},
-               stuffCategory=${filterStuffCategory}, active=${filterActive})}">
+       name=${filterName}, sku=${filterSku},
+       stuffCategory=${filterStuffCategory},
+       inventoryType=${filterInventoryType},
+       active=${filterActive})}">
             Вперед →
         </a>
     </div>

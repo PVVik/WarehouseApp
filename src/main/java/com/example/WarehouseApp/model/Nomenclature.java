@@ -10,6 +10,7 @@ import lombok.*;
 @EqualsAndHashCode(of = {"id", "sku"})
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class Nomenclature {
 
     @Id

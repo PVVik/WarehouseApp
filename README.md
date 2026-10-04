@@ -114,9 +114,6 @@ JUnit:
 Справочники-перечисления: StuffCategory (Материал, Оборудование, Инструмент, СИЗ, Топливо), UnitOfMeasure (Метр, Литр,
 Килограмм, Штука), InventoryType (Партионный, Серийный, Количественный).
 
-Обработка ошибок: NotFoundException при поиске несуществующей позиции по ID или SKU, валидация DTO на уровне
-контроллера.
-
 ### Тестирование
 
 Postman: postman/Nomenclature_Sprint2.json
@@ -174,13 +171,6 @@ JUnit:
 - GET /api/{id} — получение ячейки по ID (200 OK) или 404.
 - DELETE /api/{id} — удаление ячейки (204 No Content) или 404.
 
-### Обработка ошибок
-
-- NotFoundException — при запросе несуществующего ID в GET/PATCH/DELETE.
-- Валидация DTO на уровне контроллера (@Valid) — возврат 400 Bad Request при нарушении ограничений полей.
-- AlreadyExistsException — при попытке создать контрагента с дублирующимся ИНН.
-- DataIntegrityViolationException — на уровне БД при нарушении уникальности inn (дополнительная защита).
-
 ### Тестирование
 
 Postman:
@@ -195,3 +185,56 @@ JUnit:
   пагинация, поиск, валидация (400), обработка 404, проверка AlreadyExistsException.
 - CounterpartyRepositoryTest, StorageLocationRepositoryTest — базовые CRUD-операции репозитория, проверка existsByInn,
   проверка нарушения уникальности inn через DataIntegrityViolationException.
+
+## Спринт 4 — Партии и серийные номера
+
+Цель: учёт партий (химреагенты, трубы) и серийных номеров (УЭЦН, телесистемы), включая сертификаты, сроки годности и
+статусы жизненного цикла.
+
+### Функционал
+
+Партии (Batch):
+
+- CRUD через REST API.
+- Фильтры: по номенклатуре, поставщику, сроку годности.
+- Валидация дат: productionDate ≤ expiryDate, receiptDate ≥ productionDate.
+- Обязательные поля: batchNumber, nomenclatureId, supplierId.
+
+Серийные номера (SerialItem):
+
+- CRUD через REST API.
+- Фильтры: по номенклатуре, статусу, привязке к партии.
+- Контроль уникальности serialNumber.
+- Смена статуса только на допустимые следующие состояния.
+
+### REST API
+
+Batch API:
+
+- POST /api — создание (201).
+- PATCH /api — обновление (200).
+- GET /api — список с фильтрами (nomenclatureId, supplierId, expiryDateBefore, search).
+- GET /api/{id} — получение (200/404).
+- DELETE /api/{id} — удаление (204/404; запрещено при наличии привязанных серийных номеров).
+
+SerialItem API:
+
+- POST /api — создание (201).
+- PATCH /api — обновление (200).
+- GET /api — список с фильтрами (nomenclatureId, status, batchId, search).
+- GET /api/{id} — получение (200/404).
+- DELETE /api/{id} — удаление (204/404).
+
+### Тестирование
+
+Postman:
+
+- postman/batch_sprint4_postman.json — CRUD партий, валидация дат, фильтры, проверка запретов на удаление.
+- postman/serialItem_sprint4_postman.json — CRUD серийных номеров, переходы статусов, фильтры, проверка запретов на
+  удаление.
+
+JUnit:
+
+- BatchControllerTest, SerialControllerTest — API-эндпоинты, валидация, проверки запретов, уникальность.
+- BatchRepositoryTest, SerialRepositoryTest — CRUD, поиск по фильтрам, проверка уникальности через
+  DataIntegrityViolationException.

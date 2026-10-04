@@ -1,4 +1,4 @@
-package com.example.WarehouseApp.controller;
+package com.example.WarehouseApp.controller.warehouse;
 
 import com.example.WarehouseApp.dto.StorageLocationDto;
 import com.example.WarehouseApp.dto.WarehouseDto;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/warehouse")
 @RequiredArgsConstructor
-@Slf4j
 public class WarehouseController {
 
     private final BaseService<WarehouseDto> warehouseService;
@@ -124,36 +123,4 @@ public class WarehouseController {
         return "warehouses/view";
     }
 
-    @GetMapping("/api")
-    @ResponseBody
-    public Page<WarehouseDto> getWarehousesApi(@PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
-                                               @RequestParam(value = "search", required = false) String search) {
-        return warehouseService.getAll(pageable, search);
-    }
-
-    @GetMapping("/api/{id}")
-    @ResponseBody
-    public WarehouseDto getWarehouseByIdApi(@PathVariable long id) {
-        return warehouseService.getById(id);
-    }
-
-    @PostMapping("/api")
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CREATED)
-    public WarehouseDto addWarehouseApi(@Valid @RequestBody WarehouseDto warehouseDto) {
-        return warehouseService.create(warehouseDto);
-    }
-
-    @PatchMapping("/api")
-    @ResponseBody
-    public WarehouseDto updateWarehouseApi(@RequestBody WarehouseDto warehouseDto) {
-        return warehouseService.update(warehouseDto);
-    }
-
-    @DeleteMapping("/api/{id}")
-    @ResponseBody
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteWarehouseApi(@PathVariable long id) {
-        warehouseService.delete(id);
-    }
 }

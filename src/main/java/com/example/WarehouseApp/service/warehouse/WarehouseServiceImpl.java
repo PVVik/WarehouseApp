@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.regex.Pattern;
 
@@ -24,6 +25,7 @@ public class WarehouseServiceImpl implements BaseService<WarehouseDto> {
     private final WarehouseRepository warehouseRepository;
 
     @Override
+    @Transactional
     public WarehouseDto create(WarehouseDto warehouseDto) {
         var warehouse = warehouseRepository.save(WarehouseMapper.mapToEntity(warehouseDto));
         log.info("Создали склад с id {}", warehouse.getId());
@@ -32,6 +34,7 @@ public class WarehouseServiceImpl implements BaseService<WarehouseDto> {
     }
 
     @Override
+    @Transactional
     public WarehouseDto update(WarehouseDto warehouseDto) {
         var warehouse = warehouseRepository.findById(warehouseDto.getId()).orElseThrow(() ->
                 new NotFoundException(String.format("Склад с id %d не найден", warehouseDto.getId())));

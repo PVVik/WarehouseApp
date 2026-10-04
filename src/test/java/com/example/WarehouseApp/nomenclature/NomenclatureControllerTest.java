@@ -1,6 +1,6 @@
 package com.example.WarehouseApp.nomenclature;
 
-import com.example.WarehouseApp.controller.NomenclatureController;
+import com.example.WarehouseApp.controller.nomenclature.NomenclatureController;
 import com.example.WarehouseApp.dto.NomenclatureDto;
 import com.example.WarehouseApp.exception.ErrorHandler;
 import com.example.WarehouseApp.exception.NotFoundException;

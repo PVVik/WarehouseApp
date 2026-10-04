@@ -10,6 +10,7 @@ import lombok.*;
 @EqualsAndHashCode(of = {"id", "inn"})
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class Counterparty {
 
     @Id

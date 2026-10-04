@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.regex.Pattern;
 
@@ -25,6 +26,7 @@ public class CounterpartyServiceImpl implements BaseService<CounterpartyDto> {
     private final CounterpartyRepository counterpartyRepository;
 
     @Override
+    @Transactional
     public CounterpartyDto create(CounterpartyDto counterpartyDto) {
         checkUniqueInn(counterpartyDto.getInn());
 
@@ -45,6 +47,7 @@ public class CounterpartyServiceImpl implements BaseService<CounterpartyDto> {
     }
 
     @Override
+    @Transactional
     public CounterpartyDto update(CounterpartyDto counterpartyDto) {
         var counterparty = getEntityById(counterpartyDto.getId());
         var updated = CounterpartyMapper.mapToUpdateEntity(counterparty, counterpartyDto);

@@ -1,0 +1,480 @@
+{
+  "info": {
+    "_postman_id": "warehouse-sprint4-batch-api-v3",
+    "name": "WarehouseApp — Sprint 4: Batch API (с подготовкой контента)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Setup (подготовка контента)",
+      "description": "Создаёт поставщика и номенклатуру для партий. Запускать первой при Runner/Collection run.",
+      "item": [
+        {
+          "name": "POST /counterparty/api — создать поставщика",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"supplierId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ООО Поставщик Реагентов\",\n  \"inn\": \"7701234567\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"SUPPLIER\",\n  \"phone\": \"89123456789\",\n  \"contact\": \"Иванов Иван\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "counterparty",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — создать номенклатуру (BATCH)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"nomenclatureId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Реагент тестовый\",\n  \"sku\": \"REAGENT-TEST-001\",\n  \"stuffCategory\": \"MATERIAL\",\n  \"unitOfMeasure\": \"KILOGRAM\",\n  \"inventoryType\": \"BATCH\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Success",
+      "item": [
+        {
+          "name": "POST /batch/api — создать партию",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"batchId\", jsonData.id);",
+                  "});",
+                  "pm.test(\"batchNumber matches\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.batchNumber).to.eql('BATCH_2024_001');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomenclatureId\": {{nomenclatureId}},\n  \"batchNumber\": \"BATCH_2024_001\",\n  \"supplierId\": {{supplierId}},\n  \"productionDate\": \"2024-06-01\",\n  \"expiryDate\": \"2025-06-01\",\n  \"certificateNumber\": \"CERT-12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batch",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /batch/api/{id} — получить партию по ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has batchNumber and supplierId\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('batchNumber');",
+                  "    pm.expect(jsonData.supplierId).to.eql(Number(pm.collectionVariables.get('supplierId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batch/api/{{batchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batch",
+                "api",
+                "{{batchId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /batch/api — список партий (пагинация)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is a page object\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('content');",
+                  "    pm.expect(jsonData).to.have.property('totalElements');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batch/api?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batch",
+                "api"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /batch/api — поиск по batchNumber",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Search result contains our batch\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var found = jsonData.content.some(function (b) {",
+                  "        return b.id === Number(pm.collectionVariables.get('batchId'));",
+                  "    });",
+                  "    pm.expect(found).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batch/api?search=batchNumber:BATCH_2024_001&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batch",
+                "api"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "batchNumber:BATCH_2024_001"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /batch/api — обновить партию",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Updated certificate number\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.certificateNumber).to.eql('CERT-UPDATED-999');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{batchId}},\n  \"certificateNumber\": \"CERT-UPDATED-999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batch",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /batch/api/{id} — удалить партию",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batch/api/{{batchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batch",
+                "api",
+                "{{batchId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors",
+      "item": [
+        {
+          "name": "GET /batch/api/99999 — 404 (партия не найдена)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test(\"Response contains error message\", function () {",
+                  "    var body = pm.response.text();",
+                  "    pm.expect(body).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batch/api/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batch",
+                "api",
+                "99999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /batch/api — 404 (партия не найдена)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 99999,\n  \"certificateNumber\": \"CERT-FAKE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batch",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /batch/api/99999 — 404 (партия не найдена)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batch/api/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batch",
+                "api",
+                "99999"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "supplierId",
+      "value": ""
+    },
+    {
+      "key": "nomenclatureId",
+      "value": ""
+    },
+    {
+      "key": "batchId",
+      "value": ""
+    }
+  ]
+}
+

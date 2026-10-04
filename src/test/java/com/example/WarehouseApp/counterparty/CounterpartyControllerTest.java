@@ -1,6 +1,6 @@
 package com.example.WarehouseApp.counterparty;
 
-import com.example.WarehouseApp.controller.CounterpartyController;
+import com.example.WarehouseApp.controller.counterparty.CounterpartyController;
 import com.example.WarehouseApp.dto.CounterpartyDto;
 import com.example.WarehouseApp.exception.AlreadyExistsException;
 import com.example.WarehouseApp.exception.NotFoundException;
