@@ -12,6 +12,12 @@ public class NomenclatureMapper {
                 nomenclatureDto.getInventoryType(), nomenclatureDto.getActive());
     }
 
+    public static Nomenclature mapToEntityWithId(NomenclatureDto nomenclatureDto) {
+        return new Nomenclature(nomenclatureDto.getId(), nomenclatureDto.getName(), nomenclatureDto.getSku(),
+                nomenclatureDto.getStuffCategory(), nomenclatureDto.getUnitOfMeasure(),
+                nomenclatureDto.getInventoryType(), nomenclatureDto.getActive());
+    }
+
     public static NomenclatureDto mapToDto(Nomenclature nomenclature) {
         return new NomenclatureDto(nomenclature.getId(), nomenclature.getName(), nomenclature.getSku(),
                 nomenclature.getStuffCategory(), nomenclature.getUnitOfMeasure(), nomenclature.getInventoryType(),

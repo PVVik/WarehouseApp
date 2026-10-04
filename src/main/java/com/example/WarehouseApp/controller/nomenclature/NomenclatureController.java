@@ -1,4 +1,4 @@
-package com.example.WarehouseApp.controller;
+package com.example.WarehouseApp.controller.nomenclature;
 
 import com.example.WarehouseApp.dto.NomenclatureDto;
 import com.example.WarehouseApp.service.BaseService;
@@ -101,31 +101,4 @@ public class NomenclatureController {
         }
     }
 
-    @PostMapping("/api")
-    @ResponseStatus(HttpStatus.CREATED)
-    public NomenclatureDto addNomenclature(@RequestBody @Valid NomenclatureDto nomenclatureDto) {
-        return nomenclatureService.create(nomenclatureDto);
-    }
-
-    @PatchMapping("/api")
-    public NomenclatureDto updateNomenclature(@RequestBody NomenclatureDto nomenclatureDto) {
-        return nomenclatureService.update(nomenclatureDto);
-    }
-
-    @GetMapping("/api")
-    public Page<NomenclatureDto> getAll(@PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
-                                        @RequestParam(value = "search", required = false) String search) {
-        return nomenclatureService.getAll(pageable, search);
-    }
-
-    @GetMapping("/api/{id}")
-    public NomenclatureDto getNomenclatureById(@PathVariable long id) {
-        return nomenclatureService.getById(id);
-    }
-
-    @DeleteMapping("/api/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteNomenclature(@PathVariable long id) {
-        nomenclatureService.delete(id);
-    }
 }

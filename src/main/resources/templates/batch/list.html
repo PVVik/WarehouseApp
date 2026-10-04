@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Партии — WarehouseApp</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1, h2 { color: #2c3e50; }
+        .toolbar { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .btn { padding: 8px 16px; text-decoration: none; border-radius: 4px; font-weight: 600; cursor: pointer; border: none; }
+        .btn-primary { background-color: #3498db; color: white; }
+        .btn-primary:hover { background-color: #2980b9; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; color: #2c3e50; }
+        tr:hover { background-color: #f1f1f1; }
+        .pagination { margin-top: 20px; display: flex; gap: 5px; flex-wrap: wrap; }
+        .pagination a, .pagination span { padding: 8px 12px; border: 1px solid #ddd; text-decoration: none; color: #333; border-radius: 4px; }
+        .pagination .active { background-color: #3498db; color: white; border-color: #3498db; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="toolbar">
+        <div>
+            <h1>Партии</h1>
+            <p style="color:#7f8c8d;">Номенклатура ID: <b th:text="${nomenclatureId}"></b></p>
+        </div>
+        <a href="/nomenclature" class="btn btn-primary">← Назад к номенклатуре</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Номер партии</th>
+            <th>Дата производства</th>
+            <th>Срок годности</th>
+            <th>Поставщик</th>
+            <th>Сертификат</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="batch : ${batches}">
+            <td th:text="${batch.id}"></td>
+            <td th:text="${batch.batchNumber}"></td>
+            <td th:text="${#dates.format(batch.productionDate, 'yyyy-MM-dd')}"></td>
+            <td th:text="${#dates.format(batch.expiryDate, 'yyyy-MM-dd')}"></td>
+            <td th:text="${batch.supplierId}"></td>
+            <td th:text="${batch.certificateNumber}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(batches)}">
+            <td colspan="6" style="text-align:center; color:#7f8c8d;">Партий нет</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination" th:if="${page.totalPages > 1}">
+        <a th:if="${page.number > 0}"
+           th:href="@{/batch/list(nomenclatureId=${nomenclatureId}, page=${page.number - 1}, size=${page.size})}">
+            ← Назад
+        </a>
+        <span class="active" th:text="${page.number + 1}"></span> из <span th:text="${page.totalPages}"></span>
+        <a th:if="${page.number < page.totalPages - 1}"
+           th:href="@{/batch/list(nomenclatureId=${nomenclatureId}, page=${page.number + 1}, size=${page.size})}">
+            Вперед →
+        </a>
+    </div>
+</div>
+</body>
+</html>

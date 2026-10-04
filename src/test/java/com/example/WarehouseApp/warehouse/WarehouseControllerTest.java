@@ -1,6 +1,6 @@
 package com.example.WarehouseApp.warehouse;
 
-import com.example.WarehouseApp.controller.WarehouseController;
+import com.example.WarehouseApp.controller.warehouse.WarehouseController;
 import com.example.WarehouseApp.dto.WarehouseDto;
 import com.example.WarehouseApp.exception.NotFoundException;
 import com.example.WarehouseApp.model.WarehouseType;

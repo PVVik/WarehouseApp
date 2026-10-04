@@ -1,0 +1,709 @@
+{
+  "info": {
+    "_postman_id": "warehouse-sprint4-serial-item-api-v1",
+    "name": "WarehouseApp — Sprint 4: SerialItem API (с подготовкой контента)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Setup (подготовка контента)",
+      "description": "Создаёт поставщика, номенклатуру с типом учета SERIAL и партию для серийных единиц. Запускать первой при Runner/Collection run.",
+      "item": [
+        {
+          "name": "POST /counterparty/api — создать поставщика",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"supplierId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ООО Поставщик Насосов\",\n  \"inn\": \"7701234568\",\n  \"kpp\": \"770101002\",\n  \"counterpartyType\": \"SUPPLIER\",\n  \"phone\": \"89123456780\",\n  \"contact\": \"Петров Пётр\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "counterparty",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — создать номенклатуру (SERIAL)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"nomenclatureId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Секция насоса УЭЦН тестовая\",\n  \"sku\": \"UECN-SECTION-TEST-001\",\n  \"stuffCategory\": \"EQUIPMENT\",\n  \"unitOfMeasure\": \"PIECE\",\n  \"inventoryType\": \"SERIAL\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /batch/api — создать партию (для привязки серийника)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"batchId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomenclatureId\": {{nomenclatureId}},\n  \"batchNumber\": \"BATCH_2024_002\",\n  \"supplierId\": {{supplierId}},\n  \"productionDate\": \"2024-07-01\",\n  \"expiryDate\": \"2027-07-01\",\n  \"certificateNumber\": \"CERT-67890\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batch",
+                "api"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Success",
+      "item": [
+        {
+          "name": "POST /serial-item/api — создать серийную единицу",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"serialItemId\", jsonData.id);",
+                  "});",
+                  "pm.test(\"serialNumber matches\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.serialNumber).to.eql('SN20240001');",
+                  "});",
+                  "pm.test(\"status is IN_STOCK\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql('IN_STOCK');",
+                  "});",
+                  "pm.test(\"batchId linked\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(Number(jsonData.batchId)).to.eql(Number(pm.collectionVariables.get('batchId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomenclatureId\": {{nomenclatureId}},\n  \"serialNumber\": \"SN20240001\",\n  \"batchId\": {{batchId}},\n  \"status\": \"IN_STOCK\",\n  \"passportNumber\": \"PASS-778812\",\n  \"notes\": \"Новая секция, без замечаний\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /serial-item/api — создать серийную единицу без партии",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test(\"Response has id and no batch\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomenclatureId\": {{nomenclatureId}},\n  \"serialNumber\": \"SN20240002\",\n  \"status\": \"NEW\",\n  \"passportNumber\": \"PASS-778813\",\n  \"notes\": \"Вне партии, ручной ввод\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /serial-item/api/{id} — получить серийную единицу по ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has serialNumber and nomenclatureId\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('serialNumber');",
+                  "    pm.expect(Number(jsonData.nomenclatureId)).to.eql(Number(pm.collectionVariables.get('nomenclatureId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api/{{serialItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api",
+                "{{serialItemId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /serial-item/api — список серийных единиц (пагинация)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is a page object\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('content');",
+                  "    pm.expect(jsonData).to.have.property('totalElements');",
+                  "});",
+                  "pm.test(\"Content contains our item\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var found = jsonData.content.some(function (s) {",
+                  "        return Number(s.id) === Number(pm.collectionVariables.get('serialItemId'));",
+                  "    });",
+                  "    pm.expect(found).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /serial-item/api — поиск по статусу",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Search result contains our item\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var found = jsonData.content.some(function (s) {",
+                  "        return Number(s.id) === Number(pm.collectionVariables.get('serialItemId'));",
+                  "    });",
+                  "    pm.expect(found).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api?search=status:IN_STOCK&page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "status:IN_STOCK"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /serial-item/api — поиск по серийному номеру",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Search by serialNumber finds our item\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var found = jsonData.content.some(function (s) {",
+                  "        return s.serialNumber === 'SN20240001';",
+                  "    });",
+                  "    pm.expect(found).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api?search=serialNumber:SN20240001&page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "serialNumber:SN20240001"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /serial-item/api — обновить статус серийной единицы",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Updated status is IN_USE\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql('IN_USE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{serialItemId}},\n  \"status\": \"IN_USE\",\n  \"notes\": \"Передана в эксплуатацию\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /serial-item/api/{id} — удалить серийную единицу",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api/{{serialItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api",
+                "{{serialItemId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors",
+      "item": [
+        {
+          "name": "GET /serial-item/api/99999 — 404 (серийная единица не найдена)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test(\"Response contains error message\", function () {",
+                  "    var body = pm.response.text();",
+                  "    pm.expect(body).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api",
+                "99999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /serial-item/api — 404 (серийная единица не найдена)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 99999,\n  \"status\": \"IN_REPAIR\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /serial-item/api/99999 — 404 (серийная единица не найдена)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api",
+                "99999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /serial-item/api — 400 (нет обязательных полей)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serialNumber\": \"\",\n  \"notes\": \"Нет обязательных полей\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /serial-item/api — 500 (несуществующая номенклатура)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Request fails\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomenclatureId\": 99999,\n  \"serialNumber\": \"SN20240999\",\n  \"status\": \"NEW\",\n  \"passportNumber\": \"PASS-000000\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/serial-item/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "serial-item",
+                "api"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "supplierId",
+      "value": ""
+    },
+    {
+      "key": "nomenclatureId",
+      "value": ""
+    },
+    {
+      "key": "batchId",
+      "value": ""
+    },
+    {
+      "key": "serialItemId",
+      "value": ""
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 package com.example.WarehouseApp.storageLocation;
 
-import com.example.WarehouseApp.controller.StorageLocationController;
+import com.example.WarehouseApp.controller.storageLocation.StorageLocationController;
 import com.example.WarehouseApp.dto.StorageLocationDto;
 import com.example.WarehouseApp.exception.NotFoundException;
 import com.example.WarehouseApp.service.BaseService;

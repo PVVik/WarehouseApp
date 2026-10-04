@@ -12,6 +12,12 @@ public class CounterpartyMapper {
                 counterpartyDto.getIsActive());
     }
 
+    public static Counterparty mapToEntityWithId(CounterpartyDto counterpartyDto) {
+        return new Counterparty(counterpartyDto.getId(), counterpartyDto.getName(), counterpartyDto.getInn(), counterpartyDto.getKpp(),
+                counterpartyDto.getCounterpartyType(), counterpartyDto.getPhone(), counterpartyDto.getContact(),
+                counterpartyDto.getIsActive());
+    }
+
     public static CounterpartyDto mapToDto(Counterparty counterparty) {
         return new CounterpartyDto(counterparty.getId(), counterparty.getName(), counterparty.getInn(),
                 counterparty.getKpp(), counterparty.getCounterpartyType(), counterparty.getPhone(),
