@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Выбор номенклатуры - Приход</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .toolbar {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .filter-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            align-items: end;
+        }
+        .btn {
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary { background-color: #3498db; color: white; }
+        .btn-primary:hover { background-color: #2980b9; }
+
+        .btn-success { background-color: #2ecc71; color: white; }
+        .btn-sm { padding: 4px 8px; font-size: 0.85rem; }
+
+        input[type="text"], select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .pagination a, .pagination span {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: #333;
+            border-radius: 4px;
+        }
+        .pagination .active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .status-active { background-color: #d4edda; color: #155724; }
+        .status-inactive { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Выберите номенклатуру для прихода</h1>
+
+    <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
+
+    <div class="toolbar">
+        <div>
+            <h2>Поиск позиции</h2>
+        </div>
+        <form th:action="@{/movements/nomenclature/list}" method="get" class="filter-form">
+            <input type="text" name="name" th:value="${filterName}" placeholder="Название (например, Болт)" />
+            <div style="display: flex; gap: 8px;">
+                <button type="submit" class="btn btn-primary">Найти</button>
+                <a th:href="@{/movements/receipt/form}" class="btn btn-outline-secondary" style="background:none; color:#6c757d; text-decoration:none; padding: 8px 16px;">Назад</a>
+            </div>
+        </form>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>SKU</th>
+            <th>Название</th>
+            <th>Категория</th>
+            <th>Ед. изм.</th>
+            <th>Тип учёта</th>
+            <th>Статус</th>
+            <th>Действие</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${nomenclatureList}">
+            <td th:text="${item.sku}"></td>
+            <td th:text="${item.name}"></td>
+            <td th:text="${item.stuffCategoryLabel}"></td>
+            <td th:text="${item.unitOfMeasureLabel}"></td>
+            <td th:text="${item.inventoryTypeLabel}"></td>
+
+            <td>
+                    <span th:classappend="${item.active} ? 'status-active' : 'status-inactive'"
+                          class="status-badge"
+                          th:text="${item.active} ? 'Активен' : 'Неактивен'">
+                    </span>
+            </td>
+
+            <td>
+                <a th:href="@{/movements/receipt/form(nomenclatureId=${item.id}, nomenclatureName=${item.name}, inventoryType=${item.inventoryType})}"
+                   class="btn btn-sm btn-success">Выбрать</a>
+
+            </td>
+        <tr th:if="${#lists.isEmpty(nomenclatureList)}">
+            <td colspan="7" style="text-align:center; padding: 20px; color:#7f8c8d;">
+                Ничего не найдено.
+                <a th:href="@{/nomenclature/form(from='movements', name=${filterName})}"
+                   class="btn btn-primary" style="margin-left: 10px;">Создать позицию</a>
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 0}"
+           th:href="@{/movements/nomenclature/list(page=${currentPage - 1}, size=${pageSize}, name=${filterName})}">
+            ← Назад
+        </a>
+        <a th:if="${currentPage < totalPages - 1}"
+           th:href="@{/movements/nomenclature/list(page=${currentPage + 1}, size=${pageSize}, name=${filterName})}">
+            Вперед →
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

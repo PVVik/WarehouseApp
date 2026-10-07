@@ -4,39 +4,148 @@
     <meta charset="UTF-8">
     <title>Склады</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 960px; margin: 0 auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f5f5f5; }
-        tr:hover { background-color: #fafafa; }
-        .active { color: green; font-weight: bold; }
-        .inactive { color: #999; }
-        .btn { padding: 6px 14px; text-decoration: none; color: white; border-radius: 4px; font-size: 14px; }
-        .btn-create { background-color: #28a745; display: inline-block; margin-bottom: 15px; padding: 8px 16px; }
-        .btn-edit { background-color: #007bff; }
-        .btn-delete { background-color: #dc3545; border: none; cursor: pointer; }
-        .btn-view { background-color: #6c757d; }
-        .pagination { display: flex; gap: 8px; margin-top: 20px; list-style: none; padding: 0; }
-        .pagination a, .pagination span { padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333; }
-        .pagination .current { background-color: #007bff; color: white; border-color: #007bff; }
-        .search-form { margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .search-form input[type="text"] { padding: 6px 10px; width: 200px; }
-        .search-form select { padding: 6px 10px; }
-        .search-form button { padding: 6px 14px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .search-form a { padding: 6px 14px; background-color: #6c757d; color: white; border-radius: 4px; text-decoration: none; font-size: 14px; }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+        }
+
+        .top-controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-back-custom {
+            background-color: #6c757d !important;
+            color: white !important;
+            padding: 10px 20px !important;
+            text-decoration: none !important;
+            border-radius: 4px !important;
+            font-weight: bold;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        .btn-create-custom {
+            background-color: #28a745 !important;
+            color: white !important;
+            padding: 10px 20px !important;
+            text-decoration: none !important;
+            border-radius: 4px !important;
+            font-weight: bold;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        h1 { margin-top: 0; color: #333; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px 15px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+            color: #555;
+        }
+
+        tr:hover { background-color: #f1f1f1; }
+
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-inactive { color: #6c757d; }
+
+        .search-form {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .search-form input[type="text"] {
+            padding: 8px 12px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .search-form button, .search-form a {
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-search-custom {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+
+        .btn-reset-custom {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+            list-style: none;
+            padding: 0;
+            justify-content: center;
+        }
+
+        .pagination a, .pagination span {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .pagination .current {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
     </style>
 </head>
 <body>
 
+<div class="top-controls">
+    <a th:href="@{/}" class="btn-back-custom">← Назад к операциям</a>
+    <a th:href="@{/warehouse/new}" class="btn-create-custom">+ Добавить склад</a>
+</div>
+
 <h1>Склады</h1>
 
-<a th:href="@{/warehouse/new}" class="btn btn-create">+ Добавить склад</a>
-
 <form th:action="@{/warehouse}" method="get" class="search-form">
-    <input type="text" name="name" th:value="${filterName}" placeholder="Название"/>
-
-    <button type="submit">Искать</button>
-    <a th:href="@{/warehouse}">Сбросить</a>
+    <input type="text" name="name" th:value="${filterName}" placeholder="Название склада"/>
+    <button type="submit" class="btn-search-custom">Искать</button>
+    <a th:href="@{/warehouse}" class="btn-reset-custom">Сбросить</a>
 </form>
 
 <table>
@@ -51,43 +160,63 @@
     </tr>
     </thead>
     <tbody>
+
+    <tr th:if="${#lists.isEmpty(warehouses)}">
+        <td colspan="6" style="text-align:center; padding: 20px;">Складов пока нет</td>
+    </tr>
+
     <tr th:each="w : ${warehouses}">
         <td th:text="${w.id}"></td>
         <td th:text="${w.name}"></td>
         <td th:text="${w.address}"></td>
         <td th:text="${w.type}"></td>
         <td>
-            <span th:if="${w.active}" class="active">Активен</span>
-            <span th:unless="${w.active}" class="inactive">Неактивен</span>
+            <span th:if="${w.active}" class="status-active">Активен</span>
+            <span th:unless="${w.active}" class="status-inactive">Неактивен</span>
         </td>
         <td>
-            <a th:href="@{/warehouse/{id}(id=${w.id})}" class="btn btn-view">Просмотр</a>
-            <a th:href="@{/warehouse/{id}/edit(id=${w.id})}" class="btn btn-edit">Редактировать</a>
-            <form th:action="@{/warehouse/{id}/delete(id=${w.id})}" method="post" style="display:inline;">
-                <button type="submit" class="btn btn-delete"
-                        onclick="return confirm('Удалить склад?')">Удалить</button>
-            </form>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+
+                <a th:href="@{/warehouse/{id}(id=${w.id})}"
+                   style="background-color: #6c757d; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-size: 13px;">
+                    Просмотр
+                </a>
+
+                <a th:href="@{/warehouse/{id}/edit(id=${w.id})}"
+                   style="background-color: #007bff; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-size: 13px;">
+                    Редактировать
+                </a>
+
+                <form th:action="@{/warehouse/{id}/delete(id=${w.id})}" method="post" style="display: inline;">
+                    <button type="submit"
+                            style="background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 13px; cursor: pointer;"
+                            onclick="return confirm('Вы уверены, что хотите удалить склад?');">
+                        Удалить
+                    </button>
+                </form>
+
+            </div>
         </td>
     </tr>
-    <tr th:if="${#lists.isEmpty(warehouses)}">
-        <td colspan="6" style="text-align:center;">Складов пока нет</td>
-    </tr>
+
     </tbody>
 </table>
 
 <div th:if="${totalPages > 1}">
     <ul class="pagination">
         <li th:if="${currentPage > 0}">
-            <a th:href="@{/warehouse(page=${currentPage - 1}, size=${pageSize}, name=${filterName}, type=${filterType}, active=${filterActive})}">&laquo; Назад</a>
+            <a th:href="@{/warehouse(page=${currentPage - 1}, size=${pageSize}, name=${filterName})}">&laquo; Назад</a>
         </li>
+
         <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
             <a th:if="${i != currentPage}"
-               th:href="@{/warehouse(page=${i}, size=${pageSize}, name=${filterName}, type=${filterType}, active=${filterActive})}"
+               th:href="@{/warehouse(page=${i}, size=${pageSize}, name=${filterName})}"
                th:text="${i + 1}"></a>
             <span th:unless="${i != currentPage}" class="current" th:text="${i + 1}"></span>
         </li>
+
         <li th:if="${currentPage < totalPages - 1}">
-            <a th:href="@{/warehouse(page=${currentPage + 1}, size=${pageSize}, name=${filterName}, type=${filterType}, active=${filterActive})}">Вперёд &raquo;</a>
+            <a th:href="@{/warehouse(page=${currentPage + 1}, size=${pageSize}, name=${filterName})}">Вперёд &raquo;</a>
         </li>
     </ul>
 </div>

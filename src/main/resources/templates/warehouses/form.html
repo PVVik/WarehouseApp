@@ -23,6 +23,7 @@
 <form th:action="@{/warehouse}" th:object="${warehouseDto}" method="post">
 
     <input type="hidden" th:if="${warehouseDto.id != null}" th:field="*{id}"/>
+    <input type="hidden" name="from" th:value="${from}">
 
     <label for="name">Название</label>
     <input type="text" id="name" th:field="*{name}" placeholder="Название склада"/>
@@ -47,10 +48,12 @@
 
     <div class="actions">
         <button type="submit" class="btn-save">Сохранить</button>
-        <a th:href="@{/warehouse}" class="btn-cancel">Отмена</a>
+        <a th:href="${from == 'movements'} ? @{/movements/warehouse/list} : @{/warehouse}"
+           class="btn-cancel">Отмена</a>
     </div>
 
 </form>
+
 
 </body>
 </html>

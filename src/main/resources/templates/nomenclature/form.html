@@ -25,7 +25,7 @@
 
     <form th:action="@{/nomenclature/form}" th:object="${nomenclature}" method="post">
 
-        <input type="hidden" th:field="*{id}" />
+        <input type="hidden" name="from" th:value="${from}">
 
         <div class="form-group">
             <label for="name">Название *</label>

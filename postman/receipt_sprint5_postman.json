@@ -1,0 +1,702 @@
+{
+  "info": {
+    "_postman_id": "warehouse-sprint5-receipt-api-v1",
+    "name": "WarehouseApp — Sprint 5: Receipt API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Setup (подготовка контента)",
+      "description": "Создаёт поставщика, номенклатуру (QUANTITY/BATCH/SERIAL), склад и место хранения. Запускать первой при Runner/Collection run.",
+      "item": [
+        {
+          "name": "POST /counterparty/api — создать поставщика",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"counterpartyId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ООО Поставщик Реагентов\",\n  \"inn\": \"7701234567\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"SUPPLIER\",\n  \"phone\": \"+73466123456\",\n  \"contact\": \"Иванов Иван\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/counterparty/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "counterparty",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — создать номенклатуру (QUANTITY)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"nomenclatureIdQuantity\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Труба стальная 108x4\",\n  \"sku\": \"TRB-108-4\",\n  \"stuffCategory\": \"MATERIAL\",\n  \"unitOfMeasure\": \"METER\",\n  \"inventoryType\": \"QUANTITY\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — создать номенклатуру (BATCH)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"nomenclatureIdBatch\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Реагент тестовый\",\n  \"sku\": \"REAGENT-TEST-001\",\n  \"stuffCategory\": \"MATERIAL\",\n  \"unitOfMeasure\": \"KILOGRAM\",\n  \"inventoryType\": \"BATCH\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — создать номенклатуру (SERIAL)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"nomenclatureIdSerial\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Телесистема ТС-200\",\n  \"sku\": \"TEL-TS200-01\",\n  \"stuffCategory\": \"EQUIPMENT\",\n  \"unitOfMeasure\": \"PIECE\",\n  \"inventoryType\": \"SERIAL\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nomenclature/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "nomenclature",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /warehouse/api — создать склад (CENTRAL)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"warehouseId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Центральный склад\",\n  \"address\": \"г. Москва, ул. Складская, 1\",\n  \"type\": \"CENTRAL\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/warehouse/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "warehouse",
+                "api"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /storageLocation/api — создать место хранения",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"storageLocationId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": {{warehouseId}},\n  \"zone\": \"A\",\n  \"rack\": \"1\",\n  \"shelf\": \"2\",\n  \"code\": \"A-1-2\",\n  \"used\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/storageLocation/api",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "storageLocation",
+                "api"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Success",
+      "item": [
+        {
+          "name": "POST /receipt — приход QUANTITY (без партии и серийника)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"receiptId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdQuantity}},\n  \"warehouseTo\": {{warehouseId}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": 10,\n  \"price\": 1000,\n  \"number\": \"DOC-Q-001\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1,\n  \"notes\": \"Поставка труб\",\n  \"storageLocationId\": {{storageLocationId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipt"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /receipt — приход BATCH (с партией)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"receiptIdBatch\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdBatch}},\n  \"warehouseTo\": {{warehouseId}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": 5,\n  \"price\": 2500,\n  \"number\": \"DOC-B-001\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1,\n  \"notes\": \"Поставка реагента\",\n  \"batchDto\": {\n    \"batchNumber\": \"BATCH_2026_001\",\n    \"supplierId\": {{counterpartyId}},\n    \"productionDate\": \"2026-01-01\",\n    \"expiryDate\": \"2027-01-01\",\n    \"certificateNumber\": \"CERT-001\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipt"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /receipt — приход SERIAL (с серийником)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"receiptIdSerial\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdSerial}},\n  \"warehouseTo\": {{warehouseId}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": 1,\n  \"price\": 150000,\n  \"number\": \"DOC-S-001\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1,\n  \"notes\": \"Поставка телесистемы\",\n  \"serialItemDto\": {\n    \"serialNumber\": \"SN-2026-000123\",\n    \"status\": \"NEW\",\n    \"passportNumber\": \"PASS-001\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipt"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors",
+      "item": [
+        {
+          "name": "POST /receipt — 400 (нет nomenclatureId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"warehouseTo\": {{warehouseId}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": 10,\n  \"price\": 1000,\n  \"number\": \"DOC-ERR-001\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipt"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /receipt — 400 (нет warehouseTo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdQuantity}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": 10,\n  \"price\": 1000,\n  \"number\": \"DOC-ERR-002\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipt"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /receipt — 400 (quantity = 0)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdQuantity}},\n  \"warehouseTo\": {{warehouseId}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": 0,\n  \"price\": 1000,\n  \"number\": \"DOC-ERR-003\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipt"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /receipt — 400 (quantity отрицательное)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdQuantity}},\n  \"warehouseTo\": {{warehouseId}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": -5,\n  \"price\": 1000,\n  \"number\": \"DOC-ERR-004\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipt"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /receipt — 400 (BATCH: expiryDate < productionDate)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdBatch}},\n  \"warehouseTo\": {{warehouseId}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": 5,\n  \"price\": 2500,\n  \"number\": \"DOC-ERR-B001\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1,\n  \"batchDto\": {\n    \"batchNumber\": \"BATCH_2026_ERR_01\",\n    \"supplierId\": {{counterpartyId}},\n    \"productionDate\": \"2026-02-01\",\n    \"expiryDate\": \"2026-01-15\",\n    \"certificateNumber\": \"CERT-ERR-01\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipt"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /receipt — 400 (BATCH: productionDate в будущем)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdBatch}},\n  \"warehouseTo\": {{warehouseId}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": 5,\n  \"price\": 2500,\n  \"number\": \"DOC-ERR-B002\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1,\n  \"batchDto\": {\n    \"batchNumber\": \"BATCH_2030_001\",\n    \"supplierId\": {{counterpartyId}},\n    \"productionDate\": \"2030-01-01\",\n    \"expiryDate\": \"2031-01-01\",\n    \"certificateNumber\": \"CERT-FUTURE-01\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipt"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /receipt — 400 (SERIAL: без passportNumber)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdSerial}},\n  \"warehouseTo\": {{warehouseId}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": 1,\n  \"price\": 150000,\n  \"number\": \"DOC-ERR-S002\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1,\n  \"serialItemDto\": {\n    \"serialNumber\": \"SN-2026-ERR-999\",\n    \"status\": \"NEW\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipt"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "counterpartyId",
+      "value": ""
+    },
+    {
+      "key": "nomenclatureIdQuantity",
+      "value": ""
+    },
+    {
+      "key": "nomenclatureIdBatch",
+      "value": ""
+    },
+    {
+      "key": "nomenclatureIdSerial",
+      "value": ""
+    },
+    {
+      "key": "warehouseId",
+      "value": ""
+    },
+    {
+      "key": "storageLocationId",
+      "value": ""
+    },
+    {
+      "key": "receiptId",
+      "value": ""
+    }
+  ]
+}

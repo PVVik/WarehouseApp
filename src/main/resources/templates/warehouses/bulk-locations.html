@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Массовое создание ячеек</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 700px; margin: 0 auto; background-color: #f4f6f9; }
+        h2 { text-align: center; color: #2c3e50; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; }
+        input { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+        .row { display: flex; gap: 15px; }
+        .row .form-group { flex: 1; }
+        .btn { display: inline-block; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: 600; cursor: pointer; border: none; }
+        .btn-success { background-color: #27ae60; color: white; }
+        .btn-success:hover { background-color: #219150; }
+        .btn-outline-secondary { background-color: transparent; border: 1px solid #ccc; color: #555; }
+        .btn-outline-secondary:hover { background-color: #f8f9fa; }
+        .btn-back { background-color: #6c757d; color: white; margin-bottom: 20px; display: inline-block; }
+        .button-group { display: flex; gap: 15px; margin-top: 30px; }
+        .flash-message { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .flash-success { background-color: #d4edda; color: #155724; }
+        .flash-error { background-color: #f8d7da; color: #721c24; }
+        .preview { background-color: #f8f9fa; padding: 12px 15px; border-radius: 6px; color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a th:href="@{/warehouse/{id}(id=${warehouse.id})}" class="btn btn-back">← Назад к складу</a>
+
+    <h2>Массовое создание ячеек</h2>
+    <p style="color: #7f8c8d; text-align: center;">
+        Склад: <b th:text="${warehouse.name}"></b>
+    </p>
+
+    <div th:if="${message}" class="flash-message flash-success" th:text="${message}"></div>
+    <div th:if="${error}" class="flash-message flash-error" th:text="${error}"></div>
+
+    <form th:action="@{/warehouse/{id}/locations/bulk(id=${warehouse.id})}" method="post">
+
+        <div class="row">
+            <div class="form-group">
+                <label for="zone" class="required">Зона</label>
+                <input type="text" id="zone" name="zone" placeholder="Например, A" maxlength="2" required
+                       style="text-transform: uppercase;">
+            </div>
+            <div class="form-group">
+                <label for="rack" class="required">Стеллаж (номер)</label>
+                <input type="number" id="rack" name="rack" min="1" placeholder="Например, 1" required>
+            </div>
+            <div class="form-group">
+                <label for="count" class="required">Количество ячеек</label>
+                <input type="number" id="count" name="count" min="1" max="100" value="10" required>
+            </div>
+        </div>
+
+        <div class="preview" id="preview">
+            Будут созданы ячейки: A-1-1 … A-1-10
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn btn-success">Создать ячейки</button>
+            <a th:href="@{/warehouse/{id}(id=${warehouse.id})}" class="btn btn-outline-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var zone = document.getElementById('zone');
+        var rack = document.getElementById('rack');
+        var count = document.getElementById('count');
+        var preview = document.getElementById('preview');
+
+        function updatePreview() {
+            if (zone.value && rack.value && count.value > 0) {
+                preview.textContent = 'Будут созданы ячейки: ' +
+                    zone.value.toUpperCase() + '-' + rack.value + '-1' +
+                    ' … ' + zone.value.toUpperCase() + '-' + rack.value + '-' + count.value;
+            } else {
+                preview.textContent = 'Заполните зону, стеллаж и количество.';
+            }
+        }
+
+        zone.addEventListener('input', updatePreview);
+        rack.addEventListener('input', updatePreview);
+        count.addEventListener('input', updatePreview);
+    });
+</script>
+
+</body>
+</html>

@@ -3,19 +3,16 @@ package com.example.WarehouseApp.controller.warehouse;
 import com.example.WarehouseApp.dto.StorageLocationDto;
 import com.example.WarehouseApp.dto.WarehouseDto;
 import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.service.storageLocation.StorageLocationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/warehouse")
@@ -23,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class WarehouseController {
 
     private final BaseService<WarehouseDto> warehouseService;
-    private final BaseService<StorageLocationDto> storageLocationService;
+    private final StorageLocationService<StorageLocationDto> storageLocationService;
 
     @GetMapping
     public String list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
@@ -49,8 +46,15 @@ public class WarehouseController {
     }
 
     @GetMapping("/new")
-    public String createForm(Model model) {
-        model.addAttribute("warehouseDto", new WarehouseDto());
+    public String createForm(@RequestParam(required = false) String from,
+                             @RequestParam(required = false) String name,
+                             Model model) {
+        var dto = new WarehouseDto();
+        if (name != null && !name.isBlank()) {
+            dto.setName(name);
+        }
+        model.addAttribute("warehouseDto", dto);
+        model.addAttribute("from", from);
         return "warehouses/form";
     }
 
@@ -61,7 +65,9 @@ public class WarehouseController {
     }
 
     @PostMapping
-    public String save(@ModelAttribute @Valid WarehouseDto warehouseDto, BindingResult bindingResult) {
+    public String save(@ModelAttribute @Valid WarehouseDto warehouseDto,
+                       BindingResult bindingResult,
+                       @RequestParam(required = false) String from) {
         if (bindingResult.hasErrors()) {
             return "warehouses/form";
         }
@@ -69,6 +75,10 @@ public class WarehouseController {
             warehouseService.update(warehouseDto);
         } else {
             warehouseService.create(warehouseDto);
+        }
+
+        if ("movements".equals(from)) {
+            return "redirect:/movements/warehouse/list";
         }
         return "redirect:/warehouse";
     }
@@ -121,6 +131,30 @@ public class WarehouseController {
         model.addAttribute("filterUsed", used);
 
         return "warehouses/view";
+    }
+
+    @PostMapping("/{id}/locations/bulk")
+    public String bulkLocationsCreate(@PathVariable Long id,
+                                      @RequestParam String zone,
+                                      @RequestParam String rack,
+                                      @RequestParam(defaultValue = "10") int count,
+                                      RedirectAttributes redirectAttributes) {
+
+        var result = storageLocationService.createBulk(id, zone, rack, count);
+
+        if (!result.success()) {
+            redirectAttributes.addFlashAttribute("error", result.message());
+            return "redirect:/warehouse/" + id + "/locations/bulk";
+        }
+
+        redirectAttributes.addFlashAttribute("message", result.message());
+        return "redirect:/warehouse/" + id;
+    }
+
+    @GetMapping("/{id}/locations/bulk")
+    public String bulkLocationsForm(@PathVariable Long id, Model model) {
+        model.addAttribute("warehouse", warehouseService.getById(id));
+        return "warehouses/bulk-locations";
     }
 
 }

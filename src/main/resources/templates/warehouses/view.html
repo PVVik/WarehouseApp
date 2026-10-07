@@ -62,6 +62,11 @@
 
 <h2>Ячейки хранения</h2>
 
+<a th:href="@{/warehouse/{id}/locations/bulk(id=${warehouse.id})}" class="btn" style="background-color: #27ae60; color: white;">
+    + Создать ячейки массово
+</a>
+
+
 <div class="top-bar">
     <form class="search-form" th:action="@{/warehouse/{id}(id=${warehouse.id})}" method="get">
         <input type="text" name="zone" th:value="${filterZone}" placeholder="Зона"/>

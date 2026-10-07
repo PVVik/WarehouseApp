@@ -4,6 +4,7 @@ import com.example.WarehouseApp.dto.BatchDto;
 import com.example.WarehouseApp.dto.CounterpartyDto;
 import com.example.WarehouseApp.dto.NomenclatureDto;
 import com.example.WarehouseApp.exception.NotFoundException;
+import com.example.WarehouseApp.exception.ValidationException;
 import com.example.WarehouseApp.mapper.BatchMapper;
 import com.example.WarehouseApp.mapper.CounterpartyMapper;
 import com.example.WarehouseApp.mapper.NomenclatureMapper;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.regex.Pattern;
 
 @Service
@@ -33,6 +35,7 @@ public class BatchService implements BaseService<BatchDto> {
     @Override
     @Transactional
     public BatchDto create(BatchDto batchDto) {
+        validDate(batchDto);
         var nomenclatureDto = nomenclatureService.getById(batchDto.getNomenclatureId());
         var supplierDto = (batchDto.getSupplierId() != null)
                 ? counterpartyService.getById(batchDto.getSupplierId())
@@ -126,6 +129,19 @@ public class BatchService implements BaseService<BatchDto> {
         batchDto.setNomenclatureId(batch.getNomenclature().getId());
         if (batch.getSupplier() != null) {
             batchDto.setSupplierId(batch.getSupplier().getId());
+        }
+    }
+
+    private void validDate(BatchDto batchDto) {
+        if (batchDto.getProductionDate() != null && batchDto.getProductionDate().isAfter(LocalDate.now())) {
+            throw new ValidationException("Дата производства не может быть в будущем");
+        }
+        if (batchDto.getExpiryDate() != null && batchDto.getExpiryDate().isBefore(LocalDate.now())) {
+            throw new ValidationException("Срок годности не может быть в прошлом");
+        }
+        if (batchDto.getProductionDate() != null && batchDto.getExpiryDate() != null
+                && !batchDto.getExpiryDate().isAfter(batchDto.getProductionDate())) {
+            throw new ValidationException("Срок годности должен быть позже даты производства");
         }
     }
 }

@@ -26,7 +26,7 @@
 
 <div class="form-card">
     <form th:action="@{/counterparty/save}" method="post" th:object="${counterpartyDto}">
-        <input type="hidden" th:field="*{id}">
+        <input type="hidden" name="from" th:value="${from}">
 
         <div class="field">
             <label>Название организации</label>
@@ -80,6 +80,10 @@
             <a th:href="@{/counterparty}" class="btn btn-back">Отмена</a>
         </div>
     </form>
+
+    <a th:href="${from == 'movements'} ? @{/movements/counterparty/list} : @{/counterparty}"
+       class="btn btn-back">Назад</a>
+
 </div>
 
 </body>
