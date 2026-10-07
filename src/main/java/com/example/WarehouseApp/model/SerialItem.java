@@ -45,4 +45,12 @@ public class SerialItem {
         this.passportNumber = passportNumber;
         this.notes = notes;
     }
+
+    public SerialItem(long id, String serialNumber, ItemStatus status, String passportNumber, String notes) {
+        this.id = id;
+        this.serialNumber = serialNumber;
+        this.status = status;
+        this.passportNumber = passportNumber;
+        this.notes = notes;
+    }
 }

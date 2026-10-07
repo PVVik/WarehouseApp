@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(of = {"id"})
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class Warehouse {
 
     @Id

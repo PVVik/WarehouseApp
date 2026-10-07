@@ -44,6 +44,16 @@ public class StorageLocation {
         this.used = used;
     }
 
+    public StorageLocation(long id, long warehouseId, String zone, String rack, String shelf, boolean used) {
+        this.id = id;
+        this.warehouseId = warehouseId;
+        this.zone = zone;
+        this.rack = rack;
+        this.shelf = shelf;
+        this.code = createCode();
+        this.used = used;
+    }
+
     public String createCode() {
         return String.format("%s-%s-%s", zone, rack, shelf);
     }

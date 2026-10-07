@@ -11,6 +11,11 @@ public class SerialItemMapper {
                 serialItemDto.getNotes());
     }
 
+    public static SerialItem mapToEntityWithId(SerialItemDto serialItemDto) {
+        return new SerialItem(serialItemDto.getId(), serialItemDto.getSerialNumber(), serialItemDto.getStatus(),
+                serialItemDto.getPassportNumber(), serialItemDto.getNotes());
+    }
+
     public static SerialItemDto mapToDto(SerialItem serialItem) {
         return new SerialItemDto(serialItem.getId(), serialItem.getSerialNumber(),
                 serialItem.getStatus(), serialItem.getPassportNumber(), serialItem.getNotes());

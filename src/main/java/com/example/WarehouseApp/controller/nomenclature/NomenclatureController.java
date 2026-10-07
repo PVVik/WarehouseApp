@@ -4,12 +4,8 @@ import com.example.WarehouseApp.dto.NomenclatureDto;
 import com.example.WarehouseApp.service.BaseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -64,24 +60,34 @@ public class NomenclatureController {
     }
 
     @GetMapping("/form")
-    public String nomenclatureForm(@RequestParam(required = false) Long id, Model model) {
+    public String nomenclatureForm(@RequestParam(required = false) Long id,
+                                   @RequestParam(required = false) String from,
+                                   @RequestParam(required = false) String name,
+                                   Model model) {
 
         NomenclatureDto dto;
         if (id != null) {
             dto = nomenclatureService.getById(id);
         } else {
             dto = new NomenclatureDto();
+            if (name != null && !name.isBlank()) {
+                dto.setName(name);
+            }
         }
 
         model.addAttribute("nomenclature", dto);
         model.addAttribute("isEditMode", id != null);
+        model.addAttribute("from", from); // запоминаем, откуда пришли
 
         return "nomenclature/form";
     }
 
+
     @PostMapping("/form")
     public String saveNomenclature(@ModelAttribute("nomenclature") @Valid NomenclatureDto dto,
-                                   BindingResult result, RedirectAttributes redirectAttributes) {
+                                   BindingResult result,
+                                   @RequestParam(required = false) String from,
+                                   RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "nomenclature/form";
         }
@@ -94,10 +100,15 @@ public class NomenclatureController {
                 nomenclatureService.update(dto);
                 redirectAttributes.addFlashAttribute("successMessage", "Позиция успешно обновлена!");
             }
+
+            if ("movements".equals(from)) {
+                return "redirect:/movements/nomenclature/list";
+            }
             return "redirect:/nomenclature";
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при сохранении: " + e.getMessage());
-            return "redirect:/nomenclature/form?id=" + dto.getId();
+            return "redirect:/nomenclature/form?id=" + dto.getId() + (from != null ? "&from=" + from : "");
         }
     }
 

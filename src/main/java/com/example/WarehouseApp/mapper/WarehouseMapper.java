@@ -15,6 +15,13 @@ public class WarehouseMapper {
                 warehouseDto.getActive(), created, created);
     }
 
+    public static Warehouse mapToEntityWithId(WarehouseDto warehouseDto) {
+        var created = LocalDateTime.now();
+
+        return new Warehouse(warehouseDto.getId(), warehouseDto.getName(), warehouseDto.getAddress(), warehouseDto.getType(),
+                warehouseDto.getActive(), created, created);
+    }
+
     public static WarehouseDto mapToDto(Warehouse warehouse) {
         return new WarehouseDto(warehouse.getId(), warehouse.getName(), warehouse.getAddress(),
                 warehouse.getType(), warehouse.isActive());

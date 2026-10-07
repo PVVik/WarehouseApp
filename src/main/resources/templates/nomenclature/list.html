@@ -30,6 +30,12 @@
             gap: 15px;
         }
 
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .filter-form {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -146,45 +152,48 @@
     <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
 
     <div class="toolbar">
-        <div>
-            <h2>Список позиций</h2>
-        </div>
-        <form th:action="@{/nomenclature}" method="get" class="filter-form">
-            <input type="text" name="name" th:value="${filterName}" placeholder="Название (например, Болт)" />
-
-            <input type="text" name="sku" th:value="${filterSku}" placeholder="Артикул" />
-
-            <select name="stuffCategory">
-                <option value="">Все категории</option>
-                <option th:each="cat : ${T(com.example.WarehouseApp.model.StuffCategory).values()}"
-                        th:value="${cat.name()}"
-                        th:text="${cat.label}"
-                        th:selected="${cat.name() == filterStuffCategory}">
-                </option>
-            </select>
-
-            <select name="inventoryType">
-                <option value="">Любой тип учёта</option>
-                <option th:each="type : ${T(com.example.WarehouseApp.model.InventoryType).values()}"
-                        th:value="${type.name()}"
-                        th:text="${type.label}"
-                        th:selected="${type.name() == filterInventoryType}">
-                </option>
-            </select>
-
-            <select name="active">
-                <option value="">Любой статус</option>
-                <option value="true" th:selected="${filterActive == true}">Активен</option>
-                <option value="false" th:selected="${filterActive == false}">Неактивен</option>
-            </select>
-
-            <div style="display: flex; gap: 8px;">
-                <button type="submit" class="btn btn-primary">Найти</button>
-                <a th:href="@{/nomenclature}" class="btn btn-outline-secondary" style="background:none; color:#6c757d; text-decoration:none; padding: 8px 16px;">Сброс</a>
+        <div class="toolbar-left">
+            <a th:href="@{/}" class="btn btn-primary">← Назад к операциям</a>
+            <div>
+                <h2>Список позиций</h2>
             </div>
-        </form>
+        </div>
 
-        <a href="/nomenclature/form" class="btn btn-primary">+ Добавить позицию</a>
+        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+            <form th:action="@{/nomenclature}" method="get" class="filter-form">
+                <input type="text" name="name" th:value="${filterName}" placeholder="Название (например, Болт)" />
+                <input type="text" name="sku" th:value="${filterSku}" placeholder="Артикул" />
+                <select name="stuffCategory">
+                    <option value="">Все категории</option>
+                    <option th:each="cat : ${T(com.example.WarehouseApp.model.StuffCategory).values()}"
+                            th:value="${cat.name()}"
+                            th:text="${cat.label}"
+                            th:selected="${cat.name() == filterStuffCategory}">
+                    </option>
+                </select>
+                <select name="inventoryType">
+                    <option value="">Любой тип учёта</option>
+                    <option th:each="type : ${T(com.example.WarehouseApp.model.InventoryType).values()}"
+                            th:value="${type.name()}"
+                            th:text="${type.label}"
+                            th:selected="${type.name() == filterInventoryType}">
+                    </option>
+                </select>
+                <select name="active">
+                    <option value="">Любой статус</option>
+                    <option value="true" th:selected="${filterActive == true}">Активен</option>
+                    <option value="false" th:selected="${filterActive == false}">Неактивен</option>
+                </select>
+                <div style="display: flex; gap: 8px;">
+                    <button type="submit" class="btn btn-primary">Найти</button>
+                    <a th:href="@{/nomenclature}" class="btn" style="background:none; color:#6c757d; text-decoration:none; padding: 8px 16px;">Сброс</a>
+                </div>
+            </form>
+
+            <div style="display: flex; justify-content: flex-end;">
+                <a href="/nomenclature/form" class="btn btn-primary">+ Добавить позицию</a>
+            </div>
+        </div>
     </div>
 
     <table>
@@ -205,12 +214,9 @@
             <td th:text="${item.id}"></td>
             <td th:text="${item.sku}"></td>
             <td th:text="${item.name}"></td>
-
             <td th:text="${item.stuffCategoryLabel}"></td>
-
             <td th:text="${item.unitOfMeasureLabel}"></td>
             <td th:text="${item.inventoryTypeLabel}"></td>
-
             <td>
                 <span th:classappend="${item.active} ? 'status-active' : 'status-inactive'"
                       class="status-badge"
@@ -223,9 +229,7 @@
                    style="background:none; color:#3498db; text-decoration:underline; padding:0; margin-right: 8px;">
                     Редактировать
                 </a>
-
             </td>
-
         </tr>
         <tr th:if="${#lists.isEmpty(nomenclatureList)}">
             <td colspan="8" style="text-align:center; color:#7f8c8d;">Список пуст</td>

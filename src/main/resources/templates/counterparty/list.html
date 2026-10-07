@@ -16,8 +16,9 @@
         .btn-create { background-color: #28a745; display: inline-block; margin-bottom: 15px; padding: 8px 16px; }
         .btn-edit { background-color: #007bff; }
         .btn-delete { background-color: #dc3545; border: none; cursor: pointer; font-size: 14px; padding: 6px 14px; border-radius: 4px; color: white; }
-        .btn-back { background-color: #6c757d; margin-left: 10px; }
+        .btn-back { background-color: #6c757d; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .toolbar-left { display: flex; align-items: center; gap: 10px; }
         .search-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .search-form input[type="text"] { padding: 8px 10px; width: 180px; border: 1px solid #ddd; border-radius: 4px; }
         .search-form select { padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; }
@@ -36,6 +37,9 @@
 <h1>Контрагенты</h1>
 
 <div class="top-bar">
+    <div class="toolbar-left">
+        <a th:href="@{/}" class="btn btn-back">← Назад к операциям</a>
+    </div>
     <form class="search-form" th:action="@{/counterparty}" method="get">
         <input type="text" name="name" th:value="${filterName}" placeholder="Название"/>
         <input type="text" name="inn" th:value="${filterInn}" placeholder="ИНН"/>

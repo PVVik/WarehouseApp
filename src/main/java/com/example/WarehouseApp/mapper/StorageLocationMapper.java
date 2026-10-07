@@ -11,6 +11,11 @@ public class StorageLocationMapper {
                 storageLocationDto.getRack(), storageLocationDto.getShelf(), storageLocationDto.getUsed());
     }
 
+    public static StorageLocation mapToEntityWithId(StorageLocationDto storageLocationDto) {
+        return new StorageLocation(storageLocationDto.getId(), storageLocationDto.getWarehouseId(), storageLocationDto.getZone(),
+                storageLocationDto.getRack(), storageLocationDto.getShelf(), storageLocationDto.getUsed());
+    }
+
     public static StorageLocationDto mapToDto(StorageLocation storageLocation) {
         return new StorageLocationDto(storageLocation.getId(), storageLocation.getWarehouseId(), storageLocation.getZone(),
                 storageLocation.getRack(), storageLocation.getShelf(), storageLocation.getCode(), storageLocation.isUsed());

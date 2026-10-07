@@ -57,9 +57,16 @@ public class CounterpartyController {
     }
 
     @GetMapping("/create")
-    public String createForm(Model model) {
-        model.addAttribute("counterpartyDto", new CounterpartyDto());
+    public String createForm(@RequestParam(required = false) String from,
+                             @RequestParam(required = false) String name,
+                             Model model) {
+        var dto = new CounterpartyDto();
+        if (name != null && !name.isBlank()) {
+            dto.setName(name);
+        }
+        model.addAttribute("counterpartyDto", dto);
         model.addAttribute("types", CounterpartyType.values());
+        model.addAttribute("from", from);
         return "counterparty/form";
     }
 
@@ -71,10 +78,10 @@ public class CounterpartyController {
         return "counterparty/form";
     }
 
-
     @PostMapping("/save")
     public String save(@ModelAttribute("counterpartyDto") @Valid CounterpartyDto dto,
                        BindingResult result,
+                       @RequestParam(required = false) String from,
                        Model model,
                        RedirectAttributes redirectAttributes) {
 
@@ -90,6 +97,10 @@ public class CounterpartyController {
         } else {
             counterpartyService.update(dto);
             redirectAttributes.addFlashAttribute("message", "Контрагент успешно обновлён");
+        }
+
+        if ("movements".equals(from)) {
+            return "redirect:/movements/counterparty/list";
         }
         return "redirect:/counterparty";
     }
