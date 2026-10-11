@@ -1,12 +1,15 @@
 package com.example.WarehouseApp.controller.movement;
 
 import com.example.WarehouseApp.dto.*;
+import com.example.WarehouseApp.dto.movement.MovementDtoIssue;
 import com.example.WarehouseApp.dto.movement.MovementDtoReceipt;
 import com.example.WarehouseApp.model.ItemStatus;
 import com.example.WarehouseApp.model.MovementType;
 import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.service.movement.IssueService;
 import com.example.WarehouseApp.service.movement.ReceiptService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
@@ -25,9 +28,11 @@ import java.time.LocalDate;
 @Controller
 @RequestMapping("/movements")
 @RequiredArgsConstructor
+@Slf4j
 public class MovementController {
 
     private final ReceiptService receiptService;
+    private final IssueService issueService;
     private final BaseService<NomenclatureDto> nomenclatureService;
     private final BaseService<CounterpartyDto> counterpartyService;
     private final BaseService<WarehouseDto> warehouseService;
@@ -38,11 +43,6 @@ public class MovementController {
         return "movements/movements-actions";
     }
 
-    @GetMapping("/issue/stub")
-    public String issueStub(Model model) {
-        model.addAttribute("message", "Расход — функционал в разработке");
-        return "stub";
-    }
 
     @GetMapping("/write-off/stub")
     public String writeOffStub(Model model) {
@@ -172,7 +172,7 @@ public class MovementController {
                 var serialItemDto = new SerialItemDto();
                 serialItemDto.setSerialNumber(serialNumber);
                 serialItemDto.setPassportNumber(passportNumber);
-                serialItemDto.setStatus(ItemStatus.NEW);
+                serialItemDto.setStatus(ItemStatus.IN_STOCK);
                 if (serialNotes != null && !serialNotes.isBlank()) {
                     serialItemDto.setNotes(serialNotes);
                 }
@@ -195,6 +195,7 @@ public class MovementController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String name,
+            @RequestParam(required = false) String fromOperation,
             Model model) {
 
         var pageable = PageRequest.of(page, size, Sort.by("name").ascending());
@@ -205,6 +206,7 @@ public class MovementController {
         model.addAttribute("totalPages", result.getTotalPages());
         model.addAttribute("pageSize", result.getSize());
         model.addAttribute("filterName", name != null ? name : "");
+        model.addAttribute("fromOperation", fromOperation);
 
         return "movements/nomenclature-list";
     }
@@ -217,6 +219,7 @@ public class MovementController {
             @RequestParam(required = false) Long nomenclatureId,
             @RequestParam(required = false) String nomenclatureName,
             @RequestParam(required = false) String inventoryType,
+            @RequestParam(required = false) String fromOperation,
             Model model) {
 
         var pageable = PageRequest.of(page, size, Sort.by("id"));
@@ -227,12 +230,11 @@ public class MovementController {
         model.addAttribute("totalPages", result.getTotalPages());
         model.addAttribute("pageSize", result.getSize());
         model.addAttribute("filterName", name != null ? name : "");
-
         model.addAttribute("nomenclatureId", nomenclatureId);
         model.addAttribute("nomenclatureName", nomenclatureName);
         model.addAttribute("inventoryType", inventoryType);
-
         model.addAttribute("searchPerformed", name != null && !name.isBlank());
+        model.addAttribute("fromOperation", fromOperation);
 
         return "movements/supplier-list";
     }
@@ -248,6 +250,7 @@ public class MovementController {
             @RequestParam(required = false) Long counterpartyId,
             @RequestParam(required = false) String counterpartyName,
             @RequestParam(required = false) String inventoryType,
+            @RequestParam(required = false) String fromOperation, // <-- Это ключевой параметр
             Model model) {
 
         var pageable = PageRequest.of(page, size, Sort.by("id"));
@@ -259,16 +262,126 @@ public class MovementController {
         model.addAttribute("pageSize", result.getSize());
         model.addAttribute("filterName", name != null ? name : "");
 
+        // Пробрасываем все параметры, чтобы они не потерялись при пагинации
         model.addAttribute("nomenclatureId", nomenclatureId);
         model.addAttribute("nomenclatureName", nomenclatureName);
         model.addAttribute("counterpartyId", counterpartyId);
         model.addAttribute("counterpartyName", counterpartyName);
         model.addAttribute("inventoryType", inventoryType);
+        model.addAttribute("fromOperation", fromOperation); // <-- Сохраняем контекст
 
         model.addAttribute("searchPerformed", name != null && !name.isBlank());
 
         return "movements/warehouse-list";
     }
+
+    @GetMapping("/issue/form")
+    public String issueForm(
+            @RequestParam(required = false) Long nomenclatureId,
+            @RequestParam(required = false) String nomenclatureName,
+            @RequestParam(required = false) Long customerId,          // для ISSUE это клиент/получатель
+            @RequestParam(required = false) String customerName,
+            @RequestParam(required = false) Long warehouseFrom,       // это и есть warehouseId
+            @RequestParam(required = false) String warehouseName,     // это и есть warehouseName
+            @RequestParam(required = false) String inventoryType,
+            Model model) {
+
+        var pageable = PageRequest.of(0, 1000, Sort.by("id"));
+        model.addAttribute("storageLocations", storageLocationService.getAll(pageable, null).getContent());
+
+        // Номенклатура
+        if (nomenclatureId != null) {
+            model.addAttribute("selectedNomenclatureId", nomenclatureId);
+            model.addAttribute("selectedNomenclatureName", nomenclatureName);
+        }
+
+        // Клиент/получатель (для расхода)
+        if (customerId != null) {
+            model.addAttribute("selectedCustomerId", customerId);
+            model.addAttribute("selectedCustomerName", customerName);
+        }
+
+        // Склад (откуда) — вот тут и кроется проблема, если не подставляется
+        if (warehouseFrom != null) {
+            model.addAttribute("selectedWarehouseFromId", warehouseFrom);
+            model.addAttribute("selectedWarehouseFromName", warehouseName);
+        }
+
+        // Тип учёта
+        if (inventoryType != null && !inventoryType.isBlank()) {
+            model.addAttribute("selectedInventoryType", inventoryType);
+        }
+
+        return "movements/issue-form";
+    }
+    @PostMapping("/issue")
+    public String processIssue(
+            @RequestParam("nomenclatureId") Long nomenclatureId,
+            @RequestParam("customerId") Long customerId,
+            @RequestParam("warehouseFrom") Long warehouseFrom,
+            @RequestParam("quantity") BigDecimal quantity,
+            @RequestParam("price") BigDecimal price,
+            @RequestParam("userId") Long userId,
+            @RequestParam(required = false) String notes,
+            RedirectAttributes redirectAttributes) {
+
+        // Валидация
+        if (nomenclatureId == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Выберите номенклатуру");
+            return "redirect:/movements/issue/form";
+        }
+        if (customerId == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Выберите получателя (клиента)");
+            return "redirect:/movements/issue/form";
+        }
+        if (warehouseFrom == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Выберите склад (откуда)");
+            return "redirect:/movements/issue/form";
+        }
+        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Количество должно быть больше 0");
+            return "redirect:/movements/issue/form";
+        }
+        if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Цена не может быть отрицательной");
+            return "redirect:/movements/issue/form";
+        }
+        if (userId == null || userId <= 0) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Укажите корректного сотрудника");
+            return "redirect:/movements/issue/form";
+        }
+
+        try {
+            MovementDtoIssue dto = new MovementDtoIssue();
+            dto.setMovementType(MovementType.ISSUE);
+            dto.setNomenclatureId(nomenclatureId);
+            dto.setWarehouseFrom(warehouseFrom);
+            dto.setCustomerId(customerId);
+            dto.setQuantity(quantity);
+            dto.setPrice(price);
+            dto.setUserId(userId);
+
+            if (notes != null && !notes.isBlank()) {
+                dto.setNotes(notes);
+            }
+
+            // Если у тебя в DTO есть поле inventoryType — можно положить его сюда,
+            // но для POST-запроса оно не обязательно.
+            // String inventoryType = request.getParameter("inventoryType");
+
+            var result = issueService.createIssue(dto);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Отгрузка оформлена. Номер документа: " + result.getNumber());
+            return "redirect:/movements";
+
+        } catch (Exception e) {
+            e.printStackTrace(); // Теперь ошибка точно будет в консоли
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Ошибка при оформлении отгрузки: " + e.getMessage());
+            return "redirect:/movements/issue/form";
+        }
+    }
+
 
     private String buildContextQuery(Long nomenclatureId, String nomenclatureName,
                                      String inventoryType, Long counterpartyId, Long warehouseTo) {

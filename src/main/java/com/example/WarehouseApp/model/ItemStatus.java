@@ -2,7 +2,6 @@ package com.example.WarehouseApp.model;
 
 public enum ItemStatus {
 
-    NEW("Новый"),
     IN_STOCK("На складе"),
     IN_USE("В эксплуатации"),
     IN_REPAIR("В ремонте"),

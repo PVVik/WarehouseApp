@@ -40,6 +40,7 @@ public class MovementDtoReceipt {
     private BigDecimal quantity;
 
     @NotNull(message = "Цена обязательна к заполнению")
+    @Positive(message = "Цена не может быть отрицательной")
     private BigDecimal price;
 
     private String number;

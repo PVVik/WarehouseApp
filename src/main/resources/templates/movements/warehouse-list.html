@@ -28,6 +28,9 @@
         .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .not-found { text-align: center; padding: 20px; color: #7f8c8d; }
+        .btn-warning { background-color: #f39c12; color: white; }
+        .btn-success { background-color: #27ae60; color: white; }
+        .btn-secondary { background-color: #95a5a6; color: white; }
     </style>
 </head>
 <body>
@@ -74,8 +77,32 @@
             <span th:unless="${w.active}" class="inactive">Неактивен</span>
         </td>
         <td>
-            <a th:href="@{/movements/receipt/form(nomenclatureId=${nomenclatureId}, nomenclatureName=${nomenclatureName}, counterpartyId=${counterpartyId}, counterpartyName=${counterpartyName}, warehouseId=${w.id}, warehouseName=${w.name}, inventoryType=${inventoryType})}"
-               class="btn btn-select">Выбрать</a>
+            <!-- Если пришли из расхода (ISSUE) -->
+
+            <a th:if="${fromOperation == 'ISSUE'}"
+               th:href="@{/movements/issue/form(
+       nomenclatureId=${nomenclatureId},
+       nomenclatureName=${nomenclatureName},
+       customerId=${counterpartyId},
+       customerName=${counterpartyName},
+       warehouseFrom=${w.id},
+       warehouseName=${w.name},
+       inventoryType=${inventoryType}
+   )}"
+               class="btn btn-warning">Выбрать склад для расхода</a>
+
+            <!-- Если пришли из прихода (RECEIPT) или вообще без контекста -->
+            <a th:if="${fromOperation == 'RECEIPT' or fromOperation == null}"
+               th:href="@{/movements/receipt/form(
+           nomenclatureId=${nomenclatureId},
+           nomenclatureName=${nomenclatureName},
+           counterpartyId=${counterpartyId},
+           counterpartyName=${counterpartyName},
+           warehouseTo=${w.id},
+           warehouseName=${w.name},
+           inventoryType=${inventoryType}
+       )}"
+               class="btn btn-success">Выбрать склад для прихода</a>
         </td>
     </tr>
     <tr th:if="${searchPerformed and #lists.isEmpty(warehouses)}">

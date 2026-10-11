@@ -34,7 +34,7 @@ class SerialItemRepositoryTest {
     void save_shouldGenerateId() {
         var nom = entityManager.persistAndFlush(createNomenclature("SKU-001"));
 
-        var item = createSerialItem(nom, null, "SN20240001", ItemStatus.NEW);
+        var item = createSerialItem(nom, null, "SN20240001", ItemStatus.IN_STOCK);
         item.setNomenclature(nom);
 
         var saved = serialItemRepository.saveAndFlush(item);
@@ -85,7 +85,7 @@ class SerialItemRepositoryTest {
     void save_shouldAllowNullBatch() {
         var nom = entityManager.persistAndFlush(createNomenclature("SKU-004"));
 
-        var item = createSerialItem(nom, null, "SN20240004", ItemStatus.NEW);
+        var item = createSerialItem(nom, null, "SN20240004", ItemStatus.IN_STOCK);
         var saved = serialItemRepository.saveAndFlush(item);
         entityManager.clear();
 
@@ -112,7 +112,7 @@ class SerialItemRepositoryTest {
     void delete_shouldRemoveItem() {
         var nom = entityManager.persistAndFlush(createNomenclature("SKU-006"));
         var item = entityManager.persistAndFlush(
-                createSerialItem(nom, null, "SN20240006", ItemStatus.NEW));
+                createSerialItem(nom, null, "SN20240006", ItemStatus.IN_STOCK));
 
         serialItemRepository.deleteById(item.getId());
         serialItemRepository.flush();
@@ -124,7 +124,7 @@ class SerialItemRepositoryTest {
     void findAll_withPageable_shouldReturnPage() {
         var nom = entityManager.persistAndFlush(createNomenclature("SKU-012"));
         for (int i = 1; i <= 5; i++) {
-            entityManager.persist(createSerialItem(nom, null, "SN2024010" + i, ItemStatus.NEW));
+            entityManager.persist(createSerialItem(nom, null, "SN2024010" + i, ItemStatus.IN_STOCK));
         }
         entityManager.flush();
 
@@ -139,7 +139,7 @@ class SerialItemRepositoryTest {
     @Test
     void findAll_withSpecification_shouldFilterBySerialNumber() {
         var nom = entityManager.persistAndFlush(createNomenclature("SKU-013"));
-        entityManager.persist(createSerialItem(nom, null, "SN20240020", ItemStatus.NEW));
+        entityManager.persist(createSerialItem(nom, null, "SN20240020", ItemStatus.IN_STOCK));
         entityManager.persist(createSerialItem(nom, null, "SN20240021", ItemStatus.IN_USE));
         entityManager.flush();
 

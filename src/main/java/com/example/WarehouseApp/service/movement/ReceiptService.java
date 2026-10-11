@@ -4,10 +4,9 @@ import com.example.WarehouseApp.dto.*;
 import com.example.WarehouseApp.dto.movement.MovementDtoReceipt;
 import com.example.WarehouseApp.mapper.*;
 import com.example.WarehouseApp.model.Movement;
-import com.example.WarehouseApp.model.StockBalance;
 import com.example.WarehouseApp.repository.MovementRepository;
-import com.example.WarehouseApp.repository.StockBalanceRepository;
 import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.service.stockBalance.StockBalanceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class ReceiptService {
     private final BaseService<CounterpartyDto> counterpartyService;
     private final BaseService<WarehouseDto> warehouseService;
     private final BaseService<StorageLocationDto> storageLocationService;
-    private final StockBalanceRepository stockBalanceRepository;
+    private final StockBalanceService stockBalanceService;
 
     @Transactional
     public MovementDtoReceipt createReceipt(MovementDtoReceipt movementDtoReceipt) {
@@ -46,31 +45,15 @@ public class ReceiptService {
 
         var newMovement = movementRepository.save(movement);
 
-        saveStockBalance(nomenclature, batch, serialItem, warehouse, storageLocation, movementDtoReceipt.getQuantity());
+        stockBalanceService.saveStockBalance(nomenclature, batch, serialItem, warehouse, storageLocation,
+                movementDtoReceipt.getQuantity(), movementDtoReceipt.getMovementType());
 
         var newMovementDto = ReceiptMapper.mapToDto(newMovement);
         setFieldsToDto(newMovementDto, batch, serialItem);
 
+        log.info("Оформили приход с id и номером документа {} и {}", newMovementDto.getId(), newMovementDto.getNumber());
+
         return newMovementDto;
-    }
-
-    private void saveStockBalance(NomenclatureDto nomenclature, BatchDto batch, SerialItemDto serialItem,
-                                  WarehouseDto warehouse, StorageLocationDto storageLocation, BigDecimal quantity) {
-        var stockBalance = new StockBalance();
-        if (batch != null) {
-            stockBalance.setBatch(BatchMapper.mapToEntityWithId(batch));
-        }
-        if (serialItem != null) {
-            stockBalance.setSerialItem(SerialItemMapper.mapToEntityWithId(serialItem));
-        }
-        if (storageLocation != null) {
-            stockBalance.setStorageLocation(StorageLocationMapper.mapToEntityWithId(storageLocation));
-        }
-        stockBalance.setNomenclature(NomenclatureMapper.mapToEntityWithId(nomenclature));
-        stockBalance.setWarehouse(WarehouseMapper.mapToEntityWithId(warehouse));
-        stockBalance.setQuantity(quantity);
-
-        stockBalanceRepository.save(stockBalance);
     }
 
     private BatchDto saveBatch(BatchDto batch, NomenclatureDto nomenclature, CounterpartyDto supplier) {
