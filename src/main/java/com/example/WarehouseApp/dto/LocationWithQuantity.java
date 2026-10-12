@@ -7,12 +7,11 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
-public class LocationBalanceDto {
+public class LocationWithQuantity {
 
     private Long id;
     private String code;
-    private BigDecimal balance;
+    private BigDecimal quantity;
 
 }

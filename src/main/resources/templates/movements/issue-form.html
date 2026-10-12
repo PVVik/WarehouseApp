@@ -88,7 +88,6 @@
                 <input type="hidden" id="nomenclatureId" name="nomenclatureId"
                        th:value="${selectedNomenclatureId}">
 
-                <!-- inventoryType передаётся скрытым полем, если уже выбран -->
                 <input type="hidden" name="inventoryType" th:value="${selectedInventoryType}" />
 
                 <a th:href="@{/movements/nomenclature/list(fromOperation='ISSUE', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName})}"
@@ -96,7 +95,6 @@
             </div>
             <small style="color: #7f8c8d;">Выберите позицию из справочника, чтобы заполнить поле.</small>
         </div>
-
 
         <div class="form-group">
             <label for="customerId" class="required">Получатель (клиент)</label>
@@ -122,7 +120,6 @@
                 <input type="hidden" id="warehouseFrom" name="warehouseFrom"
                        th:value="${selectedWarehouseFromId}">
 
-                <!-- ВАЖНО: fromOperation='ISSUE' и всё в одну строку внутри @{ } -->
                 <a th:href="@{/movements/warehouse/list(fromOperation='ISSUE', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, counterpartyId=${selectedCustomerId}, counterpartyName=${selectedCustomerName}, inventoryType=${selectedInventoryType})}"
                    class="btn btn-primary">Найти</a>
             </div>
@@ -130,15 +127,23 @@
         </div>
 
         <div class="form-group">
-            <label for="storageLocationId">Место хранения (опционально)</label>
+            <label for="storageLocationId">Место хранения (ячейка)</label>
             <select id="storageLocationId" name="storageLocationId" class="form-control">
-                <option value="">Не указано</option>
-                <option th:each="sl : ${storageLocations}"
-                        th:value="${sl.id}"
-                        th:attr="data-warehouse-id=${sl.warehouseId}"
-                        th:text="${sl.code != null and !sl.code.isEmpty() ? sl.code : 'Зона ' + sl.zone + '-' + sl.rack + '-' + sl.shelf}"></option>
+                <option value="">Не выбрано</option>
+                <option th:each="loc : ${storageLocations}"
+                        th:value="${loc.id}"
+                        th:text="${loc.code + ' (остаток: ' + loc.quantity + ' шт.)'}">
+                </option>
             </select>
-            <small id="storageLocationHint" style="color: #7f8c8d;">Сначала выберите склад, чтобы увидеть доступные ячейки.</small>
+
+            <small id="storageLocationHint" style="color: #7f8c8d;">
+                <span th:if="${#lists.isEmpty(storageLocations)}">
+                    Для выбранной номенклатуры на этом складе остатков нет.
+                </span>
+                <span th:unless="${#lists.isEmpty(storageLocations)}">
+                    Выберите ячейку с товаром.
+                </span>
+            </small>
         </div>
 
         <div class="form-group">
@@ -172,49 +177,6 @@
         </div>
     </form>
 </div>
-
-<!-- Скрипт для фильтрации ячеек по складу -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var warehouseInput = document.getElementById('warehouseFrom');
-        var locationSelect = document.getElementById('storageLocationId');
-        var hint = document.getElementById('storageLocationHint');
-
-        function filterLocations() {
-            var selectedWarehouse = warehouseInput.value;
-            var visibleCount = 0;
-
-            locationSelect.querySelectorAll('option').forEach(function (option) {
-                if (!option.value) {
-                    return;
-                }
-
-                var matches = selectedWarehouse !== '' &&
-                    option.dataset.warehouseId === selectedWarehouse;
-                option.hidden = !matches;
-                option.disabled = !matches;
-                if (matches) {
-                    visibleCount++;
-                }
-            });
-
-            var selected = locationSelect.selectedOptions[0];
-            if (selected && selected.hidden) {
-                locationSelect.value = '';
-            }
-
-            if (selectedWarehouse === '') {
-                hint.textContent = 'Сначала выберите склад, чтобы увидеть доступные ячейки.';
-            } else if (visibleCount === 0) {
-                hint.textContent = 'Для этого склада пока нет свободных ячеек хранения.';
-            } else {
-                hint.textContent = 'Показаны ячейки выбранного склада.';
-            }
-        }
-
-        filterLocations();
-    });
-</script>
 
 </body>
 </html>

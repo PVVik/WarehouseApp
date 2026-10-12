@@ -73,7 +73,6 @@
             <span th:unless="${c.isActive}" class="inactive">Неактивен</span>
         </td>
         <td>
-            <!-- Если пришли из расхода (ISSUE) -->
             <a th:if="${fromOperation == 'ISSUE'}"
                th:href="@{/movements/issue/form(
            nomenclatureId=${nomenclatureId},
@@ -84,7 +83,6 @@
        )}"
                class="btn btn-warning">Выбрать для расхода</a>
 
-            <!-- Если пришли из прихода (RECEIPT) или вообще без контекста -->
             <a th:if="${fromOperation == 'RECEIPT' or fromOperation == null}"
                th:href="@{/movements/receipt/form(
            nomenclatureId=${nomenclatureId},

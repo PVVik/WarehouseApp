@@ -151,7 +151,6 @@
 
 
             <td>
-                <!-- Если пришли из отгрузки (ISSUE) -->
                 <a th:if="${fromOperation == 'ISSUE'}"
                    th:href="@{/movements/issue/form(
            nomenclatureId=${item.id},
@@ -160,7 +159,6 @@
        )}"
                    class="btn btn-sm btn-warning">Выбрать для расхода</a>
 
-                <!-- Если пришли из прихода (RECEIPT) или fromOperation не передан (старый случай) -->
                 <a th:if="${fromOperation == 'RECEIPT' or fromOperation == null}"
                    th:href="@{/movements/receipt/form(
            nomenclatureId=${item.id},

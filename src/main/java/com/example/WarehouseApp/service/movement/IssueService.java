@@ -2,6 +2,7 @@ package com.example.WarehouseApp.service.movement;
 
 import com.example.WarehouseApp.dto.*;
 import com.example.WarehouseApp.dto.movement.MovementDtoIssue;
+import com.example.WarehouseApp.exception.ValidationException;
 import com.example.WarehouseApp.mapper.*;
 import com.example.WarehouseApp.model.ItemStatus;
 import com.example.WarehouseApp.model.Movement;
@@ -15,8 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -35,6 +34,7 @@ public class IssueService {
 
     @Transactional
     public MovementDtoIssue createIssue(MovementDtoIssue movementDtoIssue) {
+        checkPriceAndQuantity(movementDtoIssue.getPrice(), movementDtoIssue.getQuantity());
         var nomenclature = nomenclatureService.getById(movementDtoIssue.getNomenclatureId());
         var customer = counterpartyService.getById(movementDtoIssue.getCustomerId());
         var warehouse = warehouseService.getById(movementDtoIssue.getWarehouseFrom());
@@ -48,31 +48,22 @@ public class IssueService {
                 ? serialItemService.getById(movementDtoIssue.getSerialItemId())
                 : null;
 
-        SerialItemDto updatedSerialItem = updateSerialItemStatus(serialItem);
+        var updatedSerialItem = updateSerialItemStatus(serialItem);
 
-        Movement movement = IssueMapper.mapToEntity(movementDtoIssue);
+        var movement = IssueMapper.mapToEntity(movementDtoIssue);
         setFieldsToEntity(movement, nomenclature, customer, warehouse, storageLocation, batch, updatedSerialItem);
 
-        Movement newMovement = movementRepository.save(movement);
+        var newMovement = movementRepository.save(movement);
 
         stockBalanceService.saveStockBalance(nomenclature, batch, serialItem, warehouse, storageLocation,
                 movementDtoIssue.getQuantity(), movementDtoIssue.getMovementType());
 
-        MovementDtoIssue newMovementDto = IssueMapper.mapToDto(newMovement);
+        var newMovementDto = IssueMapper.mapToDto(newMovement);
         setFieldsToDto(newMovementDto, batch, updatedSerialItem);
 
         log.info("Оформили списание с id и номером документа {} и {}", newMovementDto.getId(), newMovementDto.getNumber());
 
         return newMovementDto;
-    }
-
-    @Transactional(readOnly = true)
-    public List<LocationBalanceDto> getLocationsWithBalance(Long nomenclatureId, Long warehouseId) {
-        List<LocationBalanceDto> locationBalanceDtos =  movementRepository.findLocationsWithPositiveBalance(nomenclatureId, warehouseId);
-
-        log.info(locationBalanceDtos.toString());
-
-        return locationBalanceDtos;
     }
 
     private SerialItemDto updateSerialItemStatus(SerialItemDto serialItem) {
@@ -85,6 +76,7 @@ public class IssueService {
             serialItem.setStatus(ItemStatus.IN_USE);
             serialItem = serialItemService.update(serialItem);
         }
+        log.info("Обновили статус во время отгрузки");
 
         return serialItem;
     }
@@ -113,6 +105,13 @@ public class IssueService {
         }
         if (serialItem != null) {
             movementDtoIssue.setSerialItemId(serialItem.getId());
+        }
+    }
+
+    private void checkPriceAndQuantity(BigDecimal price, BigDecimal quantity) {
+        if(price.compareTo(BigDecimal.ZERO) <= 0 || quantity.compareTo(BigDecimal.ZERO) <= 0) {
+            log.warn("Введены отрицательные стоимость и/или количество");
+            throw new ValidationException("Стоимость и количество должны быть больше нуля");
         }
     }
 }
