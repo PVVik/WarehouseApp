@@ -1,0 +1,321 @@
+{
+  "info": {
+    "_postman_id": "warehouse-sprint5-issue-api-v1-short",
+    "name": "WarehouseApp — Sprint 5: Issue (Списание) API — сокращённая",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Setup (подготовка контента)",
+      "description": "Создаёт поставщика, номенклатуру, склад и место хранения. Запускать первым.",
+      "item": [
+        {
+          "name": "POST /counterparty/api — создать поставщика",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"counterpartyId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ООО Поставщик Реагентов\",\n  \"inn\": \"7701234567\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"SUPPLIER\",\n  \"phone\": \"+73466123456\",\n  \"contact\": \"Иванов Иван\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/counterparty/api"
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — номенклатура (MATERIAL, QUANTITY)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"nomenclatureIdQuantity\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Труба стальная 108x4\",\n  \"sku\": \"TRB-108-4\",\n  \"stuffCategory\": \"MATERIAL\",\n  \"unitOfMeasure\": \"METER\",\n  \"inventoryType\": \"QUANTITY\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/nomenclature/api"
+          }
+        },
+        {
+          "name": "POST /warehouse/api — склад (CENTRAL)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"warehouseId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Центральный склад\",\n  \"address\": \"г. Москва, ул. Складская, 1\",\n  \"type\": \"CENTRAL\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/warehouse/api"
+          }
+        },
+        {
+          "name": "POST /storageLocation/api — место хранения",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"storageLocationId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": {{warehouseId}},\n  \"zone\": \"A\",\n  \"rack\": \"1\",\n  \"shelf\": \"2\",\n  \"code\": \"A-1-2\",\n  \"used\": false\n}"
+            },
+            "url": "{{baseUrl}}/storageLocation/api"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Success",
+      "item": [
+        {
+          "name": "POST /issue/api — успешное списание (QUANTITY)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id and number\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('number');",
+                  "    pm.collectionVariables.set(\"issueId\", jsonData.id);",
+                  "    pm.collectionVariables.set(\"issueNumber\", jsonData.number);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"ISSUE\",\n  \"nomenclatureId\": {{nomenclatureIdQuantity}},\n  \"warehouseFrom\": {{warehouseId}},\n  \"customerId\": {{counterpartyId}},\n  \"quantity\": 5,\n  \"price\": 1200,\n  \"userId\": 1,\n  \"date\": \"2026-01-01\",\n  \"notes\": \"Списание труб для цеха №1\"\n}"
+            },
+            "url": "{{baseUrl}}/issue/api"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors (валидация DTO)",
+      "item": [
+        {
+          "name": "POST /issue/api — 400 (quantity < 0)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"ISSUE\",\n  \"nomenclatureId\": {{nomenclatureIdQuantity}},\n  \"warehouseFrom\": {{warehouseId}},\n  \"customerId\": {{counterpartyId}},\n  \"quantity\": -10,\n  \"price\": 1200,\n  \"userId\": 1,\n  \"date\": \"2026-01-01\"\n}"
+            },
+            "url": "{{baseUrl}}/issue/api"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors (бизнес-логика и внешние проверки)",
+      "item": [
+        {
+          "name": "POST /issue/api — 404 (несуществующий Nomenclature)",
+          "description": "Проверяет реакцию на несуществующий ID номенклатуры — должен быть 404 от BaseService.getById",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"ISSUE\",\n  \"nomenclatureId\": 88888,\n  \"warehouseFrom\": {{warehouseId}},\n  \"customerId\": {{counterpartyId}},\n  \"quantity\": 5,\n  \"price\": 1200,\n  \"userId\": 1,\n  \"date\": \"2026-01-01\"\n}"
+            },
+            "url": "{{baseUrl}}/issue/api"
+          }
+        },
+        {
+          "name": "POST /issue/api — 500/404 (некорректный статус SerialItem — IN_USE)",
+          "description": "Требует предварительно создать SerialItem со статусом IN_USE. В этой коллекции нет шага создания серийной единицы, поэтому тест вернёт ошибку, если SerialItem с таким ID не существует или имеет статус IN_USE.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 500 or 404 depending on ErrorHandler\", function () {",
+                  "    pm.expect([404, 500]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"ISSUE\",\n  \"nomenclatureId\": {{nomenclatureIdQuantity}},\n  \"warehouseFrom\": {{warehouseId}},\n  \"customerId\": {{counterpartyId}},\n  \"quantity\": 1,\n  \"price\": 1200,\n  \"userId\": 1,\n  \"date\": \"2026-01-01\",\n  \"serialItemId\": 99999\n}"
+            },
+            "url": "{{baseUrl}}/issue/api"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "counterpartyId",
+      "value": ""
+    },
+    {
+      "key": "nomenclatureIdQuantity",
+      "value": ""
+    },
+    {
+      "key": "warehouseId",
+      "value": ""
+    },
+    {
+      "key": "storageLocationId",
+      "value": ""
+    },
+    {
+      "key": "issueId",
+      "value": ""
+    },
+    {
+      "key": "issueNumber",
+      "value": ""
+    }
+  ]
+}

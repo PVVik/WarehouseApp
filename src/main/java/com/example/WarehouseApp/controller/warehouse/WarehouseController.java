@@ -1,6 +1,5 @@
 package com.example.WarehouseApp.controller.warehouse;
 
-import com.example.WarehouseApp.dto.StorageLocationDto;
 import com.example.WarehouseApp.dto.WarehouseDto;
 import com.example.WarehouseApp.service.BaseService;
 import com.example.WarehouseApp.service.storageLocation.StorageLocationService;
@@ -20,7 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class WarehouseController {
 
     private final BaseService<WarehouseDto> warehouseService;
-    private final StorageLocationService<StorageLocationDto> storageLocationService;
+    private final StorageLocationService storageLocationService;
 
     @GetMapping
     public String list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,

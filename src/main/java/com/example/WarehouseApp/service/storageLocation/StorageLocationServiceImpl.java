@@ -1,5 +1,6 @@
 package com.example.WarehouseApp.service.storageLocation;
 
+import com.example.WarehouseApp.dto.LocationWithQuantity;
 import com.example.WarehouseApp.dto.StorageLocationDto;
 import com.example.WarehouseApp.dto.WarehouseDto;
 import com.example.WarehouseApp.exception.NotFoundException;
@@ -16,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -23,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class StorageLocationServiceImpl implements StorageLocationService<StorageLocationDto> {
+public class StorageLocationServiceImpl implements StorageLocationService {
 
     private final StorageLocationRepository storageLocationRepository;
     private final BaseService<WarehouseDto> warehouseService;
@@ -149,6 +152,16 @@ public class StorageLocationServiceImpl implements StorageLocationService<Storag
         var message = "Создано ячеек: " + created +
                 (skipped > 0 ? ", пропущено (уже существуют): " + skipped : "");
         return new BulkCreateResult(true, created, skipped, message);
+    }
+
+    @Override
+    public List<LocationWithQuantity> getLocationsWithStock(Long nomenclatureId, Long warehouseId) {
+        // Если не выбраны склад или номенклатура, возвращаем пустой список.
+        // Это предотвращает показ всех ячеек подряд, пока пользователь не задал контекст.
+        if (nomenclatureId == null || warehouseId == null) {
+            return Collections.emptyList();
+        }
+        return storageLocationRepository.findLocationsWithQuantity(nomenclatureId, warehouseId);
     }
 
     private StorageLocation getEntityById(long id) {

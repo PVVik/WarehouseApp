@@ -2,12 +2,13 @@ package com.example.WarehouseApp.service.movement;
 
 import com.example.WarehouseApp.dto.*;
 import com.example.WarehouseApp.dto.movement.MovementDtoReceipt;
+import com.example.WarehouseApp.exception.ValidationException;
 import com.example.WarehouseApp.mapper.*;
+import com.example.WarehouseApp.model.InventoryType;
 import com.example.WarehouseApp.model.Movement;
-import com.example.WarehouseApp.model.StockBalance;
 import com.example.WarehouseApp.repository.MovementRepository;
-import com.example.WarehouseApp.repository.StockBalanceRepository;
 import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.service.stockBalance.StockBalanceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class ReceiptService {
     private final BaseService<CounterpartyDto> counterpartyService;
     private final BaseService<WarehouseDto> warehouseService;
     private final BaseService<StorageLocationDto> storageLocationService;
-    private final StockBalanceRepository stockBalanceRepository;
+    private final StockBalanceService stockBalanceService;
 
     @Transactional
     public MovementDtoReceipt createReceipt(MovementDtoReceipt movementDtoReceipt) {
@@ -40,40 +41,31 @@ public class ReceiptService {
                 : null;
         var batch = saveBatch(movementDtoReceipt.getBatchDto(), nomenclature, supplier);
         var serialItem = saveSerialItem(movementDtoReceipt.getSerialItemDto(), batch, nomenclature);
+        checkSerialItemQuantity(movementDtoReceipt, nomenclature);
 
         var movement = ReceiptMapper.mapToEntity(movementDtoReceipt);
         setFieldsToEntity(movement, nomenclature, warehouse, supplier, batch, serialItem, storageLocation);
 
         var newMovement = movementRepository.save(movement);
 
-        saveStockBalance(nomenclature, batch, serialItem, warehouse, storageLocation, movementDtoReceipt.getQuantity());
+        stockBalanceService.saveStockBalance(nomenclature, batch, serialItem, warehouse, storageLocation,
+                movementDtoReceipt.getQuantity(), movementDtoReceipt.getMovementType());
 
         var newMovementDto = ReceiptMapper.mapToDto(newMovement);
         setFieldsToDto(newMovementDto, batch, serialItem);
 
+        log.info("Оформили приход с id и номером документа {} и {}", newMovementDto.getId(), newMovementDto.getNumber());
+
         return newMovementDto;
     }
 
-    private void saveStockBalance(NomenclatureDto nomenclature, BatchDto batch, SerialItemDto serialItem,
-                                  WarehouseDto warehouse, StorageLocationDto storageLocation, BigDecimal quantity) {
-        var stockBalance = new StockBalance();
-        if (batch != null) {
-            stockBalance.setBatch(BatchMapper.mapToEntityWithId(batch));
-        }
-        if (serialItem != null) {
-            stockBalance.setSerialItem(SerialItemMapper.mapToEntityWithId(serialItem));
-        }
-        if (storageLocation != null) {
-            stockBalance.setStorageLocation(StorageLocationMapper.mapToEntityWithId(storageLocation));
-        }
-        stockBalance.setNomenclature(NomenclatureMapper.mapToEntityWithId(nomenclature));
-        stockBalance.setWarehouse(WarehouseMapper.mapToEntityWithId(warehouse));
-        stockBalance.setQuantity(quantity);
-
-        stockBalanceRepository.save(stockBalance);
-    }
-
     private BatchDto saveBatch(BatchDto batch, NomenclatureDto nomenclature, CounterpartyDto supplier) {
+        if (nomenclature.getInventoryType() == InventoryType.BATCH &&
+                (batch == null || batch.getExpiryDate() == null || batch.getProductionDate() == null)) {
+            log.warn("Не указаны данные партии для номенклатуры с id {}", nomenclature.getId());
+            throw new ValidationException("Для номенклатуры с партионным учётом нужно указать данные о партии");
+        }
+
         if (batch != null) {
             batch.setNomenclatureId(nomenclature.getId());
             batch.setSupplierId(supplier.getId());
@@ -84,6 +76,11 @@ public class ReceiptService {
     }
 
     private SerialItemDto saveSerialItem(SerialItemDto serialItem, BatchDto batch, NomenclatureDto nomenclature) {
+        if (nomenclature.getInventoryType() == InventoryType.SERIAL &&
+                (serialItem == null || serialItem.getPassportNumber() == null || serialItem.getSerialNumber() == null)) {
+            log.warn("Не указаны данные серийника для номенклатуры с id {}", nomenclature.getId());
+            throw new ValidationException("Для серийных единиц нужно указать данные об оборудовании");
+        }
         if (serialItem != null) {
             if (batch != null) {
                 serialItem.setBatchId(batch.getId());
@@ -120,6 +117,14 @@ public class ReceiptService {
         }
         if (serialItem != null) {
             movementDtoReceipt.setSerialItemDto(serialItem);
+        }
+    }
+
+    private void checkSerialItemQuantity(MovementDtoReceipt movementDtoReceipt, NomenclatureDto nomenclatureDto) {
+        if (nomenclatureDto.getInventoryType() == InventoryType.SERIAL ||
+                !movementDtoReceipt.getQuantity().equals(BigDecimal.ONE)) {
+            log.warn("Неверно введено количество серийный единиц, приемка идет по 1");
+            throw new ValidationException("Для номенклатуры с серийным учётом количество должно быть равно 1");
         }
     }
 

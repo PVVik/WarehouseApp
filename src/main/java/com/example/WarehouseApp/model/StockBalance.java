@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "stock_balance")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class StockBalance {
 
@@ -40,4 +39,5 @@ public class StockBalance {
     private StorageLocation storageLocation;
 
     private BigDecimal quantity;
+
 }

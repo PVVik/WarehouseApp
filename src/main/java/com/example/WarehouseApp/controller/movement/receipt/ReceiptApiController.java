@@ -1,4 +1,4 @@
-package com.example.WarehouseApp.controller.movement;
+package com.example.WarehouseApp.controller.movement.receipt;
 
 import com.example.WarehouseApp.dto.movement.MovementDtoReceipt;
 import com.example.WarehouseApp.service.movement.ReceiptService;

@@ -12,37 +12,37 @@ public class ErrorHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ErrorResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageConversionException.class)
-    public ErrorResponse handleValidationExceptions(HttpMessageConversionException ex) {
+    public ErrorResponse handleHttpMessageConversionException(HttpMessageConversionException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ValidationException.class)
-    public ErrorResponse handleValidationExceptions(ValidationException ex) {
+    public ErrorResponse handleValidationException(ValidationException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
-    public ErrorResponse handleValidationExceptions(NotFoundException ex) {
+    public ErrorResponse handleNotFoundException(NotFoundException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(AlreadyExistsException.class)
-    public ErrorResponse handleValidationExceptions(AlreadyExistsException ex) {
+    public ErrorResponse handleAlreadyExistsException(AlreadyExistsException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(RuntimeException.class)
-    public ErrorResponse handleValidationExceptions(RuntimeException ex) {
+    public ErrorResponse handleRuntimeException(RuntimeException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 }

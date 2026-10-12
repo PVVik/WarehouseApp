@@ -1,6 +1,6 @@
 package com.example.WarehouseApp.movement.receipt;
 
-import com.example.WarehouseApp.controller.movement.ReceiptApiController;
+import com.example.WarehouseApp.controller.movement.receipt.ReceiptApiController;
 import com.example.WarehouseApp.dto.movement.MovementDtoReceipt;
 import com.example.WarehouseApp.dto.BatchDto;
 import com.example.WarehouseApp.dto.SerialItemDto;
@@ -220,7 +220,6 @@ class ReceiptControllerTest {
                 movementType,
                 nomenclatureId,
                 warehouseTo,
-                null,
                 counterpartyId,
                 quantity,
                 price,

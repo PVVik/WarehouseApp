@@ -96,6 +96,9 @@
         }
         .status-active { background-color: #d4edda; color: #155724; }
         .status-inactive { background-color: #f8d7da; color: #721c24; }
+        .btn-warning { background-color: #f39c12; color: white; }
+        .btn-success { background-color: #27ae60; color: white; }
+        .btn-secondary { background-color: #95a5a6; color: white; }
     </style>
 </head>
 <body>
@@ -146,11 +149,25 @@
                     </span>
             </td>
 
-            <td>
-                <a th:href="@{/movements/receipt/form(nomenclatureId=${item.id}, nomenclatureName=${item.name}, inventoryType=${item.inventoryType})}"
-                   class="btn btn-sm btn-success">Выбрать</a>
 
+            <td>
+                <a th:if="${fromOperation == 'ISSUE'}"
+                   th:href="@{/movements/issue/form(
+           nomenclatureId=${item.id},
+           nomenclatureName=${item.name},
+           inventoryType=${item.inventoryType}
+       )}"
+                   class="btn btn-sm btn-warning">Выбрать для расхода</a>
+
+                <a th:if="${fromOperation == 'RECEIPT' or fromOperation == null}"
+                   th:href="@{/movements/receipt/form(
+           nomenclatureId=${item.id},
+           nomenclatureName=${item.name},
+           inventoryType=${item.inventoryType}
+       )}"
+                   class="btn btn-sm btn-success">Выбрать для прихода</a>
             </td>
+
         <tr th:if="${#lists.isEmpty(nomenclatureList)}">
             <td colspan="7" style="text-align:center; padding: 20px; color:#7f8c8d;">
                 Ничего не найдено.

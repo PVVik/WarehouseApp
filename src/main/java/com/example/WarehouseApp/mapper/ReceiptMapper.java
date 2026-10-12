@@ -17,8 +17,8 @@ public class ReceiptMapper {
 
     public static MovementDtoReceipt mapToDto(Movement movement) {
         return new MovementDtoReceipt(movement.getId(), movement.getMovementType(), movement.getNomenclature().getId(),
-                movement.getWarehouseTo().getId(), movement.getCounterparty().getId(),
-                movement.getQuantity(), movement.getPrice(), movement.getNumber(), movement.getDate(),
+                movement.getWarehouseTo().getId(), movement.getCounterparty().getId(), movement.getQuantity(),
+                movement.getPrice(), movement.getNumber(), movement.getDate(),
                 movement.getUserId(), movement.getNotes());
     }
 }
