@@ -159,8 +159,8 @@
         </div>
 
         <div class="form-group">
-            <label for="storageLocationId">Место хранения (опционально)</label>
-            <select id="storageLocationId" name="storageLocationId" class="form-control">
+            <label for="storageLocationId" class="required">Место хранения</label>
+            <select id="storageLocationId" name="storageLocationId" class="form-control" required>
                 <option value="">Не указано</option>
                 <option th:each="sl : ${storageLocations}"
                         th:value="${sl.id}"
@@ -246,6 +246,21 @@
         }
 
         filterLocations();
+
+        function validateForm() {
+            if (locationSelect.value === '') {
+                alert('Пожалуйста, выберите ячейку хранения.');
+                locationSelect.focus();
+                return false;
+            }
+            return true;
+        }
+
+        document.querySelector('form').addEventListener('submit', function (event) {
+            if (!validateForm()) {
+                event.preventDefault();
+            }
+        });
     });
 </script>
 
