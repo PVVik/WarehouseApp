@@ -5,6 +5,7 @@ import com.example.WarehouseApp.dto.movement.MovementDtoReceipt;
 import com.example.WarehouseApp.exception.ValidationException;
 import com.example.WarehouseApp.mapper.*;
 import com.example.WarehouseApp.model.InventoryType;
+import com.example.WarehouseApp.model.ItemStatus;
 import com.example.WarehouseApp.model.Movement;
 import com.example.WarehouseApp.repository.MovementRepository;
 import com.example.WarehouseApp.service.BaseService;
@@ -36,9 +37,7 @@ public class ReceiptService {
         var nomenclature = nomenclatureService.getById(movementDtoReceipt.getNomenclatureId());
         var supplier = counterpartyService.getById(movementDtoReceipt.getCounterpartyId());
         var warehouse = warehouseService.getById(movementDtoReceipt.getWarehouseTo());
-        var storageLocation = (movementDtoReceipt.getStorageLocationId() != null)
-                ? storageLocationService.getById(movementDtoReceipt.getStorageLocationId())
-                : null;
+        var storageLocation = storageLocationService.getById(movementDtoReceipt.getStorageLocationId());
         var batch = saveBatch(movementDtoReceipt.getBatchDto(), nomenclature, supplier);
         var serialItem = saveSerialItem(movementDtoReceipt.getSerialItemDto(), batch, nomenclature);
         checkSerialItemQuantity(movementDtoReceipt, nomenclature);
@@ -85,6 +84,7 @@ public class ReceiptService {
             if (batch != null) {
                 serialItem.setBatchId(batch.getId());
             }
+            serialItem.setStatus(ItemStatus.IN_STOCK);
             serialItem.setNomenclatureId(nomenclature.getId());
             serialItem = serialItemService.create(serialItem);
 
@@ -99,16 +99,13 @@ public class ReceiptService {
         movement.setNomenclature(NomenclatureMapper.mapToEntityWithId(nomenclature));
         movement.setWarehouseTo(WarehouseMapper.mapToEntityWithId(warehouse));
         movement.setCounterparty(CounterpartyMapper.mapToEntityWithId(supplier));
+        movement.setStorageLocation(StorageLocationMapper.mapToEntityWithId(storageLocation));
         if (batch != null) {
             movement.setBatch(BatchMapper.mapToEntityWithId(batch));
         }
         if (serialItem != null) {
             movement.setSerialItem(SerialItemMapper.mapToEntityWithId(serialItem));
         }
-        if (storageLocation != null) {
-            movement.setStorageLocation(StorageLocationMapper.mapToEntityWithId(storageLocation));
-        }
-
     }
 
     private void setFieldsToDto(MovementDtoReceipt movementDtoReceipt, BatchDto batch, SerialItemDto serialItem) {
@@ -121,7 +118,7 @@ public class ReceiptService {
     }
 
     private void checkSerialItemQuantity(MovementDtoReceipt movementDtoReceipt, NomenclatureDto nomenclatureDto) {
-        if (nomenclatureDto.getInventoryType() == InventoryType.SERIAL ||
+        if (nomenclatureDto.getInventoryType() == InventoryType.SERIAL &&
                 !movementDtoReceipt.getQuantity().equals(BigDecimal.ONE)) {
             log.warn("Неверно введено количество серийный единиц, приемка идет по 1");
             throw new ValidationException("Для номенклатуры с серийным учётом количество должно быть равно 1");

@@ -115,6 +115,9 @@ public class MovementController {
             @RequestParam(required = false) String counterpartyName,
             @RequestParam(required = false) String inventoryType,
             @RequestParam(required = false) String fromOperation,
+            @RequestParam(required = false) Long warehouseFromId,
+            @RequestParam(required = false) String warehouseFromName,
+            @RequestParam(required = false) Long storageLocationId,
             Model model) {
 
         var pageable = PageRequest.of(page, size, Sort.by("id"));
@@ -131,6 +134,9 @@ public class MovementController {
         model.addAttribute("counterpartyName", counterpartyName);
         model.addAttribute("inventoryType", inventoryType);
         model.addAttribute("fromOperation", fromOperation);
+        model.addAttribute("warehouseFromId", warehouseFromId);
+        model.addAttribute("warehouseFromName", warehouseFromName);
+        model.addAttribute("storageLocationId", storageLocationId);
         model.addAttribute("searchPerformed", name != null && !name.isBlank());
 
         return "movements/warehouse-list";

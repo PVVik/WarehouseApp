@@ -90,7 +90,7 @@
 
                 <input type="hidden" name="inventoryType" th:value="${selectedInventoryType}" />
 
-                <a th:href="@{/movements/nomenclature/list}" class="btn btn-primary">Найти</a>
+                <a th:href="@{/movements/nomenclature/list(fromOperation='RECEIPT')}" class="btn btn-primary">Найти</a>
             </div>
             <small style="color: #7f8c8d;">Выберите позицию из справочника, чтобы заполнить поле.</small>
         </div>
@@ -103,7 +103,7 @@
                        th:value="${selectedCounterpartyName != null ? selectedCounterpartyName : 'выберите поставщика'}">
                 <input type="hidden" id="counterpartyId" name="counterpartyId"
                        th:value="${selectedCounterpartyId}">
-                <a th:href="@{/movements/counterparty/list(nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, inventoryType=${selectedInventoryType})}"
+                <a th:href="@{/movements/counterparty/list(fromOperation='RECEIPT', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, inventoryType=${selectedInventoryType})}"
                    class="btn btn-primary">Найти</a>
 
             </div>
@@ -118,7 +118,7 @@
                        th:value="${selectedWarehouseName != null ? selectedWarehouseName : 'выберите склад'}">
                 <input type="hidden" id="warehouseTo" name="warehouseTo"
                        th:value="${selectedWarehouseId}">
-                <a th:href="@{/movements/warehouse/list(nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, counterpartyId=${selectedCounterpartyId}, counterpartyName=${selectedCounterpartyName}, inventoryType=${selectedInventoryType})}"
+                <a th:href="@{/movements/warehouse/list(fromOperation='RECEIPT', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, counterpartyId=${selectedCounterpartyId}, counterpartyName=${selectedCounterpartyName}, inventoryType=${selectedInventoryType})}"
                    class="btn btn-primary">Найти</a>
 
             </div>
@@ -159,8 +159,8 @@
         </div>
 
         <div class="form-group">
-            <label for="storageLocationId">Место хранения (опционально)</label>
-            <select id="storageLocationId" name="storageLocationId" class="form-control">
+            <label for="storageLocationId" class="required">Место хранения</label>
+            <select id="storageLocationId" name="storageLocationId" class="form-control" required>
                 <option value="">Не указано</option>
                 <option th:each="sl : ${storageLocations}"
                         th:value="${sl.id}"
@@ -246,6 +246,21 @@
         }
 
         filterLocations();
+
+        function validateForm() {
+            if (locationSelect.value === '') {
+                alert('Пожалуйста, выберите ячейку хранения.');
+                locationSelect.focus();
+                return false;
+            }
+            return true;
+        }
+
+        document.querySelector('form').addEventListener('submit', function (event) {
+            if (!validateForm()) {
+                event.preventDefault();
+            }
+        });
     });
 </script>
 

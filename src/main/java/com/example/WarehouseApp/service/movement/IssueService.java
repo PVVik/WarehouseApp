@@ -34,7 +34,6 @@ public class IssueService {
 
     @Transactional
     public MovementDtoIssue createIssue(MovementDtoIssue movementDtoIssue) {
-        checkPriceAndQuantity(movementDtoIssue.getPrice(), movementDtoIssue.getQuantity());
         var nomenclature = nomenclatureService.getById(movementDtoIssue.getNomenclatureId());
         var customer = counterpartyService.getById(movementDtoIssue.getCustomerId());
         var warehouse = warehouseService.getById(movementDtoIssue.getWarehouseFrom());
@@ -47,6 +46,9 @@ public class IssueService {
         var serialItem = movementDtoIssue.getSerialItemId() != null
                 ? serialItemService.getById(movementDtoIssue.getSerialItemId())
                 : null;
+
+        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
+        checkQuantitySerialItem(serialItem, movementDtoIssue.getQuantity());
 
         var updatedSerialItem = updateSerialItemStatus(serialItem);
 
@@ -81,6 +83,13 @@ public class IssueService {
         return serialItem;
     }
 
+    private void checkQuantitySerialItem(SerialItemDto serialItem, BigDecimal quantity) {
+        if (serialItem != null && quantity.compareTo(BigDecimal.ONE) != 0) {
+            log.warn("Некорректно введенное количество серийника, может быть только 1");
+            throw new ValidationException("Проверьте введенное количество, для серийных единиц оно может быть только 1");
+        }
+    }
+
     private void setFieldsToEntity(Movement movement, NomenclatureDto nomenclature, CounterpartyDto customer,
                                    WarehouseDto warehouse, StorageLocationDto storageLocation, BatchDto batch,
                                    SerialItemDto serialItem) {
@@ -108,10 +117,4 @@ public class IssueService {
         }
     }
 
-    private void checkPriceAndQuantity(BigDecimal price, BigDecimal quantity) {
-        if(price.compareTo(BigDecimal.ZERO) <= 0 || quantity.compareTo(BigDecimal.ZERO) <= 0) {
-            log.warn("Введены отрицательные стоимость и/или количество");
-            throw new ValidationException("Стоимость и количество должны быть больше нуля");
-        }
-    }
 }

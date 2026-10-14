@@ -32,6 +32,7 @@ public class MovementDtoReceipt {
     @NotNull(message = "Склад обязателен к заполнению")
     private Long warehouseTo;
 
+    @NotNull(message = "Ячейка для размещения обязательна к заполнению")
     private Long storageLocationId;
 
     @NotNull(message = "Поставщик обязателен к заполнению")

@@ -40,6 +40,7 @@ public class ReceiptController {
             @RequestParam(required = false) Long warehouseTo,
             @RequestParam(required = false) String warehouseName,
             @RequestParam(required = false) String inventoryType,
+            @RequestParam(required = false) String fromOperation,
             Model model) {
 
         var pageable = PageRequest.of(0, 1000, Sort.by("id"));
@@ -51,6 +52,7 @@ public class ReceiptController {
         model.addAttribute("selectedWarehouseId", warehouseTo);
         model.addAttribute("selectedWarehouseName", warehouseName);
         model.addAttribute("selectedInventoryType", inventoryType);
+        model.addAttribute("fromOperation", fromOperation);
 
         return "movements/receipt-form";
     }

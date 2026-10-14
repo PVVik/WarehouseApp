@@ -50,9 +50,18 @@
         <input type="text" name="name" th:value="${filterName}" placeholder="Название"/>
         <button type="submit">Искать</button>
         <a th:href="@{/movements/warehouse/list(nomenclatureId=${nomenclatureId}, nomenclatureName=${nomenclatureName}, counterpartyId=${counterpartyId}, counterpartyName=${counterpartyName}, inventoryType=${inventoryType})}">Сбросить</a>
+        <a th:if="${fromOperation == 'RECEIPT'}"
+           th:href="@{/movements/receipt/form}"
+           class="btn btn-outline-secondary">Назад</a>
+
+        <a th:if="${fromOperation == 'ISSUE'}"
+           th:href="@{/movements/issue/form}"
+           class="btn btn-outline-secondary">Назад</a>
+
+        <a th:if="${fromOperation == 'TRANSFER'}"
+           th:href="@{/movements/transfer/form}"
+           class="btn btn-outline-secondary">Назад</a>
     </form>
-    <a th:href="@{/movements/receipt/form(nomenclatureId=${nomenclatureId}, nomenclatureName=${nomenclatureName}, counterpartyId=${counterpartyId}, counterpartyName=${counterpartyName}, inventoryType=${inventoryType})}"
-       class="btn btn-back">Назад к приходу</a>
 </div>
 
 <table>
@@ -89,6 +98,29 @@
        inventoryType=${inventoryType}
    )}"
                class="btn btn-warning">Выбрать склад для расхода</a>
+
+            <a th:if="${fromOperation == 'TRANSFER'}"
+               th:href="@{/movements/transfer/form(
+       nomenclatureId=${nomenclatureId},
+       nomenclatureName=${nomenclatureName},
+       warehouseFromId=${w.id},
+       warehouseFromName=${w.name},
+       inventoryType=${inventoryType}
+   )}"
+               class="btn btn-warning">Выбрать склад для транспортировки</a>
+
+            <a th:if="${fromOperation == 'TRANSFER-TO'}"
+               th:href="@{/movements/transfer/form(
+       nomenclatureId=${nomenclatureId},
+       nomenclatureName=${nomenclatureName},
+       warehouseFromId=${warehouseFromId},
+       warehouseFromName=${warehouseFromName},
+       storageLocationId=${storageLocationId},
+       warehouseToId=${w.id},
+       warehouseToName=${w.name},
+       inventoryType=${inventoryType}
+   )}"
+               class="btn btn-warning">Выбрать склад для транспортировки</a>
 
             <a th:if="${fromOperation == 'RECEIPT' or fromOperation == null}"
                th:href="@{/movements/receipt/form(

@@ -78,4 +78,11 @@ public class Movement {
         this.notes = notes;
     }
 
+    public Movement(MovementType movementType, BigDecimal quantity, long userId, String notes) {
+        this.movementType = movementType;
+        this.quantity = quantity;
+        this.userId = userId;
+        this.notes = notes;
+    }
+
 }

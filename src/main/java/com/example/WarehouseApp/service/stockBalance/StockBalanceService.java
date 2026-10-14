@@ -1,6 +1,7 @@
 package com.example.WarehouseApp.service.stockBalance;
 
 import com.example.WarehouseApp.dto.*;
+import com.example.WarehouseApp.exception.NotFoundException;
 import com.example.WarehouseApp.exception.ValidationException;
 import com.example.WarehouseApp.mapper.*;
 import com.example.WarehouseApp.model.MovementType;
@@ -35,7 +36,7 @@ public class StockBalanceService {
             if (movementType == MovementType.RECEIPT) {
                 stockBalance.setQuantity(oldQuantity.add(quantity));
             }
-            if (movementType == MovementType.ISSUE) {
+            if (movementType == MovementType.ISSUE || movementType == MovementType.TRANSFER) {
                 checkBalance(stockBalance, quantity);
                 stockBalance.setQuantity(oldQuantity.subtract(quantity));
             }
@@ -43,6 +44,19 @@ public class StockBalanceService {
         }
 
         return stockBalance;
+    }
+
+    public void checkNomenclatureExistsOnWarehouseAndPositiveQuantity(NomenclatureDto nomenclature, WarehouseDto warehouse) {
+        StockBalance stockBalance = stockBalanceRepository.findByNomenclatureIdAndWarehouseId(
+                nomenclature.getId(), warehouse.getId()).orElseGet(() -> {
+            log.warn("На складе с id {} не найдена позиция с id {}", warehouse.getId(), nomenclature.getId());
+            throw new NotFoundException(String.format("На выбранном складе нет номенклатуры %s", nomenclature.getName()));
+        });
+
+        if (stockBalance.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
+            log.warn("На складе с id {} не найдена позиция с id {}", warehouse.getId(), nomenclature.getId());
+            throw new NotFoundException(String.format("На выбранном складе нет номенклатуры %s", nomenclature.getName()));
+        }
     }
 
     private StockBalance getByNomenclatureIdAndWarehouseId(long nomenclatureId, long warehouseId) {
