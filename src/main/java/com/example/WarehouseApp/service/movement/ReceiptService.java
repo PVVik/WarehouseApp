@@ -5,6 +5,7 @@ import com.example.WarehouseApp.dto.movement.MovementDtoReceipt;
 import com.example.WarehouseApp.exception.ValidationException;
 import com.example.WarehouseApp.mapper.*;
 import com.example.WarehouseApp.model.InventoryType;
+import com.example.WarehouseApp.model.ItemStatus;
 import com.example.WarehouseApp.model.Movement;
 import com.example.WarehouseApp.repository.MovementRepository;
 import com.example.WarehouseApp.service.BaseService;
@@ -85,6 +86,7 @@ public class ReceiptService {
             if (batch != null) {
                 serialItem.setBatchId(batch.getId());
             }
+            serialItem.setStatus(ItemStatus.IN_STOCK);
             serialItem.setNomenclatureId(nomenclature.getId());
             serialItem = serialItemService.create(serialItem);
 
@@ -121,7 +123,7 @@ public class ReceiptService {
     }
 
     private void checkSerialItemQuantity(MovementDtoReceipt movementDtoReceipt, NomenclatureDto nomenclatureDto) {
-        if (nomenclatureDto.getInventoryType() == InventoryType.SERIAL ||
+        if (nomenclatureDto.getInventoryType() == InventoryType.SERIAL &&
                 !movementDtoReceipt.getQuantity().equals(BigDecimal.ONE)) {
             log.warn("Неверно введено количество серийный единиц, приемка идет по 1");
             throw new ValidationException("Для номенклатуры с серийным учётом количество должно быть равно 1");

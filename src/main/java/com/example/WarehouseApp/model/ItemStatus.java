@@ -5,7 +5,8 @@ public enum ItemStatus {
     IN_STOCK("На складе"),
     IN_USE("В эксплуатации"),
     IN_REPAIR("В ремонте"),
-    WRITTEN_OFF("Списан");
+    WRITTEN_OFF("Списан"),
+    IN_TRANSIT("В перемещении");
 
     private final String displayName;
 

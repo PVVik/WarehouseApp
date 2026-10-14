@@ -1,6 +1,5 @@
 package com.example.WarehouseApp.controller.movement.issue;
 
-import com.example.WarehouseApp.dto.LocationWithQuantity;
 import com.example.WarehouseApp.dto.movement.MovementDtoIssue;
 import com.example.WarehouseApp.model.MovementType;
 import com.example.WarehouseApp.service.movement.IssueService;
@@ -18,7 +17,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.List;
 
 @Controller
 @RequestMapping("/movements/issue")
@@ -34,9 +32,10 @@ public class IssueController {
             @RequestParam(required = false) String nomenclatureName,
             @RequestParam(required = false) Long customerId,
             @RequestParam(required = false) String customerName,
-            @RequestParam(required = false) Long warehouseFrom,
-            @RequestParam(required = false) String warehouseName,
+            @RequestParam(required = false) Long warehouseFromId,
+            @RequestParam(required = false) String warehouseFromName,
             @RequestParam(required = false) String inventoryType,
+            @RequestParam(required = false) String fromOperation,
             Model model) {
 
         var pageable = PageRequest.of(0, 1000, Sort.by("id"));
@@ -45,12 +44,13 @@ public class IssueController {
         model.addAttribute("selectedNomenclatureName", nomenclatureName);
         model.addAttribute("selectedCustomerId", customerId);
         model.addAttribute("selectedCustomerName", customerName);
-        model.addAttribute("selectedWarehouseFromId", warehouseFrom);
-        model.addAttribute("selectedWarehouseFromName", warehouseName);
+        model.addAttribute("selectedWarehouseFromId", warehouseFromId);
+        model.addAttribute("selectedWarehouseFromName", warehouseFromName);
         model.addAttribute("selectedInventoryType", inventoryType);
+        model.addAttribute("fromOperation", fromOperation);
 
-        if (warehouseFrom != null && nomenclatureId != null) {
-            var locations = storageLocationService.getLocationsWithStock(nomenclatureId, warehouseFrom);
+        if (warehouseFromId != null && nomenclatureId != null) {
+            var locations = storageLocationService.getLocationsWithStock(nomenclatureId, warehouseFromId);
             model.addAttribute("storageLocations", locations);
         } else {
             model.addAttribute("storageLocations", Collections.emptyList());

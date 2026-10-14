@@ -99,6 +99,18 @@
         .btn-warning { background-color: #f39c12; color: white; }
         .btn-success { background-color: #27ae60; color: white; }
         .btn-secondary { background-color: #95a5a6; color: white; }
+        /* Добавлен стиль для outline-кнопки */
+        .btn-outline-secondary {
+            background: none;
+            color: #6c757d;
+            border: 1px solid #ced4da;
+            padding: 8px 16px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-outline-secondary:hover {
+            background-color: #e9ecef;
+        }
     </style>
 </head>
 <body>
@@ -117,7 +129,17 @@
             <input type="text" name="name" th:value="${filterName}" placeholder="Название (например, Болт)" />
             <div style="display: flex; gap: 8px;">
                 <button type="submit" class="btn btn-primary">Найти</button>
-                <a th:href="@{/movements/receipt/form}" class="btn btn-outline-secondary" style="background:none; color:#6c757d; text-decoration:none; padding: 8px 16px;">Назад</a>
+                <a th:if="${fromOperation == 'RECEIPT'}"
+                   th:href="@{/movements/receipt/form}"
+                   class="btn btn-outline-secondary">Назад</a>
+
+                <a th:if="${fromOperation == 'ISSUE'}"
+                   th:href="@{/movements/issue/form}"
+                   class="btn btn-outline-secondary">Назад</a>
+
+                <a th:if="${fromOperation == 'TRANSFER'}"
+                   th:href="@{/movements/transfer/form}"
+                   class="btn btn-outline-secondary">Назад</a>
             </div>
         </form>
     </div>
@@ -135,6 +157,14 @@
         </tr>
         </thead>
         <tbody>
+        <tr th:if="${#lists.isEmpty(nomenclatureList)}">
+            <td colspan="7" style="text-align:center; padding: 20px; color:#7f8c8d;">
+                Ничего не найдено.
+                <a th:href="@{/nomenclature/form(from='movements', name=${filterName})}"
+                   class="btn btn-primary" style="margin-left: 10px;">Создать позицию</a>
+            </td>
+        </tr>
+
         <tr th:each="item : ${nomenclatureList}">
             <td th:text="${item.sku}"></td>
             <td th:text="${item.name}"></td>
@@ -149,33 +179,32 @@
                     </span>
             </td>
 
-
             <td>
                 <a th:if="${fromOperation == 'ISSUE'}"
                    th:href="@{/movements/issue/form(
-           nomenclatureId=${item.id},
-           nomenclatureName=${item.name},
-           inventoryType=${item.inventoryType}
-       )}"
+                           nomenclatureId=${item.id},
+                           nomenclatureName=${item.name},
+                           inventoryType=${item.inventoryType}
+                       )}"
                    class="btn btn-sm btn-warning">Выбрать для расхода</a>
 
                 <a th:if="${fromOperation == 'RECEIPT' or fromOperation == null}"
                    th:href="@{/movements/receipt/form(
-           nomenclatureId=${item.id},
-           nomenclatureName=${item.name},
-           inventoryType=${item.inventoryType}
-       )}"
+                           nomenclatureId=${item.id},
+                           nomenclatureName=${item.name},
+                           inventoryType=${item.inventoryType}
+                       )}"
                    class="btn btn-sm btn-success">Выбрать для прихода</a>
-            </td>
 
-        <tr th:if="${#lists.isEmpty(nomenclatureList)}">
-            <td colspan="7" style="text-align:center; padding: 20px; color:#7f8c8d;">
-                Ничего не найдено.
-                <a th:href="@{/nomenclature/form(from='movements', name=${filterName})}"
-                   class="btn btn-primary" style="margin-left: 10px;">Создать позицию</a>
+                <a th:if="${fromOperation == 'TRANSFER' or fromOperation == null}"
+                   th:href="@{/movements/transfer/form(
+                           nomenclatureId=${item.id},
+                           nomenclatureName=${item.name},
+                           inventoryType=${item.inventoryType}
+                       )}"
+                   class="btn btn-sm btn-success">Выбрать для транспортировки</a>
             </td>
         </tr>
-
         </tbody>
     </table>
 
