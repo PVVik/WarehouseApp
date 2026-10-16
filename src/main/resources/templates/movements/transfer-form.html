@@ -123,6 +123,36 @@
             <small style="color: #7f8c8d;">Склад, на который перемещаем товар.</small>
         </div>
 
+
+
+        <div class="form-group"
+             th:if="${isBatchRequired and batchesWithStock != null and !#lists.isEmpty(batchesWithStock)}">
+
+            <label for="batchId" class="required">Партия</label>
+
+            <select id="batchId" name="batchId" class="form-control">
+                <option value="">Выберите партию</option>
+                <option th:each="batch : ${batchesWithStock}"
+                        th:value="${batch.id}"
+                        th:text="${batch.number + ' (остаток: ' + batch.totalQuantity + ')'}">
+                </option>
+            </select>
+
+            <small class="text-muted">Обязательный выбор партии для партионного учёта</small>
+        </div>
+
+        <div th:if="${isSerialRequired}" class="form-group">
+            <label for="serialItemId" class="required">Серийная единица</label>
+            <select id="serialItemId" name="serialItemId" class="form-control" required>
+                <option value="">Выберите серийную единицу</option>
+                <option th:each="serial : ${serialItemsWithStock}"
+                        th:value="${serial.id}"
+                        th:text="${serial.serialNumber + ' (статус: ' + serial.status + ')'}">
+                </option>
+            </select>
+            <small class="text-muted">Выберите конкретный серийный номер оборудования</small>
+        </div>
+
         <div class="form-group">
             <label for="storageLocationId" class="required">Место хранения (ячейка)</label>
             <select id="storageLocationId" name="storageLocationId" class="form-control" required>
