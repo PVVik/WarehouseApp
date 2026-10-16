@@ -18,4 +18,8 @@ public interface StockBalanceRepository extends JpaRepository<StockBalance, Long
                                                                                             Long warehouseId,
                                                                                             Long storageLocationId);
 
+    @Query("SELECT sb FROM StockBalance sb " +
+            "WHERE sb.warehouse.id = :warehouseId AND sb.quantity > 0")
+    List<StockBalance> findPositiveBalancesByWarehouse(@Param("warehouseId") Long warehouseId);
+
 }

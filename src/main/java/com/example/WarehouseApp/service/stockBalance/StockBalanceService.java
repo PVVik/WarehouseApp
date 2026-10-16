@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +47,10 @@ public class StockBalanceService {
         }
 
         return stockBalance;
+    }
+
+    public List<StockBalance> findPositiveBalancesByWarehouse(Long warehouseId) {
+        return stockBalanceRepository.findPositiveBalancesByWarehouse(warehouseId);
     }
 
     public void checkNomenclatureExistsOnWarehouseAndPositiveQuantity(NomenclatureDto nomenclature, WarehouseDto warehouse,

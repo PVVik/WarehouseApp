@@ -78,9 +78,6 @@ public class ReceiptController {
         var contextQuery = buildContextQuery(nomenclatureId, null,
                 inventoryType, counterpartyId, warehouseTo);
 
-        boolean requiresBatch = "BATCH".equals(inventoryType);
-        boolean requiresSerial = "SERIAL".equals(inventoryType);
-
         try {
             var dto = new MovementDtoReceipt();
             dto.setMovementType(MovementType.RECEIPT);

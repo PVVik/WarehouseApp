@@ -2,6 +2,7 @@ package com.example.WarehouseApp.controller.storageLocation;
 
 import com.example.WarehouseApp.dto.StorageLocationDto;
 import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.service.storageLocation.StorageLocationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class StorageLocationController {
 
-    private final BaseService<StorageLocationDto> storageLocationService;
+    private final StorageLocationService storageLocationService;
 
     @GetMapping("/create")
     public String createForm(@RequestParam Long warehouseId, Model model) {

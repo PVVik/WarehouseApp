@@ -1,7 +1,6 @@
 package com.example.WarehouseApp.controller.batch;
 
 import com.example.WarehouseApp.dto.BatchDto;
-import com.example.WarehouseApp.service.BaseService;
 import com.example.WarehouseApp.service.batch.BatchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

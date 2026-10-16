@@ -2,6 +2,7 @@ package com.example.WarehouseApp.controller.serialItem;
 
 import com.example.WarehouseApp.dto.SerialItemDto;
 import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.service.serialItem.SerialItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/serial-item/api")
 public class SerialItemApiController {
 
-    private final BaseService<SerialItemDto> serialItemService;
+    private final SerialItemService serialItemService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

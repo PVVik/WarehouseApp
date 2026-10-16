@@ -27,4 +27,9 @@ public interface StorageLocationRepository extends JpaRepository<StorageLocation
             @Param("nomenclatureId") Long nomenclatureId,
             @Param("warehouseId") Long warehouseId
     );
+
+    @Query("SELECT DISTINCT sl FROM StorageLocation sl " +
+            "JOIN StockBalance sb ON sl.id = sb.storageLocation.id " +
+            "WHERE sb.batch.id = :batchId AND sb.quantity > 0")
+    List<StorageLocation> findLocationsWithQuantityByBatch(@Param("batchId") Long batchId);
 }
