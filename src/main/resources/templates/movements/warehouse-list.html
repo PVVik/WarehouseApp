@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Выбор склада - Приход</title>
+    <title>Выбор склада</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; max-width: 960px; margin: 0 auto; background-color: #f4f6f9; }
         h1 { color: #2c3e50; }
@@ -35,7 +35,7 @@
 </head>
 <body>
 
-<h1>Выберите склад для прихода</h1>
+<h1>Выберите склад</h1>
 
 <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
 <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
@@ -93,8 +93,8 @@
        nomenclatureName=${nomenclatureName},
        customerId=${counterpartyId},
        customerName=${counterpartyName},
-       warehouseFrom=${w.id},
-       warehouseName=${w.name},
+       warehouseFromId=${w.id},
+       warehouseFromName=${w.name},
        inventoryType=${inventoryType}
    )}"
                class="btn btn-warning">Выбрать склад для расхода</a>

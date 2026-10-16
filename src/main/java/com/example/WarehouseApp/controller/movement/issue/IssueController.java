@@ -39,7 +39,7 @@ public class IssueController {
             Model model) {
 
         var pageable = PageRequest.of(0, 1000, Sort.by("id"));
-        model.addAttribute("storageLocations", storageLocationService.getAll(pageable, null).getContent());
+        //     model.addAttribute("storageLocations", storageLocationService.getAll(pageable, null).getContent());
         model.addAttribute("selectedNomenclatureId", nomenclatureId);
         model.addAttribute("selectedNomenclatureName", nomenclatureName);
         model.addAttribute("selectedCustomerId", customerId);
