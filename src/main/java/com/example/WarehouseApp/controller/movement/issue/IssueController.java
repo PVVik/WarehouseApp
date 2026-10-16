@@ -1,7 +1,9 @@
 package com.example.WarehouseApp.controller.movement.issue;
 
 import com.example.WarehouseApp.dto.movement.MovementDtoIssue;
+import com.example.WarehouseApp.model.InventoryType;
 import com.example.WarehouseApp.model.MovementType;
+import com.example.WarehouseApp.service.batch.BatchService;
 import com.example.WarehouseApp.service.movement.IssueService;
 import com.example.WarehouseApp.service.storageLocation.StorageLocationService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class IssueController {
 
     private final IssueService issueService;
     private final StorageLocationService storageLocationService;
+    private final BatchService batchService;
 
     @GetMapping("/form")
     public String issueForm(
@@ -34,26 +37,41 @@ public class IssueController {
             @RequestParam(required = false) String customerName,
             @RequestParam(required = false) Long warehouseFromId,
             @RequestParam(required = false) String warehouseFromName,
+            @RequestParam(required = false) Long batchId,
             @RequestParam(required = false) String inventoryType,
             @RequestParam(required = false) String fromOperation,
             Model model) {
 
         var pageable = PageRequest.of(0, 1000, Sort.by("id"));
-        //     model.addAttribute("storageLocations", storageLocationService.getAll(pageable, null).getContent());
         model.addAttribute("selectedNomenclatureId", nomenclatureId);
         model.addAttribute("selectedNomenclatureName", nomenclatureName);
         model.addAttribute("selectedCustomerId", customerId);
         model.addAttribute("selectedCustomerName", customerName);
         model.addAttribute("selectedWarehouseFromId", warehouseFromId);
         model.addAttribute("selectedWarehouseFromName", warehouseFromName);
+        model.addAttribute("selectedBatchId", batchId);
         model.addAttribute("selectedInventoryType", inventoryType);
         model.addAttribute("fromOperation", fromOperation);
+
+        boolean isBatchRequired = false;
+        if (inventoryType != null) {
+            isBatchRequired = inventoryType.equals(InventoryType.BATCH.toString());
+        }
+        model.addAttribute("isBatchRequired", isBatchRequired);
+
 
         if (warehouseFromId != null && nomenclatureId != null) {
             var locations = storageLocationService.getLocationsWithStock(nomenclatureId, warehouseFromId);
             model.addAttribute("storageLocations", locations);
         } else {
             model.addAttribute("storageLocations", Collections.emptyList());
+        }
+
+        if (warehouseFromId != null && nomenclatureId != null) {
+            var batches = batchService.getBatchesWithStockOnWarehouse(nomenclatureId, warehouseFromId);
+            model.addAttribute("batchesWithStock", batches);
+        } else {
+            model.addAttribute("batchesWithStock", Collections.emptyList());
         }
 
         return "movements/issue-form";
@@ -67,6 +85,7 @@ public class IssueController {
             @RequestParam("quantity") BigDecimal quantity,
             @RequestParam("price") BigDecimal price,
             @RequestParam("userId") Long userId,
+            @RequestParam("batchId") Long batchId,
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) Long storageLocationId,
             RedirectAttributes redirectAttributes) {
@@ -83,6 +102,10 @@ public class IssueController {
 
             if (notes != null && !notes.isBlank()) {
                 dto.setNotes(notes);
+            }
+
+            if (batchId != null) {
+                dto.setBatchId(batchId);
             }
 
             if (storageLocationId != null) {

@@ -156,8 +156,6 @@ public class StorageLocationServiceImpl implements StorageLocationService {
 
     @Override
     public List<LocationWithQuantity> getLocationsWithStock(Long nomenclatureId, Long warehouseId) {
-        // Если не выбраны склад или номенклатура, возвращаем пустой список.
-        // Это предотвращает показ всех ячеек подряд, пока пользователь не задал контекст.
         if (nomenclatureId == null || warehouseId == null) {
             return Collections.emptyList();
         }

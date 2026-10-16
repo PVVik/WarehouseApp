@@ -26,8 +26,10 @@ public class StockBalanceService {
                                          WarehouseDto warehouse, StorageLocationDto storageLocation, BigDecimal quantity,
                                          MovementType movementType) {
         StockBalance stockBalance = batch != null
-                ? getByNomenclatureIdAndBatchIdAndWarehouseId(nomenclature.getId(), batch.getId(), warehouse.getId())
-                : getByNomenclatureIdAndWarehouseId(nomenclature.getId(), warehouse.getId());
+                ? getByNomenclatureIdAndBatchIdAndWarehouseId(nomenclature.getId(), batch.getId(),
+                warehouse.getId(), storageLocation.getId())
+                : getByNomenclatureIdAndWarehouseIdAndStorageLocationId(nomenclature.getId(), warehouse.getId(),
+                storageLocation.getId());
 
         if (stockBalance == null) {
             stockBalance = create(nomenclature, batch, serialItem, warehouse, storageLocation, quantity);
@@ -46,9 +48,10 @@ public class StockBalanceService {
         return stockBalance;
     }
 
-    public void checkNomenclatureExistsOnWarehouseAndPositiveQuantity(NomenclatureDto nomenclature, WarehouseDto warehouse) {
-        StockBalance stockBalance = stockBalanceRepository.findByNomenclatureIdAndWarehouseId(
-                nomenclature.getId(), warehouse.getId()).orElseGet(() -> {
+    public void checkNomenclatureExistsOnWarehouseAndPositiveQuantity(NomenclatureDto nomenclature, WarehouseDto warehouse,
+                                                                      StorageLocationDto storageLocation) {
+        StockBalance stockBalance = stockBalanceRepository.findByNomenclatureIdAndWarehouseIdAndStorageLocationId(
+                nomenclature.getId(), warehouse.getId(), storageLocation.getId()).orElseGet(() -> {
             log.warn("На складе с id {} не найдена позиция с id {}", warehouse.getId(), nomenclature.getId());
             throw new NotFoundException(String.format("На выбранном складе нет номенклатуры %s", nomenclature.getName()));
         });
@@ -59,12 +62,16 @@ public class StockBalanceService {
         }
     }
 
-    private StockBalance getByNomenclatureIdAndWarehouseId(long nomenclatureId, long warehouseId) {
-        return stockBalanceRepository.findByNomenclatureIdAndWarehouseId(nomenclatureId, warehouseId).orElse(null);
+    private StockBalance getByNomenclatureIdAndWarehouseIdAndStorageLocationId(long nomenclatureId, long warehouseId,
+                                                                               long storageLocationId) {
+        return stockBalanceRepository.findByNomenclatureIdAndWarehouseIdAndStorageLocationId(
+                nomenclatureId, warehouseId, storageLocationId).orElse(null);
     }
 
-    private StockBalance getByNomenclatureIdAndBatchIdAndWarehouseId(long nomenclatureId, long batchId, long warehouseId) {
-        return stockBalanceRepository.findByNomenclatureIdAndBatchIdAndWarehouseId(nomenclatureId, batchId, warehouseId)
+    private StockBalance getByNomenclatureIdAndBatchIdAndWarehouseId(long nomenclatureId, long batchId, long warehouseId,
+                                                                     long storageLocationId) {
+        return stockBalanceRepository.findByNomenclatureIdAndBatchIdAndWarehouseIdAndStorageLocationId(
+                        nomenclatureId, batchId, warehouseId, storageLocationId)
                 .orElse(null);
     }
 

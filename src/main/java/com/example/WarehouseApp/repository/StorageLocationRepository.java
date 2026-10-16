@@ -18,9 +18,9 @@ public interface StorageLocationRepository extends JpaRepository<StorageLocation
             "sb.quantity" +
             ") " +
             "FROM StorageLocation sl " +
-            "JOIN StockBalance sb ON sl.id = sb.storageLocation.id " + // <-- вот тут исправлено
-            "WHERE sb.nomenclature.id = :nomenclatureId " +           // <-- тоже лучше через связь
-            "AND sb.warehouse.id = :warehouseId " +                    // <-- и тут
+            "JOIN StockBalance sb ON sl.id = sb.storageLocation.id " +
+            "WHERE sb.nomenclature.id = :nomenclatureId " +
+            "AND sb.warehouse.id = :warehouseId " +
             "AND sb.quantity > 0 " +
             "ORDER BY sb.quantity DESC")
     List<LocationWithQuantity> findLocationsWithQuantity(

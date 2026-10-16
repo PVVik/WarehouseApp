@@ -126,6 +126,19 @@
             <small style="color: #7f8c8d;">Укажите склад, с которого происходит отгрузка.</small>
         </div>
 
+
+        <div th:if="${isBatchRequired}" class="form-group">
+            <label for="batchId" class="required">Партия</label>
+            <select id="batchId" name="batchId" class="form-control" required>
+                <option value="">Выберите партию</option>
+                <option th:each="batch : ${batchesWithStock}"
+                        th:value="${batch.id}"
+                        th:text="${batch.number + ' (остаток: ' + #numbers.formatDecimal(batch.totalQuantity, 1, 2) + ')'}">
+                </option>
+            </select>
+            <small class="text-muted">Выберите конкретную партию для списания</small>
+        </div>
+
         <div class="form-group">
             <label for="storageLocationId">Место хранения (ячейка)</label>
             <select id="storageLocationId" name="storageLocationId" class="form-control">

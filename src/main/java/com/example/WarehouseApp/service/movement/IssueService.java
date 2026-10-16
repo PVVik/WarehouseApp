@@ -9,6 +9,7 @@ import com.example.WarehouseApp.model.Movement;
 import com.example.WarehouseApp.model.MovementType;
 import com.example.WarehouseApp.repository.MovementRepository;
 import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.service.batch.BatchService;
 import com.example.WarehouseApp.service.stockBalance.StockBalanceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class IssueService {
     private final BaseService<CounterpartyDto> counterpartyService;
     private final BaseService<WarehouseDto> warehouseService;
     private final BaseService<StorageLocationDto> storageLocationService;
-    private final BaseService<BatchDto> batchService;
+    private final BatchService batchService;
     private final BaseService<SerialItemDto> serialItemService;
     private final DocumentNumberService documentNumberService;
 
@@ -47,7 +48,7 @@ public class IssueService {
                 ? serialItemService.getById(movementDtoIssue.getSerialItemId())
                 : null;
 
-        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
+        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse, storageLocation);
         checkQuantitySerialItem(serialItem, movementDtoIssue.getQuantity());
 
         var updatedSerialItem = updateSerialItemStatus(serialItem);
