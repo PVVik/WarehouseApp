@@ -7,7 +7,7 @@ import com.example.WarehouseApp.model.ItemStatus;
 import com.example.WarehouseApp.model.MovementType;
 import com.example.WarehouseApp.service.BaseService;
 import com.example.WarehouseApp.service.batch.BatchService;
-import com.example.WarehouseApp.service.movement.MovementTransferService;
+import com.example.WarehouseApp.service.movement.TransferService;
 import com.example.WarehouseApp.service.serialItem.SerialItemService;
 import com.example.WarehouseApp.service.storageLocation.StorageLocationService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class TransferController {
 
-    private final MovementTransferService transferService;
+    private final TransferService transferService;
     private final StorageLocationService storageLocationService;
     private final BaseService<WarehouseDto> warehouseService;
     private final BatchService batchService;
@@ -49,7 +49,6 @@ public class TransferController {
 
         var pageable = PageRequest.of(0, 1000, Sort.by("id"));
 
-        // Сохраняем всё, что уже выбрали
         model.addAttribute("warehouses", warehouseService.getAll(pageable, null).getContent());
         model.addAttribute("selectedNomenclatureId", nomenclatureId);
         model.addAttribute("selectedNomenclatureName", nomenclatureName);

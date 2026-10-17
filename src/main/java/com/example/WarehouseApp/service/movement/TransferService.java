@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class MovementTransferService {
+public class TransferService {
 
     private final MovementRepository movementRepository;
     private final DocumentNumberService documentNumberService;
@@ -59,6 +59,8 @@ public class MovementTransferService {
 
         var newDto = TransferMapper.mapToDto(newMovement);
         setFieldsToDto(newDto, batch, serialItem);
+
+        log.info("Оформили трансфер с id {}", newDto.getId());
 
         return newDto;
     }

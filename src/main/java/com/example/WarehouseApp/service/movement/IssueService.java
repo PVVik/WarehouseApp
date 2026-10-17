@@ -66,7 +66,7 @@ public class IssueService {
         var newMovementDto = IssueMapper.mapToDto(newMovement);
         setFieldsToDto(newMovementDto, batch, updatedSerialItem);
 
-        log.info("Оформили списание с id и номером документа {} и {}", newMovementDto.getId(), newMovementDto.getNumber());
+        log.info("Оформили расход с id и номером документа {} и {}", newMovementDto.getId(), newMovementDto.getNumber());
 
         return newMovementDto;
     }

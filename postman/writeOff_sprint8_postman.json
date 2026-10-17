@@ -1,0 +1,420 @@
+{
+  "info": {
+    "_postman_id": "warehouse-sprint8-writeoff-api",
+    "name": "WarehouseApp — Sprint 8: WriteOff (Списание) API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Setup (подготовка контента)",
+      "description": "Создаёт поставщика, номенклатуру, склад, ячейку, делает приход. Запускать первым.",
+      "item": [
+        {
+          "name": "POST /counterparty/api — создать поставщика",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"counterpartyIdWriteOff\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ООО Поставщик Труб\",\n  \"inn\": \"7701234567\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"SUPPLIER\",\n  \"phone\": \"+73466123456\",\n  \"contact\": \"Иванов Иван\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/counterparty/api"
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — номенклатура (QUANTITY)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"nomenclatureIdWriteOff\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Труба стальная 108x4 (для списания)\",\n  \"sku\": \"TRB-WO-108-4\",\n  \"stuffCategory\": \"MATERIAL\",\n  \"unitOfMeasure\": \"METER\",\n  \"inventoryType\": \"QUANTITY\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/nomenclature/api"
+          }
+        },
+        {
+          "name": "POST /warehouse/api — склад (CENTRAL)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"warehouseIdWriteOff\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Центральный склад (для списания)\",\n  \"address\": \"г. Москва, ул. Складская, 1\",\n  \"type\": \"CENTRAL\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/warehouse/api"
+          }
+        },
+        {
+          "name": "POST /storageLocation/api — место хранения",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"storageLocationIdWriteOff\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": {{warehouseIdWriteOff}},\n  \"zone\": \"A\",\n  \"rack\": \"1\",\n  \"shelf\": \"3\",\n  \"code\": \"A-1-3\",\n  \"used\": false\n}"
+            },
+            "url": "{{baseUrl}}/storageLocation/api"
+          }
+        },
+        {
+          "name": "POST /receipt/api — приход (оприходование товара)",
+          "description": "Важно: делаем приход ДО списания, иначе будет ошибка «нет номенклатуры на складе». Обязательно нужен counterpartyId.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id and number\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('number');",
+                  "    pm.collectionVariables.set(\"receiptIdWriteOff\", jsonData.id);",
+                  "    pm.collectionVariables.set(\"receiptNumberWriteOff\", jsonData.number);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdWriteOff}},\n  \"warehouseTo\": {{warehouseIdWriteOff}},\n  \"counterpartyId\": {{counterpartyIdWriteOff}},\n  \"quantity\": 10,\n  \"price\": 500,\n  \"number\": \"DOC-REC-001\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1,\n  \"notes\": \"Приход для теста списания\",\n  \"storageLocationId\": {{storageLocationIdWriteOff}}\n}"
+            },
+            "url": "{{baseUrl}}/receipt/api"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Success (успешное списание)",
+      "item": [
+        {
+          "name": "POST /writeoff/api — успешное списание (QUANTITY)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id and number\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('number');",
+                  "    pm.collectionVariables.set(\"writeOffId\", jsonData.id);",
+                  "    pm.collectionVariables.set(\"writeOffNumber\", jsonData.number);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomenclatureId\": {{nomenclatureIdWriteOff}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"quantity\": 3,\n  \"warehouseFrom\": {{warehouseIdWriteOff}},\n  \"storageLocationId\": {{storageLocationIdWriteOff}},\n  \"notes\": \"Списание по акту №123\",\n  \"userId\": 1\n}"
+            },
+            "url": "{{baseUrl}}/writeoff/api"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors",
+      "item": [
+        {
+          "name": "DTO Validation (валидация полей)",
+          "item": [
+            {
+              "name": "POST /writeoff/api — 400 (quantity <= 0)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nomenclatureId\": {{nomenclatureIdWriteOff}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"quantity\": 0,\n  \"warehouseFrom\": {{warehouseIdWriteOff}},\n  \"storageLocationId\": {{storageLocationIdWriteOff}},\n  \"notes\": \"Списание\",\n  \"userId\": 1\n}"
+                },
+                "url": "{{baseUrl}}/writeoff/api"
+              }
+            },
+            {
+              "name": "POST /writeoff/api — 400 (negative quantity)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nomenclatureId\": {{nomenclatureIdWriteOff}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"quantity\": -5,\n  \"warehouseFrom\": {{warehouseIdWriteOff}},\n  \"storageLocationId\": {{storageLocationIdWriteOff}},\n  \"notes\": \"Списание\",\n  \"userId\": 1\n}"
+                },
+                "url": "{{baseUrl}}/writeoff/api"
+              }
+            },
+            {
+              "name": "POST /writeoff/api — 400 (empty notes)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nomenclatureId\": {{nomenclatureIdWriteOff}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"quantity\": 2,\n  \"warehouseFrom\": {{warehouseIdWriteOff}},\n  \"storageLocationId\": {{storageLocationIdWriteOff}},\n  \"notes\": \"\",\n  \"userId\": 1\n}"
+                },
+                "url": "{{baseUrl}}/writeoff/api"
+              }
+            },
+            {
+              "name": "POST /writeoff/api — 400 (null notes)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nomenclatureId\": {{nomenclatureIdWriteOff}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"quantity\": 2,\n  \"warehouseFrom\": {{warehouseIdWriteOff}},\n  \"storageLocationId\": {{storageLocationIdWriteOff}},\n  \"notes\": null,\n  \"userId\": 1\n}"
+                },
+                "url": "{{baseUrl}}/writeoff/api"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Business Logic & External Checks (бизнес‑ошибки)",
+          "item": [
+            {
+              "name": "POST /writeoff/api — 404 (несуществующий Nomenclature)",
+              "description": "BaseService.getById должен вернуть 404, если номенклатуры нет",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 404\", function () {",
+                      "    pm.response.to.have.status(404);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nomenclatureId\": 99999,\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"quantity\": 2,\n  \"warehouseFrom\": {{warehouseIdWriteOff}},\n  \"storageLocationId\": {{storageLocationIdWriteOff}},\n  \"notes\": \"Списание несуществующей номенклатуры\",\n  \"userId\": 1\n}"
+                },
+                "url": "{{baseUrl}}/writeoff/api"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "counterpartyId",
+      "value": ""
+    },
+    {
+      "key": "nomenclatureIdQuantity",
+      "value": ""
+    },
+    {
+      "key": "warehouseId",
+      "value": ""
+    },
+    {
+      "key": "storageLocationId",
+      "value": ""
+    },
+    {
+      "key": "issueId",
+      "value": ""
+    },
+    {
+      "key": "issueNumber",
+      "value": ""
+    }
+  ]
+}

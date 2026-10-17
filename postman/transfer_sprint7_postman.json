@@ -1,0 +1,611 @@
+{
+  "info": {
+    "_postman_id": "warehouse-sprint7-transfer-api",
+    "name": "WarehouseApp — Sprint 7: Transfer (Трансфер) API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Setup (подготовка контента)",
+      "description": "Создаёт поставщика, номенклатуру, 2 склада, ячейку, делает приход. Запускать первым.",
+      "item": [
+        {
+          "name": "POST /counterparty/api — создать поставщика",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"counterpartyIdTransfer\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ООО Поставщик Труб\",\n  \"inn\": \"7701234567\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"SUPPLIER\",\n  \"phone\": \"+73466123456\",\n  \"contact\": \"Иванов Иван\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/counterparty/api"
+          }
+        },
+        {
+          "name": "POST /nomenclature/api — номенклатура (QUANTITY)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"nomenclatureIdTransfer\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Труба стальная 108x4 (для трансфера)\",\n  \"sku\": \"TRB-TF-108-4\",\n  \"stuffCategory\": \"MATERIAL\",\n  \"unitOfMeasure\": \"METER\",\n  \"inventoryType\": \"QUANTITY\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/nomenclature/api"
+          }
+        },
+        {
+          "name": "POST /warehouse/api — склад-отправитель (FROM)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"warehouseFromIdTransfer\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Склад-отправитель (Центральный)\",\n  \"address\": \"г. Москва, ул. Складская, 1\",\n  \"type\": \"CENTRAL\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/warehouse/api"
+          }
+        },
+        {
+          "name": "POST /warehouse/api — склад-получатель (TO)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"warehouseToIdTransfer\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Склад-получатель (Филиал)\",\n  \"address\": \"г. Москва, ул. Промышленная, 5\",\n  \"type\": \"REMOTE\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/warehouse/api"
+          }
+        },
+        {
+          "name": "POST /storageLocation/api — место хранения (на складе-отправителе)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"storageLocationIdTransfer\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": {{warehouseFromIdTransfer}},\n  \"zone\": \"A\",\n  \"rack\": \"1\",\n  \"shelf\": \"3\",\n  \"code\": \"A-1-3\",\n  \"used\": false\n}"
+            },
+            "url": "{{baseUrl}}/storageLocation/api"
+          }
+        },
+        {
+          "name": "POST /receipt/api — приход (оприходование на склад-отправитель)",
+          "description": "Важно: приход на warehouseFrom, иначе будет ошибка проверки остатков.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id and number\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('number');",
+                  "    pm.collectionVariables.set(\"receiptIdTransfer\", jsonData.id);",
+                  "    pm.collectionVariables.set(\"receiptNumberTransfer\", jsonData.number);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdTransfer}},\n  \"warehouseTo\": {{warehouseFromIdTransfer}},\n  \"counterpartyId\": {{counterpartyIdTransfer}},\n  \"quantity\": 10,\n  \"price\": 500,\n  \"number\": \"DOC-REC-002\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1,\n  \"notes\": \"Приход для теста трансфера\",\n  \"storageLocationId\": {{storageLocationIdTransfer}}\n}"
+            },
+            "url": "{{baseUrl}}/receipt/api"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Success (успешный трансфер)",
+      "item": [
+        {
+          "name": "POST /transfer/api — успешный трансфер (QUANTITY)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has id and number\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('number');",
+                  "    pm.collectionVariables.set(\"transferId\", jsonData.id);",
+                  "    pm.collectionVariables.set(\"transferNumber\", jsonData.number);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"TRANSFER\",\n  \"nomenclatureId\": {{nomenclatureIdTransfer}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"warehouseFrom\": {{warehouseFromIdTransfer}},\n  \"warehouseTo\": {{warehouseToIdTransfer}},\n  \"storageLocationId\": {{storageLocationIdTransfer}},\n  \"quantity\": 3,\n  \"userId\": 1,\n  \"notes\": \"Трансфер по акту №321\"\n}"
+            },
+            "url": "{{baseUrl}}/transfer/api"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors",
+      "item": [
+        {
+          "name": "DTO Validation (валидация полей)",
+          "item": [
+            {
+              "name": "POST /transfer/api — 400 (quantity <= 0)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"movementType\": \"TRANSFER\",\n  \"nomenclatureId\": {{nomenclatureIdTransfer}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"warehouseFrom\": {{warehouseFromIdTransfer}},\n  \"warehouseTo\": {{warehouseToIdTransfer}},\n  \"storageLocationId\": {{storageLocationIdTransfer}},\n  \"quantity\": 0,\n  \"userId\": 1,\n  \"notes\": \"Трансфер с нулевым количеством\"\n}"
+                },
+                "url": "{{baseUrl}}/transfer/api"
+              }
+            },
+            {
+              "name": "POST /transfer/api — 400 (negative quantity)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"movementType\": \"TRANSFER\",\n  \"nomenclatureId\": {{nomenclatureIdTransfer}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"warehouseFrom\": {{warehouseFromIdTransfer}},\n  \"warehouseTo\": {{warehouseToIdTransfer}},\n  \"storageLocationId\": {{storageLocationIdTransfer}},\n  \"quantity\": -5,\n  \"userId\": 1,\n  \"notes\": \"Трансфер с отрицательным количеством\"\n}"
+                },
+                "url": "{{baseUrl}}/transfer/api"
+              }
+            },
+            {
+              "name": "POST /transfer/api — 400 (null warehouseFrom)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"movementType\": \"TRANSFER\",\n  \"nomenclatureId\": {{nomenclatureIdTransfer}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"warehouseFrom\": null,\n  \"warehouseTo\": {{warehouseToIdTransfer}},\n  \"storageLocationId\": {{storageLocationIdTransfer}},\n  \"quantity\": 2,\n  \"userId\": 1,\n  \"notes\": \"Нет склада-отправителя\"\n}"
+                },
+                "url": "{{baseUrl}}/transfer/api"
+              }
+            },
+            {
+              "name": "POST /transfer/api — 400 (null warehouseTo)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"movementType\": \"TRANSFER\",\n  \"nomenclatureId\": {{nomenclatureIdTransfer}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"warehouseFrom\": {{warehouseFromIdTransfer}},\n  \"warehouseTo\": null,\n  \"storageLocationId\": {{storageLocationIdTransfer}},\n  \"quantity\": 2,\n  \"userId\": 1,\n  \"notes\": \"Нет склада-получателя\"\n}"
+                },
+                "url": "{{baseUrl}}/transfer/api"
+              }
+            },
+            {
+              "name": "POST /transfer/api — 400 (null storageLocationId)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"movementType\": \"TRANSFER\",\n  \"nomenclatureId\": {{nomenclatureIdTransfer}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"warehouseFrom\": {{warehouseFromIdTransfer}},\n  \"warehouseTo\": {{warehouseToIdTransfer}},\n  \"storageLocationId\": null,\n  \"quantity\": 2,\n  \"userId\": 1,\n  \"notes\": \"Нет ячейки хранения\"\n}"
+                },
+                "url": "{{baseUrl}}/transfer/api"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Business Logic & External Checks (бизнес‑ошибки)",
+          "item": [
+            {
+              "name": "POST /transfer/api — 404 (несуществующий Nomenclature)",
+              "description": "BaseService.getById должен вернуть 404, если номенклатуры нет",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 404\", function () {",
+                      "    pm.response.to.have.status(404);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"movementType\": \"TRANSFER\",\n  \"nomenclatureId\": 99999,\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"warehouseFrom\": {{warehouseFromIdTransfer}},\n  \"warehouseTo\": {{warehouseToIdTransfer}},\n  \"storageLocationId\": {{storageLocationIdTransfer}},\n  \"quantity\": 2,\n  \"userId\": 1,\n  \"notes\": \"Трансфер несуществующей номенклатуры\"\n}"
+                },
+                "url": "{{baseUrl}}/transfer/api"
+              }
+            },
+            {
+              "name": "POST /transfer/api — 404 (несуществующий warehouseFrom)",
+              "description": "Проверка getById для склада-отправителя",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 404\", function () {",
+                      "    pm.response.to.have.status(404);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"movementType\": \"TRANSFER\",\n  \"nomenclatureId\": {{nomenclatureIdTransfer}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"warehouseFrom\": 88888,\n  \"warehouseTo\": {{warehouseToIdTransfer}},\n  \"storageLocationId\": {{storageLocationIdTransfer}},\n  \"quantity\": 2,\n  \"userId\": 1,\n  \"notes\": \"Склад-отправитель не найден\"\n}"
+                },
+                "url": "{{baseUrl}}/transfer/api"
+              }
+            },
+            {
+              "name": "POST /transfer/api — 404 (несуществующий warehouseTo)",
+              "description": "Проверка getById для склада-получателя",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 404\", function () {",
+                      "    pm.response.to.have.status(404);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"movementType\": \"TRANSFER\",\n  \"nomenclatureId\": {{nomenclatureIdTransfer}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"warehouseFrom\": {{warehouseFromIdTransfer}},\n  \"warehouseTo\": 88888,\n  \"storageLocationId\": {{storageLocationIdTransfer}},\n  \"quantity\": 2,\n  \"userId\": 1,\n  \"notes\": \"Склад-получатель не найден\"\n}"
+                },
+                "url": "{{baseUrl}}/transfer/api"
+              }
+            },
+            {
+              "name": "POST /transfer/api — 404 (несуществующий storageLocationId)",
+              "description": "Проверка getById для ячейки хранения",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 404\", function () {",
+                      "    pm.response.to.have.status(404);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"movementType\": \"TRANSFER\",\n  \"nomenclatureId\": {{nomenclatureIdTransfer}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"warehouseFrom\": {{warehouseFromIdTransfer}},\n  \"warehouseTo\": {{warehouseToIdTransfer}},\n  \"storageLocationId\": 77777,\n  \"quantity\": 2,\n  \"userId\": 1,\n  \"notes\": \"Ячейка не найдена\"\n}"
+                },
+                "url": "{{baseUrl}}/transfer/api"
+              }
+            },
+            {
+              "name": "POST /transfer/api — 400 (недостаточно остатков на складе-отправителе)",
+              "description": "stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test(\"Response contains error message\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('message');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"movementType\": \"TRANSFER\",\n  \"nomenclatureId\": {{nomenclatureIdTransfer}},\n  \"batchId\": null,\n  \"serialItemId\": null,\n  \"warehouseFrom\": {{warehouseFromIdTransfer}},\n  \"warehouseTo\": {{warehouseToIdTransfer}},\n  \"storageLocationId\": {{storageLocationIdTransfer}},\n  \"quantity\": 100,\n  \"userId\": 1,\n  \"notes\": \"Попытка списать больше, чем есть на складе\"\n}"
+                },
+                "url": "{{baseUrl}}/transfer/api"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "counterpartyIdTransfer",
+      "value": ""
+    },
+    {
+      "key": "nomenclatureIdTransfer",
+      "value": ""
+    },
+    {
+      "key": "warehouseFromIdTransfer",
+      "value": ""
+    },
+    {
+      "key": "warehouseToIdTransfer",
+      "value": ""
+    },
+    {
+      "key": "storageLocationIdTransfer",
+      "value": ""
+    },
+    {
+      "key": "transferId",
+      "value": ""
+    },
+    {
+      "key": "transferNumber",
+      "value": ""
+    }
+  ]
+}
