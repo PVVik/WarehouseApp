@@ -5,7 +5,7 @@ import com.example.WarehouseApp.dto.movement.MovementDtoTransfer;
 import com.example.WarehouseApp.exception.NotFoundException;
 import com.example.WarehouseApp.exception.ValidationException;
 import com.example.WarehouseApp.model.MovementType;
-import com.example.WarehouseApp.service.movement.MovementTransferService;
+import com.example.WarehouseApp.service.movement.TransferService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ class TransferControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private MovementTransferService movementTransferService;
+    private TransferService transferService;
 
     private static final Long VALID_STORAGE_LOCATION_ID = 4L;
 
@@ -64,7 +64,7 @@ class TransferControllerTest {
                 "Перемещение между складами"
         );
 
-        when(movementTransferService.createTransfer(any(MovementDtoTransfer.class))).thenReturn(response);
+        when(transferService.createTransfer(any(MovementDtoTransfer.class))).thenReturn(response);
 
         mockMvc.perform(post("/transfer/api")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -79,7 +79,7 @@ class TransferControllerTest {
                 .andExpect(jsonPath("$.number").value("TRF-2026-000001"))
                 .andExpect(jsonPath("$.movementType").value("TRANSFER"));
 
-        verify(movementTransferService).createTransfer(any(MovementDtoTransfer.class));
+        verify(transferService).createTransfer(any(MovementDtoTransfer.class));
     }
 
     @Test
@@ -95,7 +95,7 @@ class TransferControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        verify(movementTransferService, never()).createTransfer(any());
+        verify(transferService, never()).createTransfer(any());
     }
 
     @Test
@@ -111,7 +111,7 @@ class TransferControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        verify(movementTransferService, never()).createTransfer(any());
+        verify(transferService, never()).createTransfer(any());
     }
 
     @Test
@@ -127,7 +127,7 @@ class TransferControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        verify(movementTransferService, never()).createTransfer(any());
+        verify(transferService, never()).createTransfer(any());
     }
 
     @Test
@@ -143,7 +143,7 @@ class TransferControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        verify(movementTransferService, never()).createTransfer(any());
+        verify(transferService, never()).createTransfer(any());
     }
 
     @Test
@@ -159,7 +159,7 @@ class TransferControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        verify(movementTransferService, never()).createTransfer(any());
+        verify(transferService, never()).createTransfer(any());
     }
 
     @Test
@@ -177,7 +177,7 @@ class TransferControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        verify(movementTransferService, never()).createTransfer(any());
+        verify(transferService, never()).createTransfer(any());
     }
 
     @Test
@@ -187,7 +187,7 @@ class TransferControllerTest {
                         .content(""))
                 .andExpect(status().isBadRequest());
 
-        verify(movementTransferService, never()).createTransfer(any());
+        verify(transferService, never()).createTransfer(any());
     }
 
     @Test
@@ -198,7 +198,7 @@ class TransferControllerTest {
                 BigDecimal.TEN, null, null, 10L, null
         );
 
-        when(movementTransferService.createTransfer(any(MovementDtoTransfer.class)))
+        when(transferService.createTransfer(any(MovementDtoTransfer.class)))
                 .thenThrow(new NotFoundException("Номенклатура с id 999 не найдена"));
 
         mockMvc.perform(post("/transfer/api")
@@ -206,7 +206,7 @@ class TransferControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
 
-        verify(movementTransferService).createTransfer(any(MovementDtoTransfer.class));
+        verify(transferService).createTransfer(any(MovementDtoTransfer.class));
     }
 
     @Test
@@ -218,7 +218,7 @@ class TransferControllerTest {
         );
         request.setSerialItemId(99L);
 
-        when(movementTransferService.createTransfer(any(MovementDtoTransfer.class)))
+        when(transferService.createTransfer(any(MovementDtoTransfer.class)))
                 .thenThrow(new IllegalStateException("Серийная единица не может быть списана, статус — IN_USE"));
 
         mockMvc.perform(post("/transfer/api")
@@ -226,7 +226,7 @@ class TransferControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isInternalServerError());
 
-        verify(movementTransferService).createTransfer(any(MovementDtoTransfer.class));
+        verify(transferService).createTransfer(any(MovementDtoTransfer.class));
     }
 
     @Test
@@ -238,7 +238,7 @@ class TransferControllerTest {
         );
         request.setSerialItemId(99L);
 
-        when(movementTransferService.createTransfer(any(MovementDtoTransfer.class)))
+        when(transferService.createTransfer(any(MovementDtoTransfer.class)))
                 .thenThrow(new ValidationException("Проверьте введенное количество, для серийных единиц оно может быть только 1"));
 
         mockMvc.perform(post("/transfer/api")
@@ -246,7 +246,7 @@ class TransferControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        verify(movementTransferService).createTransfer(any(MovementDtoTransfer.class));
+        verify(transferService).createTransfer(any(MovementDtoTransfer.class));
     }
 
     private MovementDtoTransfer buildDto(Long id, MovementType movementType, Long nomenclatureId,

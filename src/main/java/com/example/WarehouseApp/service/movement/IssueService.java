@@ -9,7 +9,10 @@ import com.example.WarehouseApp.model.Movement;
 import com.example.WarehouseApp.model.MovementType;
 import com.example.WarehouseApp.repository.MovementRepository;
 import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.service.batch.BatchService;
+import com.example.WarehouseApp.service.serialItem.SerialItemService;
 import com.example.WarehouseApp.service.stockBalance.StockBalanceService;
+import com.example.WarehouseApp.service.storageLocation.StorageLocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,9 +30,9 @@ public class IssueService {
     private final BaseService<NomenclatureDto> nomenclatureService;
     private final BaseService<CounterpartyDto> counterpartyService;
     private final BaseService<WarehouseDto> warehouseService;
-    private final BaseService<StorageLocationDto> storageLocationService;
-    private final BaseService<BatchDto> batchService;
-    private final BaseService<SerialItemDto> serialItemService;
+    private final StorageLocationService storageLocationService;
+    private final BatchService batchService;
+    private final SerialItemService serialItemService;
     private final DocumentNumberService documentNumberService;
 
     @Transactional
@@ -47,7 +50,7 @@ public class IssueService {
                 ? serialItemService.getById(movementDtoIssue.getSerialItemId())
                 : null;
 
-        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
+        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse, storageLocation);
         checkQuantitySerialItem(serialItem, movementDtoIssue.getQuantity());
 
         var updatedSerialItem = updateSerialItemStatus(serialItem);
@@ -63,7 +66,7 @@ public class IssueService {
         var newMovementDto = IssueMapper.mapToDto(newMovement);
         setFieldsToDto(newMovementDto, batch, updatedSerialItem);
 
-        log.info("Оформили списание с id и номером документа {} и {}", newMovementDto.getId(), newMovementDto.getNumber());
+        log.info("Оформили расход с id и номером документа {} и {}", newMovementDto.getId(), newMovementDto.getNumber());
 
         return newMovementDto;
     }

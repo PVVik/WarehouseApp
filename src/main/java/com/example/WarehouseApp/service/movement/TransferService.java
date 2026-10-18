@@ -8,7 +8,10 @@ import com.example.WarehouseApp.model.ItemStatus;
 import com.example.WarehouseApp.model.Movement;
 import com.example.WarehouseApp.repository.MovementRepository;
 import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.service.batch.BatchService;
+import com.example.WarehouseApp.service.serialItem.SerialItemService;
 import com.example.WarehouseApp.service.stockBalance.StockBalanceService;
+import com.example.WarehouseApp.service.storageLocation.StorageLocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,15 +22,15 @@ import java.math.BigDecimal;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class MovementTransferService {
+public class TransferService {
 
     private final MovementRepository movementRepository;
     private final DocumentNumberService documentNumberService;
     private final BaseService<NomenclatureDto> nomenclatureService;
     private final BaseService<WarehouseDto> warehouseService;
-    private final BaseService<StorageLocationDto> storageLocationService;
-    private final BaseService<BatchDto> batchService;
-    private final BaseService<SerialItemDto> serialItemService;
+    private final StorageLocationService storageLocationService;
+    private final BatchService batchService;
+    private final SerialItemService serialItemService;
     private final StockBalanceService stockBalanceService;
 
     @Transactional
@@ -42,7 +45,7 @@ public class MovementTransferService {
         var serialItem = movementDtoTransfer.getSerialItemId() != null
                 ? serialItemService.getById(movementDtoTransfer.getSerialItemId())
                 : null;
-        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouseFrom);
+        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouseFrom, storageLocation);
         checkQuantitySerialItem(serialItem, movementDtoTransfer.getQuantity());
 
         var movement = TransferMapper.mapToEntity(movementDtoTransfer);
@@ -56,6 +59,8 @@ public class MovementTransferService {
 
         var newDto = TransferMapper.mapToDto(newMovement);
         setFieldsToDto(newDto, batch, serialItem);
+
+        log.info("Оформили трансфер с id {}", newDto.getId());
 
         return newDto;
     }

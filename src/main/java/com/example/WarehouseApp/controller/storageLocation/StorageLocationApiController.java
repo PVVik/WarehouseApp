@@ -1,7 +1,7 @@
 package com.example.WarehouseApp.controller.storageLocation;
 
 import com.example.WarehouseApp.dto.StorageLocationDto;
-import com.example.WarehouseApp.service.BaseService;
+import com.example.WarehouseApp.service.storageLocation.StorageLocationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class StorageLocationApiController {
 
-    private final BaseService<StorageLocationDto> storageLocationService;
+    private final StorageLocationService storageLocationService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Выбор склада - Приход</title>
+    <title>Выбор склада</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; max-width: 960px; margin: 0 auto; background-color: #f4f6f9; }
         h1 { color: #2c3e50; }
@@ -35,7 +35,7 @@
 </head>
 <body>
 
-<h1>Выберите склад для прихода</h1>
+<h1>Выберите склад</h1>
 
 <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
 <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
@@ -60,6 +60,10 @@
 
         <a th:if="${fromOperation == 'TRANSFER'}"
            th:href="@{/movements/transfer/form}"
+           class="btn btn-outline-secondary">Назад</a>
+
+        <a th:if="${fromOperation == 'WRITE-OFF'}"
+           th:href="@{/movements/write-off/form}"
            class="btn btn-outline-secondary">Назад</a>
     </form>
 </div>
@@ -93,11 +97,23 @@
        nomenclatureName=${nomenclatureName},
        customerId=${counterpartyId},
        customerName=${counterpartyName},
-       warehouseFrom=${w.id},
-       warehouseName=${w.name},
+       warehouseFromId=${w.id},
+       warehouseFromName=${w.name},
        inventoryType=${inventoryType}
    )}"
                class="btn btn-warning">Выбрать склад для расхода</a>
+
+            <a th:if="${fromOperation == 'WRITE_OFF'}"
+               th:href="@{/movements/write-off/form(
+       nomenclatureId=${nomenclatureId},
+       nomenclatureName=${nomenclatureName},
+       customerId=${counterpartyId},
+       customerName=${counterpartyName},
+       warehouseFromId=${w.id},
+       warehouseFromName=${w.name},
+       inventoryType=${inventoryType}
+   )}"
+               class="btn btn-warning">Выбрать склад для списания</a>
 
             <a th:if="${fromOperation == 'TRANSFER'}"
                th:href="@{/movements/transfer/form(

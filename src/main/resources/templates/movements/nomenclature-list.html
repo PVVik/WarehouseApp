@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Выбор номенклатуры - Приход</title>
+    <title>Выбор номенклатуры</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -99,7 +99,6 @@
         .btn-warning { background-color: #f39c12; color: white; }
         .btn-success { background-color: #27ae60; color: white; }
         .btn-secondary { background-color: #95a5a6; color: white; }
-        /* Добавлен стиль для outline-кнопки */
         .btn-outline-secondary {
             background: none;
             color: #6c757d;
@@ -116,7 +115,7 @@
 <body>
 
 <div class="container">
-    <h1>Выберите номенклатуру для прихода</h1>
+    <h1>Выберите номенклатуру</h1>
 
     <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
     <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
@@ -139,6 +138,10 @@
 
                 <a th:if="${fromOperation == 'TRANSFER'}"
                    th:href="@{/movements/transfer/form}"
+                   class="btn btn-outline-secondary">Назад</a>
+
+                <a th:if="${fromOperation == 'WRITE_OFF'}"
+                   th:href="@{/movements/write-off/form}"
                    class="btn btn-outline-secondary">Назад</a>
             </div>
         </form>
@@ -188,7 +191,7 @@
                        )}"
                    class="btn btn-sm btn-warning">Выбрать для расхода</a>
 
-                <a th:if="${fromOperation == 'RECEIPT' or fromOperation == null}"
+                <a th:if="${fromOperation == 'RECEIPT'}"
                    th:href="@{/movements/receipt/form(
                            nomenclatureId=${item.id},
                            nomenclatureName=${item.name},
@@ -196,13 +199,21 @@
                        )}"
                    class="btn btn-sm btn-success">Выбрать для прихода</a>
 
-                <a th:if="${fromOperation == 'TRANSFER' or fromOperation == null}"
+                <a th:if="${fromOperation == 'TRANSFER'}"
                    th:href="@{/movements/transfer/form(
                            nomenclatureId=${item.id},
                            nomenclatureName=${item.name},
                            inventoryType=${item.inventoryType}
                        )}"
                    class="btn btn-sm btn-success">Выбрать для транспортировки</a>
+
+                <a th:if="${fromOperation == 'WRITE_OFF'}"
+                   th:href="@{/movements/write-off/form(
+                           nomenclatureId=${item.id},
+                           nomenclatureName=${item.name},
+                           inventoryType=${item.inventoryType}
+                       )}"
+                   class="btn btn-sm btn-success">Выбрать для списания</a>
             </td>
         </tr>
         </tbody>

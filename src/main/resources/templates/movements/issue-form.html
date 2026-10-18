@@ -126,6 +126,31 @@
             <small style="color: #7f8c8d;">Укажите склад, с которого происходит отгрузка.</small>
         </div>
 
+
+        <div th:if="${isBatchRequired}" class="form-group">
+            <label for="batchId" class="required">Партия</label>
+            <select id="batchId" name="batchId" class="form-control" required>
+                <option value="">Выберите партию</option>
+                <option th:each="batch : ${batchesWithStock}"
+                        th:value="${batch.id}"
+                        th:text="${batch.number + ' (остаток: ' + #numbers.formatDecimal(batch.totalQuantity, 1, 2) + ')'}">
+                </option>
+            </select>
+            <small class="text-muted">Выберите конкретную партию для списания</small>
+        </div>
+
+        <div th:if="${isSerialRequired}" class="form-group">
+            <label for="serialItemId" class="required">Серийная единица</label>
+            <select id="serialItemId" name="serialItemId" class="form-control" required>
+                <option value="">Выберите серийную единицу</option>
+                <option th:each="serial : ${serialItemsWithStock}"
+                        th:value="${serial.id}"
+                        th:text="${serial.serialNumber + ' (статус: ' + serial.status + ')'}">
+                </option>
+            </select>
+            <small class="text-muted">Выберите конкретный серийный номер оборудования</small>
+        </div>
+
         <div class="form-group">
             <label for="storageLocationId">Место хранения (ячейка)</label>
             <select id="storageLocationId" name="storageLocationId" class="form-control">
@@ -141,7 +166,7 @@
                     Для выбранной номенклатуры на этом складе остатков нет.
                 </span>
                 <span th:unless="${#lists.isEmpty(storageLocations)}">
-                    Выберите ячейку с товаром.
+                    Выберите ячейку с товаром. Выбирайте по остаткам!
                 </span>
             </small>
         </div>

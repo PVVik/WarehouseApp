@@ -14,7 +14,7 @@ CREATE TABLE serial_item (
     nomenclature_id BIGINT NOT NULL REFERENCES nomenclature(id),
     serial_number VARCHAR(50) NOT NULL UNIQUE,
     batch_id BIGINT REFERENCES batch(id),
-    status VARCHAR(20) NOT NULL CHECK (status IN ('NEW', 'IN_STOCK', 'IN_USE', 'IN_REPAIR', 'WRITTEN_OFF')),
+    status VARCHAR(20) NOT NULL CHECK (status IN ('IN_STOCK', 'IN_TRANSIT', 'IN_USE', 'IN_REPAIR', 'WRITTEN_OFF')),
     passport_number VARCHAR(50) NOT NULL,
     notes VARCHAR(200)
 );
