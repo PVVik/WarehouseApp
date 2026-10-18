@@ -61,6 +61,10 @@
         <a th:if="${fromOperation == 'TRANSFER'}"
            th:href="@{/movements/transfer/form}"
            class="btn btn-outline-secondary">Назад</a>
+
+        <a th:if="${fromOperation == 'WRITE-OFF'}"
+           th:href="@{/movements/write-off/form}"
+           class="btn btn-outline-secondary">Назад</a>
     </form>
 </div>
 
@@ -98,6 +102,18 @@
        inventoryType=${inventoryType}
    )}"
                class="btn btn-warning">Выбрать склад для расхода</a>
+
+            <a th:if="${fromOperation == 'WRITE_OFF'}"
+               th:href="@{/movements/write-off/form(
+       nomenclatureId=${nomenclatureId},
+       nomenclatureName=${nomenclatureName},
+       customerId=${counterpartyId},
+       customerName=${counterpartyName},
+       warehouseFromId=${w.id},
+       warehouseFromName=${w.name},
+       inventoryType=${inventoryType}
+   )}"
+               class="btn btn-warning">Выбрать склад для списания</a>
 
             <a th:if="${fromOperation == 'TRANSFER'}"
                th:href="@{/movements/transfer/form(
