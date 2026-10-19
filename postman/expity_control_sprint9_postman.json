@@ -1,0 +1,434 @@
+{
+  "info": {
+    "_postman_id": "warehouse-sprint9-expiry-api",
+    "name": "WarehouseApp — Sprint 9: Expiry Control (Сроки годности) API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Setup (подготовка данных для тестов)",
+      "description": "Три отдельных прихода. Каждый — полноценный документ со своими партиями. Запускать по порядку.",
+      "item": [
+        {
+          "name": "1. POST /counterparty/api — создать поставщика",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"counterpartyId\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ООО Поставщик Реагентов\",\n  \"inn\": \"7701234567\",\n  \"kpp\": \"770101001\",\n  \"counterpartyType\": \"SUPPLIER\",\n  \"phone\": \"+73466123456\",\n  \"contact\": \"Иванов Иван\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/counterparty/api"
+          }
+        },
+        {
+          "name": "2. POST /nomenclature/api — номенклатура",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"nomenclatureIdExpiry\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Труба стальная 108x4 (сроки)\",\n  \"sku\": \"TRB-EXP-108-4\",\n  \"stuffCategory\": \"MATERIAL\",\n  \"unitOfMeasure\": \"METER\",\n  \"inventoryType\": \"BATCH\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/nomenclature/api"
+          }
+        },
+        {
+          "name": "3. POST /warehouse/api — склад",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"warehouseIdExpiry\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Центральный склад (сроки)\",\n  \"address\": \"г. Москва, ул. Складская, 1\",\n  \"type\": \"CENTRAL\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/warehouse/api"
+          }
+        },
+        {
+          "name": "4. POST /storageLocation/api — место хранения",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set(\"storageLocationIdExpiry\", jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": {{warehouseIdExpiry}},\n  \"zone\": \"A\",\n  \"rack\": \"1\",\n  \"shelf\": \"3\",\n  \"code\": \"A-1-3\",\n  \"used\": false\n}"
+            },
+            "url": "{{baseUrl}}/storageLocation/api"
+          }
+        },
+        {
+          "name": "5. POST /receipt/api — Приход №1 (ACTIVE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has id and number\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('number');",
+                  "    pm.collectionVariables.set(\"receiptIdExpiry1\", jsonData.id);",
+                  "    pm.collectionVariables.set(\"receiptNumberExpiry1\", jsonData.number);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdExpiry}},\n  \"warehouseTo\": {{warehouseIdExpiry}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": 30,\n  \"price\": 500,\n  \"number\": \"DOC-REC-EXP-001\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1,\n  \"notes\": \"Приход №1: партия ACTIVE\",\n  \"storageLocationId\": {{storageLocationIdExpiry}},\n  \"batchDto\": {\n    \"nomenclatureId\": {{nomenclatureIdExpiry}},\n    \"batchNumber\": \"BATCH-001-ACTIVE\",\n    \"supplierId\": {{counterpartyId}},\n    \"productionDate\": \"2025-12-01\",\n    \"expiryDate\": \"2027-12-31\"\n  }\n}"
+            },
+            "url": "{{baseUrl}}/receipt/api"
+          }
+        },
+        {
+          "name": "6. POST /receipt/api — Приход №2 (EXPIRING_SOON)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has id and number\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('number');",
+                  "    pm.collectionVariables.set(\"receiptIdExpiry2\", jsonData.id);",
+                  "    pm.collectionVariables.set(\"receiptNumberExpiry2\", jsonData.number);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RECEIPT\",\n  \"nomenclatureId\": {{nomenclatureIdExpiry}},\n  \"warehouseTo\": {{warehouseIdExpiry}},\n  \"counterpartyId\": {{counterpartyId}},\n  \"quantity\": 30,\n  \"price\": 500,\n  \"number\": \"DOC-REC-EXP-001\",\n  \"date\": \"2026-01-01\",\n  \"userId\": 1,\n  \"notes\": \"Приход №1: партия EXPIRING_SOON\",\n  \"storageLocationId\": {{storageLocationIdExpiry}},\n  \"batchDto\": {\n    \"nomenclatureId\": {{nomenclatureIdExpiry}},\n    \"batchNumber\": \"BATCH-001-EXPIRING_SOON\",\n    \"supplierId\": {{counterpartyId}},\n    \"productionDate\": \"2025-12-01\",\n    \"expiryDate\": \"2026-10-30\"\n  }\n}"
+            },
+            "url": "{{baseUrl}}/receipt/api"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Success (успешные сценарии)",
+      "item": [
+        {
+          "name": "GET /api/analytics/expiry-control — базовая пагинация (страница 0, size 10)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.expect(jsonData).to.have.property('content');",
+                  "pm.expect(jsonData.content).to.be.an('array');",
+                  "pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+                  "pm.expect(jsonData).to.have.property('totalElements');",
+                  "pm.expect(jsonData.totalElements).to.be.a('number');",
+                  "pm.expect(jsonData).to.have.property('pageable');",
+                  "pm.expect(jsonData.pageable.pageNumber).to.eql(0);",
+                  "pm.expect(jsonData.pageable.pageSize).to.eql(10);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "none"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/expiry-control?page=0&size=10",
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "expiry-control"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/analytics/expiry-control — поиск по названию номенклатуры",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.content && jsonData.content.length > 0) {",
+                  "  pm.test(\"Search found expected name\", function () {",
+                  "    var found = jsonData.content.some(item => item.nomenclatureName.includes(\"Труба\"));",
+                  "    pm.expect(found).to.be.true;",
+                  "  });",
+                  "} else {",
+                  "  console.log('Search returned empty list');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "none"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/expiry-control?search=Труба&page=0&size=10",
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Труба"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "expiry-control"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/analytics/expiry-control — проверка полей DTO (batchNumber, nomenclatureName, status)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.expect(jsonData.content[0]).to.have.property('batchNumber');",
+                  "pm.expect(jsonData.content[0]).to.have.property('nomenclatureName');",
+                  "pm.expect(jsonData.content[0]).to.have.property('status');",
+                  "pm.expect(['ACTIVE', 'EXPIRING_SOON', 'EXPIRED']).to.contain(jsonData.content[0].status);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "none"
+            },
+            "url": "{{baseUrl}}/api/analytics/expiry-control?page=0&size=5"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Errors & Edge Cases",
+      "item": [
+        {
+          "name": "GET /api/analytics/expiry-control — пустой результат (поиск несуществующего)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.expect(jsonData.content).to.be.an('array');",
+                  "pm.expect(jsonData.content.length).to.eql(0);",
+                  "pm.expect(jsonData.totalElements).to.eql(0);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "none"
+            },
+            "url": "{{baseUrl}}/api/analytics/expiry-control?search=batchNumber:НЕСУЩЕСТВУЮЩАЯ_НОМЕНКЛАТУРА&page=0&size=10"
+          }
+        },
+        {
+          "name": "GET /api/analytics/expiry-control — некорректные параметры пагинации (negative page)",
+          "description": "Spring Data обычно сам обрабатывает отрицательные страницы, но проверим поведение.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.expect(jsonData.pageable.pageNumber).to.be.greaterThanOrEqual(0);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "none"
+            },
+            "url": "{{baseUrl}}/api/analytics/expiry-control?page=-1&size=10"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "nomenclatureIdExpiry",
+      "value": ""
+    },
+    {
+      "key": "warehouseIdExpiry",
+      "value": ""
+    },
+    {
+      "key": "storageLocationIdExpiry",
+      "value": ""
+    },
+    {
+      "key": "receiptIdExpiry",
+      "value": ""
+    },
+    {
+      "key": "receiptNumberExpiry",
+      "value": ""
+    },
+    {
+      "key": "currentDatePlus30Days",
+      "value": ""
+    }
+  ]
+}

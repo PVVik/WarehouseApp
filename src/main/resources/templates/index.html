@@ -123,6 +123,13 @@
         <h3>ООО «ННП» WarehouseApp</h3>
     </div>
 
+    <div th:if="${expiringSoonCount > 0}"
+         class="alert alert-warning"
+         role="alert">
+        Внимание: <b th:text="${expiringSoonCount}"></b> партий истекают в течение 30 дней.
+        <a th:href="@{/analytics/expiry-control}" class="alert-link">Посмотреть список</a>
+    </div>
+
     <div class="dashboard-grid">
 
         <div class="card">
@@ -139,8 +146,8 @@
 
         <div class="card">
             <h2>Отчеты</h2>
-            <p style="color: #95a5a6;">Функционал в разработке.<br>Здесь будут графики остатков и аналитика.</p>
-            <a href="#" class="btn btn-secondary btn-disabled">Перейти (заглушка)</a>
+            <p style="color: #95a5a6;">Аналитика по остаткам, срокам годности и движениям товаров.</p>
+            <a th:href="@{/analytics}" class="btn btn-primary">Перейти к отчётам</a>
         </div>
 
         <div class="card">

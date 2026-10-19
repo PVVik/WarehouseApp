@@ -338,3 +338,23 @@ JUnit:
 - WriteOffControllerTest — API-эндпоинты, валидация.
 
 Postman: postman/writeOff_sprint8_postman.json
+
+## Спринт 9 — Контроль сроков годности и уведомления
+Цель: реализовать автоматический мониторинг партий с истекающим сроком годности.
+
+### Функционал
+
+Создание BatchExpiryScheduler, сервиса-помощника, который запускает обновление статусов сроков годности по установленному расписанию 
+в 8:00 утра. 
+
+Реализация ExpiryControlService для получения данных о всех партиях с указанием их статусов сроков годности.
+
+### API Эндпоинты
+
+GET /api/analytics/expiry-control Получение информации о состоянии партий
+
+### Тестирование
+
+JUnit: ExpiryControlApiControllerTest
+
+Postman: postman/expity_control_sprint9_postman.json

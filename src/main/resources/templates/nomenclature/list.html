@@ -165,7 +165,7 @@
                 <input type="text" name="sku" th:value="${filterSku}" placeholder="Артикул" />
                 <select name="stuffCategory">
                     <option value="">Все категории</option>
-                    <option th:each="cat : ${T(com.example.WarehouseApp.model.StuffCategory).values()}"
+                    <option th:each="cat : ${T(com.example.warehouseApp.model.StuffCategory).values()}"
                             th:value="${cat.name()}"
                             th:text="${cat.label}"
                             th:selected="${cat.name() == filterStuffCategory}">
@@ -173,7 +173,7 @@
                 </select>
                 <select name="inventoryType">
                     <option value="">Любой тип учёта</option>
-                    <option th:each="type : ${T(com.example.WarehouseApp.model.InventoryType).values()}"
+                    <option th:each="type : ${T(com.example.warehouseApp.model.InventoryType).values()}"
                             th:value="${type.name()}"
                             th:text="${type.label}"
                             th:selected="${type.name() == filterInventoryType}">

@@ -1,0 +1,32 @@
+package com.example.warehouseApp.dto;
+
+import com.example.warehouseApp.model.WarehouseType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class WarehouseDto implements Comparable<WarehouseDto> {
+
+    private Long id;
+
+    @NotBlank(message = "Название склада обязательно")
+    private String name;
+
+    @NotBlank(message = "Адрес обязателен")
+    private String address;
+
+    @NotNull(message = "Тип склада обязателен")
+    private WarehouseType type;
+
+    private Boolean active;
+
+    @Override
+    public int compareTo(WarehouseDto o) {
+        return Math.toIntExact(this.getId() - o.getId());
+    }
+}
