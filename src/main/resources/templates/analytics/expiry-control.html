@@ -1,0 +1,91 @@
+<style>
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status-expiring {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-expired {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        font-size: 0.95rem;
+    }
+
+    th, td {
+        border: 1px solid #dee2e6;
+        padding: 10px 12px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+    }
+</style>
+
+<h3>Контроль сроков годности партий</h3>
+
+<div style="margin-bottom: 15px;">
+    <a th:href="@{/analytics}" class="btn btn-secondary">← Назад</a>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+        <tr>
+            <th>Номенклатура</th>
+            <th>Номер партии</th>
+            <th>Срок годности</th>
+            <th>Статус</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${batches}">
+            <td th:text="${item.nomenclatureName}">Название</td>
+
+            <td th:text="${item.batchNumber}">Номер партии</td>
+
+            <td th:text="${#temporals.format(item.expiryDate, 'dd.MM.yyyy')}">Дата</td>
+
+            <td>
+                    <span th:if="${item.status == 'EXPIRING_SOON'}"
+                          class="status-badge status-expiring">
+                        Срок годности скоро истекает
+                    </span>
+
+                <span th:if="${item.status == 'EXPIRED'}"
+                      class="status-badge status-expired">
+                        Срок годности истек
+                    </span>
+
+                <span th:unless="${item.status == 'EXPIRING_SOON' or item.status == 'EXPIRED'}"
+                      class="status-badge status-active">
+                        В норме
+                    </span>
+            </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(batches.content)}">
+            <td colspan="4" style="text-align: center; padding: 20px; color: #6c757d;">
+                Нет партий для отображения.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${!batches.hasPrevious() and !batches.hasNext()}"></div>
+</div>

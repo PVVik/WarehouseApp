@@ -5,7 +5,6 @@ CREATE TABLE batch (
     supplier_id BIGINT REFERENCES counterparty(id),
     production_date DATE,
     expiry_date DATE,
-    certificate_number VARCHAR(100),
     receipt_date DATE
 );
 
