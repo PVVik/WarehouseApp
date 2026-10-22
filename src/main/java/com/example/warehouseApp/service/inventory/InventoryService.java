@@ -133,6 +133,15 @@ public class InventoryService {
                 .toList();
     }
 
+    public InventoryLineDto getLineById(Long lineId) {
+        InventoryLine line = inventoryLineRepository.findById(lineId)
+                .orElseGet(() -> {
+                    log.info("Не нашли строку инвентаризации с id {}", lineId);
+                    throw new NotFoundException(String.format("Строка инвентаризации с id %d не найдена", lineId));
+                });
+        return InventoryLineMapper.mapToDto(line);
+    }
+
     private InventoryCheck createInventoryCheckEntity(WarehouseDto warehouse) {
         Warehouse checkWarehouse = WarehouseMapper.mapToEntityWithId(warehouse);
         Long currentUserId = currentUserProvider.getCurrentUserId();
