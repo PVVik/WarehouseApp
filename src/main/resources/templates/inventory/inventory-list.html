@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Инвентаризации - WarehouseApp</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-add {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-add:hover {
+            background-color: #2980b9;
+        }
+
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* Таблица */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .bg-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .bg-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .text-muted {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .no-data-message {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border: 1px dashed #ccc;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Инвентаризации</h1>
+    <a href="/" class="btn btn-back">Назад</a>
+
+    <a th:href="@{/inventory/create}" class="btn btn-add">+ Новая инвентаризация</a>
+
+    <div th:if="${successMessage}" class="flash-message flash-success">
+        <b th:text="${successMessage}"></b>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Склад</th>
+            <th>Дата проверки</th>
+            <th>Статус</th>
+            <th>Строк</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="check : ${checks}" th:object="${check}">
+            <td th:text="*{id}"></td>
+            <td th:text="*{warehouseId}"></td>
+            <td th:text="*{checkDate}"></td>
+            <td>
+                <span class="status-badge"
+                      th:classappend="${#strings.equals(check.status, 'COMPLETED')} ? 'bg-success' : 'bg-warning'">
+                    <span th:text="*{status}"></span>
+                </span>
+            </td>
+            <td th:text="*{totalLines}"></td>
+            <td>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a th:if="${#strings.equals(check.status, 'IN_PROGRESS')}"
+                       th:href="@{/inventory/{id}/review(id=${check.id})}"
+                       class="btn btn-sm btn-info"
+                       style="padding: 6px 12px; background-color: #17a2b8; color: white; text-decoration: none; border-radius: 4px; white-space: nowrap;">
+                        Просмотр перед завершением
+                    </a>
+
+                    <form th:if="${#strings.equals(check.status, 'IN_PROGRESS')}"
+                          th:action="@{/inventory/{id}/complete(id=${check.id})}"
+                          method="post"
+                          onsubmit="return confirm('Вы уверены, что хотите завершить инвентаризацию?\nПосле этого нельзя будет менять фактические количества.');">
+                        <button type="submit" class="btn btn-sm btn-primary"
+                                style="padding: 6px 12px; background-color: #3498db; color: white; border: none; border-radius: 4px; white-space: nowrap;">
+                            Завершить
+                        </button>
+                    </form>
+
+                    <a th:if="${#strings.equals(check.status, 'DRAFT')}"
+                       th:href="@{/inventory/{id}/lines(id=${check.id})}"
+                       class="btn btn-sm btn-add"
+                       style="padding: 6px 12px; background-color: #27ae60; color: white; text-decoration: none; border-radius: 4px; white-space: nowrap;">
+                        + Ввести остатки
+                    </a>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p th:if="${checks.isEmpty()}" class="no-data-message">Пока нет инвентаризаций.</p>
+</div>
+
+</body>
+</html>

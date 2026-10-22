@@ -17,10 +17,10 @@ public class StorageLocation {
     @Column(name = "id")
     private Long id;
 
-    @JoinColumn(name = "warehouse_id")
+    @JoinColumn(name = "warehouse_id", nullable = false)
     private long warehouseId;
 
-    @Column(name = "zone")
+    @Column(name = "zone", nullable = false)
     private String zone;
 
     @Column(name = "rack")
@@ -29,10 +29,10 @@ public class StorageLocation {
     @Column(name = "shelf")
     private String shelf;
 
-    @Column(name = "code")
+    @Column(name = "code", nullable = false)
     private String code;
 
-    @Column(name = "used")
+    @Column(name = "used", nullable = false)
     private boolean used;
 
     public StorageLocation(long warehouseId, String zone, String rack, String shelf, boolean used) {

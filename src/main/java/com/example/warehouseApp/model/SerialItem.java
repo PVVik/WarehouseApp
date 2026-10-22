@@ -18,21 +18,21 @@ public class SerialItem {
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nomenclature_id")
+    @JoinColumn(name = "nomenclature_id", nullable = false)
     private Nomenclature nomenclature;
 
-    @Column(name = "serial_number")
+    @Column(name = "serial_number", nullable = false)
     private String serialNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "batch_id")
     private Batch batch;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private ItemStatus status;
 
-    @Column(name = "passport_number")
+    @Column(name = "passport_number", nullable = false)
     private String passportNumber;
 
     @Column(name = "notes")

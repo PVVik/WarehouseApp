@@ -18,26 +18,26 @@ public class Counterparty {
     @Column(name = "id")
     private long id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "inn")
+    @Column(name = "inn", nullable = false)
     private String inn;
 
-    @Column(name = "kpp")
+    @Column(name = "kpp", nullable = false)
     private String kpp;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type")
+    @Column(name = "type", nullable = false)
     private CounterpartyType counterpartyType;
 
-    @Column(name = "phone")
+    @Column(name = "phone", nullable = false)
     private String phone;
 
-    @Column(name = "contact")
+    @Column(name = "contact", nullable = false)
     private String contact;
 
-    @Column(name = "active")
+    @Column(name = "active", nullable = false)
     private boolean isActive;
 
     public Counterparty(String name, String inn, String kpp, CounterpartyType counterpartyType, String phone, String contact, boolean isActive) {

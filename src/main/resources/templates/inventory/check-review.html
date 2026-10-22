@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Просмотр инвентаризации</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: #333;
+            border: 1px solid #ccc;
+        }
+        .btn-outline:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Таблица */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .qty-col {
+            text-align: right;
+        }
+
+        .text-muted {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .no-data-message {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border: 1px dashed #ccc;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📋 Инвентаризация №<span th:text="${check.id}">—</span></h2>
+
+    <p><strong>Склад:</strong> <span th:text="${check.warehouseId}">—</span></p>
+    <p><strong>Статус:</strong> <span th:text="${check.status}">—</span></p>
+
+    <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+
+    <table>
+        <thead>
+        <tr>
+            <th>Товар</th>
+            <th>Партия</th>
+            <th class="qty-col">Учётное кол-во</th>
+            <th class="qty-col">Фактическое кол-во</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${lines == null or lines.isEmpty()}">
+            <td colspan="4" class="no-data-message">В инвентаризации нет позиций</td>
+        </tr>
+
+        <tr th:each="line : ${lines}">
+            <td><strong th:text="${line.nomenclatureName}">—</strong></td>
+            <td th:text="${line.batchNumber ?: 'Без партии'}"></td>
+            <td class="qty-col" th:text="${line.accountedQty}">0</td>
+            <td class="qty-col" th:text="${line.actualQty}">0</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <br>
+
+    <div>
+        <a th:if="${check.status == 'IN_PROGRESS'}"
+           th:href="@{/inventory/{id}/lines(id=${check.id})}"
+           class="btn btn-outline">
+            ⬅️ Вернуться к вводу
+        </a>
+
+        <form th:action="@{/inventory/{id}/complete(id=${check.id})}"
+              method="post"
+              onsubmit="return confirm('Вы уверены, что хотите завершить инвентаризацию?');"
+              style="display: inline;">
+            <button type="submit" class="btn btn-primary">
+                ✅ Завершить инвентаризацию
+            </button>
+        </form>
+
+        <a th:href="@{/inventory}"
+           class="btn btn-outline"
+           style="margin-left: 10px;">
+            Отмена
+        </a>
+    </div>
+</div>
+
+</body>
+</html>
