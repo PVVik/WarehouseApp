@@ -3,7 +3,7 @@ package com.example.warehouseApp.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -28,13 +28,13 @@ public class InventoryDiscrepancyAct {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 50, nullable = false)
-    private DiscrepancyStatus status;
+    private DocumentStatus status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDate createdAt;
 
     @Column(name = "approved_at")
-    private LocalDateTime approvedAt;
+    private LocalDate approvedAt;
 
     @OneToMany(mappedBy = "act", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DiscrepancyLine> lines;

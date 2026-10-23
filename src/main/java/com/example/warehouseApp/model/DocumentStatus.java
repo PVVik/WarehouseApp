@@ -1,6 +1,6 @@
 package com.example.warehouseApp.model;
 
-public enum InventoryStatus {
+public enum DocumentStatus {
     DRAFT,
     IN_PROGRESS,
     COMPLETED

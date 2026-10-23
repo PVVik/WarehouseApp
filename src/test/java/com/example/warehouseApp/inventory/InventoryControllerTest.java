@@ -6,8 +6,7 @@ import com.example.warehouseApp.dto.inventory.InventoryDiscrepancyActDto;
 import com.example.warehouseApp.dto.inventory.InventoryLineDto;
 import com.example.warehouseApp.exception.BusinessException;
 import com.example.warehouseApp.exception.NotFoundException;
-import com.example.warehouseApp.model.DiscrepancyStatus;
-import com.example.warehouseApp.model.InventoryStatus;
+import com.example.warehouseApp.model.DocumentStatus;
 import com.example.warehouseApp.service.inventory.InventoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -49,7 +48,7 @@ public class InventoryControllerTest {
                 100L,
                 warehouseId,
                 checkDate,
-                InventoryStatus.DRAFT
+                DocumentStatus.DRAFT
         );
         expectedResponse.setTotalLines(5L);
 
@@ -205,8 +204,8 @@ public class InventoryControllerTest {
     @Test
     void getAllChecks_shouldReturnList() throws Exception {
         List<InventoryCheckDtoResponse> checks = List.of(
-                new InventoryCheckDtoResponse(1L, 10L, LocalDate.now(), InventoryStatus.DRAFT),
-                new InventoryCheckDtoResponse(2L, 20L, LocalDate.now().minusDays(1), InventoryStatus.COMPLETED)
+                new InventoryCheckDtoResponse(1L, 10L, LocalDate.now(), DocumentStatus.DRAFT),
+                new InventoryCheckDtoResponse(2L, 20L, LocalDate.now().minusDays(1), DocumentStatus.COMPLETED)
         );
 
         when(inventoryService.getAllChecks()).thenReturn(checks);
@@ -223,7 +222,7 @@ public class InventoryControllerTest {
     @Test
     void getCheckById_shouldReturnSingleCheck() throws Exception {
         Long id = 1L;
-        InventoryCheckDtoResponse check = new InventoryCheckDtoResponse(id, 10L, LocalDate.now(), InventoryStatus.IN_PROGRESS);
+        InventoryCheckDtoResponse check = new InventoryCheckDtoResponse(id, 10L, LocalDate.now(), DocumentStatus.IN_PROGRESS);
 
         when(inventoryService.getById(eq(id))).thenReturn(check);
 

@@ -27,7 +27,7 @@ public class InventoryCheck {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private InventoryStatus status;
+    private DocumentStatus status;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
@@ -35,7 +35,7 @@ public class InventoryCheck {
     @Column(name = "completed_at")
     private LocalDate completedAt;
 
-    public InventoryCheck(Warehouse warehouse, LocalDate checkDate, InventoryStatus status, Long userId) {
+    public InventoryCheck(Warehouse warehouse, LocalDate checkDate, DocumentStatus status, Long userId) {
         this.warehouse = warehouse;
         this.checkDate = checkDate;
         this.status = status;

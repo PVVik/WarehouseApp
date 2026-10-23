@@ -1,6 +1,6 @@
 package com.example.warehouseApp.dto.inventory;
 
-import com.example.warehouseApp.model.InventoryStatus;
+import com.example.warehouseApp.model.DocumentStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,10 +13,10 @@ public class InventoryCheckDtoResponse {
     private Long id;
     private Long warehouseId;
     private LocalDate checkDate;
-    private InventoryStatus status;
+    private DocumentStatus status;
     private Long totalLines;
 
-    public InventoryCheckDtoResponse(Long id, Long warehouseId, LocalDate checkDate, InventoryStatus status) {
+    public InventoryCheckDtoResponse(Long id, Long warehouseId, LocalDate checkDate, DocumentStatus status) {
         this.id = id;
         this.warehouseId = warehouseId;
         this.checkDate = checkDate;

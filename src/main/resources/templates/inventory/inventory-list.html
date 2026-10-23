@@ -180,6 +180,13 @@
                        style="padding: 6px 12px; background-color: #27ae60; color: white; text-decoration: none; border-radius: 4px; white-space: nowrap;">
                         + Ввести остатки
                     </a>
+
+                    <a th:if="${#strings.equals(check.status, 'COMPLETED') and check.id != null}"
+                       th:href="@{/inventory/acts/{actId}(actId=${check.id})}"
+                       class="btn btn-sm btn-outline-secondary"
+                       style="padding: 6px 12px; color: #333; border-color: #ccc; text-decoration: none; border-radius: 4px; white-space: nowrap;">
+                        📄 Акт расхождений
+                    </a>
                 </div>
             </td>
         </tr>

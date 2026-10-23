@@ -50,4 +50,10 @@ public class InventoryApiController {
     public List<InventoryLineDto> getLinesByCheckId(@PathVariable Long checkId) {
         return inventoryService.getLinesByCheckId(checkId);
     }
+
+    @PostMapping("/acts/{actId}/settle")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void settleAct(@PathVariable Long actId) {
+        inventoryService.settleDiscrepancies(actId);
+    }
 }

@@ -168,4 +168,35 @@ public class InventoryController {
 
         return "inventory/check-review";
     }
+
+    @GetMapping("/acts/{actId}")
+    public String showAct(@PathVariable Long actId, Model model) {
+        InventoryDiscrepancyActDto actDto = inventoryService.getActById(actId);
+
+        model.addAttribute("act", actDto);
+        return "inventory/act-details";
+    }
+
+    @PostMapping("/acts/{actId}/settle")
+    public String settleAct(@PathVariable Long actId, RedirectAttributes redirectAttributes) {
+        try {
+            inventoryService.settleDiscrepancies(actId);
+
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Расхождения урегулированы! Созданы черновики документов списания и оприходования."
+            );
+            return "redirect:/inventory/acts/" + actId;
+
+        } catch (BusinessException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/inventory/acts/" + actId;
+        } catch (NotFoundException e) {
+            redirectAttributes.addFlashAttribute("error", "Акт не найден");
+            return "redirect:/inventory";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Произошла ошибка при урегулировании: " + e.getMessage());
+            return "redirect:/inventory/acts/" + actId;
+        }
+    }
 }

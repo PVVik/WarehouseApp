@@ -1,11 +1,11 @@
 package com.example.warehouseApp.dto.inventory;
 
-import com.example.warehouseApp.model.DiscrepancyStatus;
+import com.example.warehouseApp.model.DocumentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -16,9 +16,9 @@ public class InventoryDiscrepancyActDto {
     private Long checkId;
     private String checkStatus;
     private Long createdBy;
-    private DiscrepancyStatus status;
-    private LocalDateTime createdAt;
-    private LocalDateTime approvedAt;
+    private DocumentStatus status;
+    private LocalDate createdAt;
+    private LocalDate approvedAt;
     private long totalLines;
     private List<DiscrepancyLineDto> lines;
 }

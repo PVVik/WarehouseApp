@@ -22,9 +22,9 @@ CREATE TABLE inventory_discrepancy_act (
     id BIGSERIAL PRIMARY KEY,
     check_id BIGINT NOT NULL REFERENCES inventory_check(id) ON DELETE CASCADE,
     created_by BIGINT NOT NULL,
-    status VARCHAR(50) NOT NULL DEFAULT 'DRAFT',
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    approved_at TIMESTAMP
+    status VARCHAR(50) NOT NULL CHECK (status IN ('DRAFT', 'IN_PROGRESS', 'COMPLETED')) DEFAULT 'DRAFT',
+    created_at DATE NOT NULL DEFAULT NOW(),
+    approved_at DATE
 );
 
 CREATE TABLE discrepancy_line (
@@ -36,6 +36,26 @@ CREATE TABLE discrepancy_line (
     actual_qty DECIMAL(18,6) NOT NULL,
     difference DECIMAL(18,6) NOT NULL,
     type VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE write_off_document (
+    id BIGSERIAL PRIMARY KEY,
+    act_id BIGINT NOT NULL REFERENCES inventory_discrepancy_act(id) ON DELETE CASCADE,
+    reason TEXT,
+    quantity DECIMAL(18, 2) NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('DRAFT', 'IN_PROGRESS', 'COMPLETED')) DEFAULT 'DRAFT',
+    created_at DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE receipt_document (
+    id BIGSERIAL PRIMARY KEY,
+    act_id BIGINT NOT NULL REFERENCES inventory_discrepancy_act(id) ON DELETE CASCADE,
+    source TEXT,
+    quantity DECIMAL(18, 2) NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('DRAFT', 'IN_PROGRESS', 'COMPLETED')) DEFAULT 'DRAFT',
+    created_at DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_inventory_check_warehouse ON inventory_check(warehouse_id);

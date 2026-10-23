@@ -11,16 +11,14 @@ import com.example.warehouseApp.mapper.InventoryDiscrepancyActMapper;
 import com.example.warehouseApp.mapper.InventoryLineMapper;
 import com.example.warehouseApp.mapper.WarehouseMapper;
 import com.example.warehouseApp.model.*;
-import com.example.warehouseApp.repository.DiscrepancyLineRepository;
-import com.example.warehouseApp.repository.InventoryCheckRepository;
-import com.example.warehouseApp.repository.InventoryDiscrepancyRepository;
-import com.example.warehouseApp.repository.InventoryLineRepository;
+import com.example.warehouseApp.repository.*;
 import com.example.warehouseApp.security.CurrentUserProvider;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -40,6 +38,8 @@ public class InventoryService {
     private final StockBalanceService stockBalanceService;
     private final InventoryDiscrepancyRepository inventoryDiscrepancyRepository;
     private final DiscrepancyLineRepository discrepancyLineRepository;
+    private final WriteOffDocumentRepository writeOffDocumentRepository;
+    private final ReceiptDocumentRepository receiptDocumentRepository;
 
     @Transactional
     public InventoryCheckDtoResponse createCheck(Long warehouseId) {
@@ -77,7 +77,7 @@ public class InventoryService {
                 .orElseThrow(() -> new NotFoundException(String.format("Строка инвентаризации с id %d не найдена", lineId)));
 
         InventoryCheck check = inventoryCheckRepository.getReferenceById(line.getCheck().getId());
-        if (check.getStatus() == InventoryStatus.COMPLETED) {
+        if (check.getStatus() == DocumentStatus.COMPLETED) {
             throw new BusinessException("Нельзя менять фактические количества в завершённой инвентаризации");
         }
 
@@ -86,7 +86,7 @@ public class InventoryService {
         line.setDifference(difference);
 
         InventoryCheck inventoryCheck = inventoryCheckRepository.getReferenceById(line.getCheck().getId());
-        inventoryCheck.setStatus(InventoryStatus.IN_PROGRESS);
+        inventoryCheck.setStatus(DocumentStatus.IN_PROGRESS);
         inventoryCheckRepository.save(inventoryCheck);
 
         inventoryLineRepository.save(line);
@@ -142,11 +142,64 @@ public class InventoryService {
         return InventoryLineMapper.mapToDto(line);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void settleDiscrepancies(Long actId) {
+        InventoryDiscrepancyAct act = inventoryDiscrepancyRepository.findById(actId)
+                .orElseThrow(() -> new NotFoundException("Акт не найден"));
+
+        if (act.getStatus() == DocumentStatus.COMPLETED) {
+            return;
+        }
+        LocalDate now = LocalDate.now();
+
+        for (DiscrepancyLine line : act.getLines()) {
+            switch (line.getType()) {
+                case WRITE_OFF:
+                    WriteOffDocument wf = new WriteOffDocument();
+                    wf.setAct(act);
+                    wf.setQuantity(line.getDifference());
+                    wf.setStatus(DocumentStatus.DRAFT);
+                    wf.setCreatedAt(now);
+                    wf.setUpdatedAt(now);
+                    writeOffDocumentRepository.save(wf);
+                    break;
+                case RECEIPT:
+                    ReceiptDocument rf = new ReceiptDocument();
+                    rf.setAct(act);
+                    rf.setQuantity(line.getDifference());
+                    rf.setStatus(DocumentStatus.DRAFT);
+                    rf.setCreatedAt(now);
+                    rf.setUpdatedAt(now);
+                    receiptDocumentRepository.save(rf);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        act.setStatus(DocumentStatus.COMPLETED);
+        act.setApprovedAt(now);
+        inventoryDiscrepancyRepository.save(act);
+
+        log.info("Акт {} урегулирован. Созданы черновики документов.", actId);
+    }
+
+    public InventoryDiscrepancyActDto getActById(Long id) {
+        InventoryDiscrepancyAct act = inventoryDiscrepancyRepository.findById(id).orElseGet(() -> {
+            log.warn("Не наши акт по id {}", id);
+            throw new NotFoundException(String.format("Акт по id %d не был найден", id));
+        });
+
+        log.info("Вернули акт по id {}", id);
+
+        return InventoryDiscrepancyActMapper.toDto(act);
+    }
+
     private InventoryCheck createInventoryCheckEntity(WarehouseDto warehouse) {
         Warehouse checkWarehouse = WarehouseMapper.mapToEntityWithId(warehouse);
         Long currentUserId = currentUserProvider.getCurrentUserId();
 
-        return new InventoryCheck(checkWarehouse, LocalDate.now(), InventoryStatus.DRAFT, currentUserId);
+        return new InventoryCheck(checkWarehouse, LocalDate.now(), DocumentStatus.DRAFT, currentUserId);
     }
 
     private List<InventoryLine> createInventoryLines(InventoryCheck check, List<StockBalance> stockBalances) {
@@ -196,21 +249,22 @@ public class InventoryService {
     }
 
     private void markCheckAsCompleted(InventoryCheck check) {
-        if (check.getStatus() == InventoryStatus.COMPLETED) {
+        if (check.getStatus() == DocumentStatus.COMPLETED) {
             log.warn("Попытка завершить уже завершенную инвентаризацию {}", check.getId());
             throw new BusinessException("Инвентаризация уже завершена");
         }
 
-        check.setStatus(InventoryStatus.COMPLETED);
+        check.setStatus(DocumentStatus.COMPLETED);
         check.setCompletedAt(LocalDate.now());
         inventoryCheckRepository.save(check);
     }
 
     private InventoryDiscrepancyAct createDiscrepancyAct(InventoryCheck check) {
         InventoryDiscrepancyAct act = new InventoryDiscrepancyAct();
+        act.setCreatedAt(LocalDate.now());
         act.setCheck(check);
         act.setCreatedBy(currentUserProvider.getCurrentUserId());
-        act.setStatus(DiscrepancyStatus.DRAFT);
+        act.setStatus(DocumentStatus.DRAFT);
         return act;
     }
 
