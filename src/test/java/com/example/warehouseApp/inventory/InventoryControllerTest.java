@@ -156,8 +156,8 @@ public class InventoryControllerTest {
                 checkId,
                 "COMPLETED",
                 1234L,
-                DiscrepancyStatus.DRAFT,
-                LocalDateTime.now(),
+                DocumentStatus.DRAFT,
+                LocalDate.now(),
                 null,
                 2L,
                 Collections.emptyList()
