@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчёты — Складская система</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2.page-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 40px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .custom-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .custom-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            background-color: #ffffff;
+            color: #2c3e50;
+            font-size: 1rem;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+            width: 100%;
+            text-align: center;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="javascript:history.go(-1)" class="back-link">Назад</a>
+
+    <h2 class="page-title">Отчёт остатков по складу</h2>
+
+    <form th:action="@{/report/form/download}" method="get" class="custom-card">
+        <div>
+            <label for="warehouseId">Выберите склад:</label>
+            <select name="warehouseId" id="warehouseId" required>
+                <option value="" disabled selected>-- Выберите склад --</option>
+                <option th:each="w : ${warehouses}"
+                        th:value="${w.id}"
+                        th:text="${w.name}"></option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Скачать отчёт (CSV)</button>
+    </form>
+</div>
+</body>
+</html>
