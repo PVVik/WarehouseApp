@@ -1,11 +1,13 @@
 package com.example.warehouseApp.controller.report;
 
 import com.example.warehouseApp.dto.WarehouseDto;
+import com.example.warehouseApp.dto.reports.MovementReportProjection;
 import com.example.warehouseApp.dto.reports.StockBalanceReportDto;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.reports.ReportService;
 import com.example.warehouseApp.util.CsvGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -28,27 +31,90 @@ public class ReportViewController {
     private final CsvGenerator csvGenerator;
     private final ReportService reportService;
 
-    @GetMapping("/form")
-    public String showReportForm(Model model) {
+    @GetMapping("/stock-form")
+    public String showStockForm(Model model) {
         model.addAttribute("warehouses", warehouseService.getAll(Pageable.unpaged(), null));
-        return "report/report-form";
+        return "report/stock-form";
     }
 
-    @GetMapping("/form/download")
-    public ResponseEntity<byte[]> downloadReport(@RequestParam(required = false) Long warehouseId) {
+    @GetMapping("/download-stock")
+    public ResponseEntity<byte[]> downloadStockReport(@RequestParam(required = false) Long warehouseId) {
         List<StockBalanceReportDto> data = reportService.getStockBalanceReport(warehouseId);
 
         if (data == null || data.isEmpty()) {
             String emptyCsv = "Артикул;Наименование;Партия;Склад;Место;Количество;Ед.изм.\n";
-            return createResponseWithBom(emptyCsv.getBytes(StandardCharsets.UTF_8));
+            return createResponseWithBom(emptyCsv.getBytes(StandardCharsets.UTF_8), "stock_balance_report.csv");
         }
 
         byte[] csvBytes = csvGenerator.generateStockBalanceCsv(data);
-
-        return createResponseWithBom(csvBytes);
+        return createResponseWithBom(csvBytes, "stock_balance_report.csv");
     }
 
-    private ResponseEntity<byte[]> createResponseWithBom(byte[] content) {
+    @GetMapping("/stock-view")
+    public String showStockView(@RequestParam(required = false) Long warehouseId, Model model) {
+        model.addAttribute("warehouses", warehouseService.getAll(Pageable.unpaged(), null));
+
+        List<StockBalanceReportDto> data = reportService.getStockBalanceReport(warehouseId);
+        model.addAttribute("reportRows", data);
+
+        model.addAttribute("selectedWarehouseId", warehouseId);
+
+        return "report/stock-view";
+    }
+
+    @GetMapping("/movement-form")
+    public String showMovementForm(Model model) {
+        model.addAttribute("warehouses", warehouseService.getAll(Pageable.unpaged(), null));
+        return "report/movement-form";
+    }
+
+    @GetMapping("/download-movement")
+    public ResponseEntity<byte[]> downloadMovementReport(
+            @RequestParam(required = false) Long warehouseId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
+
+        List<MovementReportProjection> data = reportService.getMovementReport(warehouseId, startDate, endDate);
+
+        if (data == null || data.isEmpty()) {
+            String emptyCsv = "Дата;Тип документа;Номер документа;Номенклатура;Количество\n";
+            return createResponseWithBom(emptyCsv.getBytes(StandardCharsets.UTF_8), "movement_report.csv");
+        }
+
+        byte[] csvBytes = csvGenerator.generateMovementReportCsv(data);
+        return createResponseWithBom(csvBytes, "movement_report.csv");
+    }
+
+    @GetMapping("/movement-view")
+    public String showMovementView(
+            @RequestParam(required = false) Long warehouseId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate,
+            Model model) {
+
+        Page<WarehouseDto> warehouses = warehouseService.getAll(Pageable.unpaged(), null);
+        model.addAttribute("warehouses", warehouses);
+        model.addAttribute("selectedWarehouseId", warehouseId);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+
+        String selectedWarehouseName = "Все склады";
+        if (warehouseId != null) {
+            selectedWarehouseName = warehouses.stream()
+                    .filter(w -> w.getId().equals(warehouseId))
+                    .map(WarehouseDto::getName)
+                    .findFirst()
+                    .orElse("Склад не найден");
+        }
+        model.addAttribute("selectedWarehouseName", selectedWarehouseName);
+
+        List<MovementReportProjection> data = reportService.getMovementReport(warehouseId, startDate, endDate);
+        model.addAttribute("reportRows", data);
+
+        return "report/movement-view";
+    }
+
+    private ResponseEntity<byte[]> createResponseWithBom(byte[] content, String filename) {
         byte[] bom = new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
         byte[] fullContent = new byte[bom.length + content.length];
         System.arraycopy(bom, 0, fullContent, 0, bom.length);
@@ -56,8 +122,9 @@ public class ReportViewController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "text/csv; charset=utf-8");
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"stock_balance_report.csv\"");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
 
         return new ResponseEntity<>(fullContent, headers, HttpStatus.OK);
     }
 }
+

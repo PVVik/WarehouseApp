@@ -93,19 +93,25 @@
 
     <h2 class="page-title">Отчёт остатков по складу</h2>
 
-    <form th:action="@{/report/form/download}" method="get" class="custom-card">
+    <form th:action="@{/report/stock-view}" method="get" class="custom-card mb-4">
         <div>
             <label for="warehouseId">Выберите склад:</label>
-            <select name="warehouseId" id="warehouseId" required>
+            <select name="warehouseId" id="warehouseId" class="form-control">
                 <option value="" disabled selected>-- Выберите склад --</option>
                 <option th:each="w : ${warehouses}"
                         th:value="${w.id}"
-                        th:text="${w.name}"></option>
+                        th:text="${w.name}"
+                        th:selected="${selectedWarehouseId == w.id}"></option>
             </select>
         </div>
-
-        <button type="submit" class="btn btn-primary">Скачать отчёт (CSV)</button>
+        <button type="submit" class="btn btn-primary">Показать на экране</button>
     </form>
+
+    <a th:href="@{/report/download-stock(warehouseId=${selectedWarehouseId})}"
+       class="btn btn-outline-secondary"
+       th:if="${selectedWarehouseId != null}">
+        📥 Скачать отчёт (CSV)
+    </a>
 </div>
 </body>
 </html>
