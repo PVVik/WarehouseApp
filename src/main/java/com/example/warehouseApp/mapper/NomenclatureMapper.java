@@ -7,22 +7,37 @@ import org.flywaydb.core.internal.util.StringUtils;
 public class NomenclatureMapper {
 
     public static Nomenclature mapToEntity(NomenclatureDto nomenclatureDto) {
-        return new Nomenclature(nomenclatureDto.getName(), nomenclatureDto.getSku(),
+        Nomenclature nomenclature = new Nomenclature(nomenclatureDto.getName(), nomenclatureDto.getSku(),
                 nomenclatureDto.getStuffCategory(), nomenclatureDto.getUnitOfMeasure(),
                 nomenclatureDto.getInventoryType(), nomenclatureDto.getActive());
+        if (nomenclatureDto.getMinStock() != null) {
+            nomenclature.setMinStock(nomenclatureDto.getMinStock());
+        }
+
+        return nomenclature;
     }
 
     public static Nomenclature mapToEntityWithId(NomenclatureDto nomenclatureDto) {
-        return new Nomenclature(nomenclatureDto.getId(), nomenclatureDto.getName(), nomenclatureDto.getSku(),
+        Nomenclature nomenclature = new Nomenclature(nomenclatureDto.getId(), nomenclatureDto.getName(), nomenclatureDto.getSku(),
                 nomenclatureDto.getStuffCategory(), nomenclatureDto.getUnitOfMeasure(),
                 nomenclatureDto.getInventoryType(), nomenclatureDto.getActive());
+        if (nomenclatureDto.getMinStock() != null) {
+            nomenclature.setMinStock(nomenclatureDto.getMinStock());
+        }
+
+        return nomenclature;
     }
 
     public static NomenclatureDto mapToDto(Nomenclature nomenclature) {
-        return new NomenclatureDto(nomenclature.getId(), nomenclature.getName(), nomenclature.getSku(),
+        NomenclatureDto dto = new NomenclatureDto(nomenclature.getId(), nomenclature.getName(), nomenclature.getSku(),
                 nomenclature.getStuffCategory(), nomenclature.getUnitOfMeasure(), nomenclature.getInventoryType(),
                 nomenclature.isActive(), nomenclature.getStuffCategory().getLabel(),
                 nomenclature.getUnitOfMeasure().getLabel(), nomenclature.getInventoryType().getLabel());
+        if (nomenclature.getMinStock() != null) {
+            dto.setMinStock(nomenclature.getMinStock());
+        }
+
+        return dto;
     }
 
     public static Nomenclature mapToUpdateEntity(Nomenclature nomenclature, NomenclatureDto nomenclatureDto) {
@@ -43,6 +58,9 @@ public class NomenclatureMapper {
         }
         if (nomenclatureDto.getActive() != null) {
             nomenclature.setActive(nomenclatureDto.getActive());
+        }
+        if (nomenclatureDto.getMinStock() != null) {
+            nomenclature.setMinStock(nomenclatureDto.getMinStock());
         }
 
         return nomenclature;
