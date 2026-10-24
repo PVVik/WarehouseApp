@@ -11,8 +11,14 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class TurnoverReportDto {
 
-    private String group;
+    private Long nomenclatureId;
     private String nomenclatureName;
-    private BigDecimal avgMonthlySales;
-    private BigDecimal turnoverDays;
+    private BigDecimal totalQuantity;
+    private BigDecimal avgMonthlyQuantity;
+    private BigDecimal totalAmount;
+    private String group;
+
+    public static BigDecimal zeroIfNull(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
+    }
 }

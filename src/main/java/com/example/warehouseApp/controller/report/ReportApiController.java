@@ -2,6 +2,8 @@ package com.example.warehouseApp.controller.report;
 
 import com.example.warehouseApp.dto.reports.MovementReportProjection;
 import com.example.warehouseApp.dto.reports.StockBalanceReportDto;
+import com.example.warehouseApp.dto.reports.TurnoverProjection;
+import com.example.warehouseApp.dto.reports.TurnoverReportDto;
 import com.example.warehouseApp.service.reports.ReportService;
 import com.example.warehouseApp.util.CsvGenerator;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -89,6 +92,60 @@ public class ReportApiController {
             csvBytes = csvGenerator.generateEmptyMovementCsv();
         } else {
             csvBytes = csvGenerator.generateMovementReportCsv(data);
+        }
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(csvBytes);
+    }
+
+    @GetMapping("/turnover")
+    public List<TurnoverReportDto> getTurnoverJson(
+            @RequestParam(required = false) Long warehouseId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
+
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Параметры startDate и endDate обязательны для API-запроса");
+        }
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("startDate не может быть позже endDate");
+        }
+
+        if (warehouseId != null && warehouseId <= 0) {
+            throw new IllegalArgumentException("warehouseId должен быть положительным числом или отсутствовать");
+        }
+
+        return reportService.getTurnoverReportWithAbc(warehouseId, startDate, endDate);
+    }
+
+    @GetMapping(value = "/turnover/csv", produces = "text/csv")
+    public ResponseEntity<byte[]> getTurnoverCsv(
+            @RequestParam(required = false) Long warehouseId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
+
+        if (startDate == null || endDate == null || startDate.isAfter(endDate)) {
+            return ResponseEntity.badRequest().body("Некорректные даты".getBytes(StandardCharsets.UTF_8));
+        }
+
+        if (warehouseId != null && warehouseId <= 0) {
+            return ResponseEntity.badRequest().body("Некорректный warehouseId".getBytes(StandardCharsets.UTF_8));
+        }
+
+        List<TurnoverReportDto> data = reportService.getTurnoverReportWithAbc(warehouseId, startDate, endDate);
+
+        String filename = "turnover_report_"
+                + (warehouseId != null ? "warehouse_" + warehouseId : "all_warehouses")
+                + "_" + startDate + "_to_" + endDate + ".csv";
+
+        HttpHeaders headers = createHeaders(filename);
+        byte[] csvBytes;
+
+        if (data == null || data.isEmpty()) {
+            csvBytes = csvGenerator.generateEmptyTurnoverCsv();
+        } else {
+            csvBytes = csvGenerator.generateTurnoverReportCsv(data);
         }
 
         return ResponseEntity.ok()

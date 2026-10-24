@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчёт по оборачиваемости (ABC)</title>
+    <style>
+        .filter-panel {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="number"], input[type="date"] {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .submit-btn {
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .badge-a {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .badge-b {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .badge-c {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="margin-bottom: 15px;">
+    <a href="/analytics" class="back-btn" style="
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #f0f0f0;
+        color: #333;
+        text-decoration: none;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    ">← Назад</a>
+</div>
+
+<form th:action="@{/report/turnover}" method="get" class="filter-panel"
+      style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 6px;">
+
+    <div class="form-group" style="display: inline-block;">
+        <label for="warehouseId">Склад:</label>
+        <select id="warehouseId" name="warehouseId" style="padding: 6px 10px; min-width: 220px;">
+            <option value="" th:selected="${selectedWarehouseId == null}">-- Все склады --</option>
+            <option th:each="wh : ${warehouses}"
+                    th:value="${wh.id}"
+                    th:text="${wh.name}"
+                    th:selected="${selectedWarehouseId != null and selectedWarehouseId == wh.id}">
+            </option>
+        </select>
+    </div>
+
+    <div class="form-group" style="display: inline-block; margin-left: 15px;">
+        <label for="start">С:</label>
+        <input type="date" id="start" name="start"
+               th:value="${#temporals.format(selectedStart, 'yyyy-MM-dd')}"
+               required style="padding: 5px;"/>
+    </div>
+
+    <div class="form-group" style="display: inline-block; margin-left: 15px;">
+        <label for="end">По:</label>
+        <input type="date" id="end" name="end"
+               th:value="${#temporals.format(selectedEnd, 'yyyy-MM-dd')}"
+               required style="padding: 5px;"/>
+    </div>
+
+    <button type="submit" class="submit-btn" style="
+        margin-left: 20px;
+        padding: 7px 18px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    ">Сформировать отчёт
+    </button>
+
+    <button type="button" class="download-btn"
+            onclick="downloadCsv()"
+            style="
+            margin-left: 10px;
+            padding: 7px 18px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        ">
+        📥 Скачать отчёт (CSV)
+    </button>
+</form>
+
+<h2>Отчёт по оборачиваемости и ABC-анализу
+    <th:block th:if="${selectedWarehouseId != null}">
+        (склад №<span th:text="${selectedWarehouseId}"></span>)
+    </th:block>
+    <br>
+    <small>Период:
+        <span th:text="${#temporals.format(selectedStart, 'dd.MM.yyyy')}"></span>
+        –
+        <span th:text="${#temporals.format(selectedEnd, 'dd.MM.yyyy')}"></span>
+    </small>
+</h2>
+
+<table style="width: 100%; border-collapse: collapse;">
+    <thead>
+    <tr style="background-color: #f8f9fa;">
+        <th style="width: 80px; padding: 8px; text-align: left; border: 1px solid #ddd;">Группа ABC</th>
+        <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Номенклатура</th>
+        <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Расход (шт)</th>
+        <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Ср. мес. расход (шт)</th>
+        <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Сумма расхода (руб)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="row : ${turnoverList}">
+        <td style="padding: 8px; border: 1px solid #ddd;">
+            <span th:class="'badge-' + ${row.group.toLowerCase()}"
+                  style="padding: 3px 6px; border-radius: 4px; color: white; font-weight: bold;">
+                <strong th:text="${row.group}"></strong>
+            </span>
+        </td>
+        <td style="padding: 8px; border: 1px solid #ddd;" th:text="${row.nomenclatureName}"></td>
+
+        <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">
+            <th:block th:if="${row.totalQuantity != null}">
+                <span th:text="${row.totalQuantity}"></span>
+            </th:block>
+            <th:block th:unless="${row.totalQuantity != null}">—</th:block>
+        </td>
+
+        <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">
+            <th:block th:if="${row.avgMonthlyQuantity != null}">
+                <span th:text="${row.avgMonthlyQuantity}"></span>
+            </th:block>
+            <th:block th:unless="${row.avgMonthlyQuantity != null}">—</th:block>
+        </td>
+
+        <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">
+            <th:block th:if="${row.totalAmount != null}">
+                <span th:text="${row.totalAmount}"></span>&nbsp;₽
+            </th:block>
+            <th:block th:unless="${row.totalAmount != null}">—</th:block>
+        </td>
+    </tr>
+
+    <tr th:if="${#lists.isEmpty(turnoverList)}">
+        <td colspan="5" style="text-align: center; padding: 20px; color: #666; border: 1px solid #ddd;">
+            Нет данных за выбранный период
+        </td>
+    </tr>
+    </tbody>
+</table>
+<script>
+    function downloadCsv() {
+        const warehouseId = document.getElementById('warehouseId').value;
+        const start = document.getElementById('start').value;
+        const end = document.getElementById('end').value;
+
+        if (!start || !end) {
+            alert('Укажите даты периода');
+            return;
+        }
+
+        let url = '/api/reports/turnover/csv?startDate=' + start + '&endDate=' + end;
+
+        if (warehouseId) {
+            url += '&warehouseId=' + warehouseId;
+        }
+
+        window.location.href = url;
+    }
+</script>
+</body>
+
+</html>

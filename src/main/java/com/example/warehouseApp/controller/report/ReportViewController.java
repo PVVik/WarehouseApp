@@ -3,6 +3,7 @@ package com.example.warehouseApp.controller.report;
 import com.example.warehouseApp.dto.WarehouseDto;
 import com.example.warehouseApp.dto.reports.MovementReportProjection;
 import com.example.warehouseApp.dto.reports.StockBalanceReportDto;
+import com.example.warehouseApp.dto.reports.TurnoverReportDto;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.reports.ReportService;
 import com.example.warehouseApp.util.CsvGenerator;
@@ -112,6 +113,36 @@ public class ReportViewController {
         model.addAttribute("reportRows", data);
 
         return "report/movement-view";
+    }
+
+    @GetMapping("/turnover")
+    public String turnoverView(
+            @RequestParam(required = false) Long warehouseId,
+            @RequestParam(required = false) LocalDate start,
+            @RequestParam(required = false) LocalDate end,
+            Model model) {
+
+        if (start == null || end == null) {
+            end = LocalDate.now();
+            start = end.minusDays(29);
+        }
+
+        if (start.isAfter(end)) {
+            LocalDate temp = start;
+            start = end;
+            end = temp;
+        }
+
+        List<TurnoverReportDto> rows = reportService.getTurnoverReportWithAbc(warehouseId, start, end);
+        Page<WarehouseDto> warehouses = warehouseService.getAll(Pageable.unpaged(), null);
+
+        model.addAttribute("warehouses", warehouses);
+        model.addAttribute("turnoverList", rows);
+        model.addAttribute("selectedStart", start);
+        model.addAttribute("selectedEnd", end);
+        model.addAttribute("selectedWarehouseId", warehouseId);
+
+        return "report/turnover-view";
     }
 
     private ResponseEntity<byte[]> createResponseWithBom(byte[] content, String filename) {

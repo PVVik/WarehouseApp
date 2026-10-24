@@ -2,9 +2,12 @@ package com.example.warehouseApp.util;
 
 import com.example.warehouseApp.dto.reports.MovementReportProjection;
 import com.example.warehouseApp.dto.reports.StockBalanceReportDto;
+import com.example.warehouseApp.dto.reports.TurnoverReportDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -12,9 +15,11 @@ import java.util.List;
 @Slf4j
 public class CsvGenerator {
 
+    private static final String BOM = "\uFEFF";
+
     public byte[] generateStockBalanceCsv(List<StockBalanceReportDto> data) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\uFEFF");
+        sb.append(BOM);
         sb.append("Артикул;Наименование;Партия;Склад;Место;Количество;Ед.изм.\n");
 
         for (StockBalanceReportDto dto : data) {
@@ -34,7 +39,7 @@ public class CsvGenerator {
 
     public byte[] generateMovementReportCsv(List<MovementReportProjection> data) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\uFEFF");
+        sb.append(BOM);
         sb.append("Дата;Тип документа;Номер документа;Номенклатура;Количество\n");
 
         for (MovementReportProjection p : data) {
@@ -53,6 +58,38 @@ public class CsvGenerator {
         }
 
         log.debug("Сгенерирован отчёт по движениям, размер: {} байт", sb.length());
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public byte[] generateTurnoverReportCsv(List<TurnoverReportDto> data) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(BOM);
+
+        sb.append("Группа ABC;Номенклатура;Расход за период (шт);Ср. мес. расход (шт);Сумма расхода (руб)\n");
+
+        if (data != null) {
+            for (TurnoverReportDto row : data) {
+                sb.append(escape(row.getGroup()))
+                        .append(";")
+                        .append(escape(row.getNomenclatureName()))
+                        .append(";")
+                        .append(formatNumber(row.getTotalQuantity()))
+                        .append(";")
+                        .append(formatNumber(row.getAvgMonthlyQuantity()))
+                        .append(";")
+                        .append(formatCurrency(row.getTotalAmount()))
+                        .append("\n");
+            }
+        }
+
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public byte[] generateEmptyTurnoverCsv() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(BOM);
+        sb.append("Группа ABC;Номенклатура;Расход за период (шт);Ср. мес. расход (шт);Сумма расхода (руб)\n");
+
         return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 
@@ -76,6 +113,29 @@ public class CsvGenerator {
             return "\"" + s.replace("\"", "\"\"") + "\"";
         }
         return s;
+    }
+
+    private String formatNumber(BigDecimal value) {
+        if (value == null || value.compareTo(BigDecimal.ZERO) == 0) {
+            return "";
+        }
+        BigDecimal rounded = value.setScale(0, RoundingMode.HALF_UP);
+        String raw = rounded.toPlainString();
+
+        return raw;
+    }
+
+    private String formatCurrency(BigDecimal value) {
+        if (value == null || value.compareTo(BigDecimal.ZERO) == 0) {
+            return "";
+        }
+        BigDecimal rounded = value.setScale(2, RoundingMode.HALF_UP);
+        String raw = rounded.toPlainString();
+
+        if (raw.contains(".")) {
+            return raw.replace('.', ',');
+        }
+        return raw;
     }
 
 }
