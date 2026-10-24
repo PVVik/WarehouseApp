@@ -18,7 +18,7 @@ public class StockBalance {
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nomenclature_id")
+    @JoinColumn(name = "nomenclature_id", nullable = false)
     private Nomenclature nomenclature;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,13 +30,14 @@ public class StockBalance {
     private SerialItem serialItem;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "warehouse_id")
+    @JoinColumn(name = "warehouse_id", nullable = false)
     private Warehouse warehouse;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "storage_location_id")
     private StorageLocation storageLocation;
 
+    @Column(name = "quantity", nullable = false)
     private BigDecimal quantity;
 
 }

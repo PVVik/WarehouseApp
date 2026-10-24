@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчёт по дефициту</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+        }
+
+        .filter-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            border: 1px solid #e0e0e0;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        select {
+            padding: 8px 12px;
+            min-width: 280px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 10px 20px;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+        }
+
+        .btn-success:hover {
+            background-color: #219150;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #555;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        td {
+            color: #444;
+        }
+
+        .badge-critical {
+            background-color: #fadbd8;
+            color: #c0392b;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .badge-warning {
+            background-color: #fdebd0;
+            color: #d35400;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a th:href="@{/analytics}" class="btn btn-primary" style="margin-bottom: 20px;">
+        ← Назад к аналитике
+    </a>
+
+    <form th:action="@{/report/deficit}" method="get" class="filter-panel">
+        <div class="form-group">
+            <label for="warehouseId">Склад:</label>
+            <select id="warehouseId" name="warehouseId" required>
+                <option value="" th:selected="${selectedWarehouseId == null}">-- Выберите склад --</option>
+                <option th:each="wh : ${warehouses}"
+                        th:value="${wh.id}"
+                        th:text="${wh.name}"
+                        th:selected="${selectedWarehouseId != null and selectedWarehouseId == wh.id}">
+                </option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Сформировать отчёт</button>
+
+        <a th:if="${selectedWarehouseId != null}"
+           th:href="@{/api/reports/deficit/csv(warehouseId=${selectedWarehouseId})}"
+           class="btn btn-success"
+           style="margin-left: auto;">
+            📥 Скачать отчёт (CSV)
+        </a>
+    </form>
+
+    <h2>Отчёт по дефициту
+        <th:block th:if="${selectedWarehouseId != null}">
+            (склад №<span th:text="${selectedWarehouseId}"></span>)
+        </th:block>
+    </h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th style="width: 90px;">Статус</th>
+            <th>Номенклатура</th>
+            <th class="text-right">Остаток</th>
+            <th class="text-right">Мин. норма</th>
+            <th class="text-right">Не хватает</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${deficitList}">
+            <td>
+                <span th:class="${row.level.toString() == 'CRITICAL' ? 'badge-critical' : 'badge-warning'}">
+                    <strong th:text="${row.level.toString() == 'CRITICAL' ? 'КРИТИЧЕСКИЙ' : 'ВНИМАНИЕ'}"></strong>
+                </span>
+            </td>
+            <td th:text="${row.nomenclatureName}"></td>
+            <td class="text-right" th:text="${row.currentStock.stripTrailingZeros().toPlainString()}"></td>
+            <td class="text-right" th:text="${row.minThreshold.stripTrailingZeros().toPlainString()}"></td>
+            <td class="text-right" th:text="${row.deficitAmount.stripTrailingZeros().toPlainString()}"></td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(deficitList)}">
+            <td colspan="5" style="text-align: center; padding: 30px; color: #7f8c8d; border: none;">
+                Нет позиций с дефицитом на выбранном складе
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

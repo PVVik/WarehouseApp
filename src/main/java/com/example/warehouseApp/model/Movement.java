@@ -21,11 +21,11 @@ public class Movement {
     private long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "movement_type")
+    @Column(name = "movement_type", nullable = false)
     private MovementType movementType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nomenclature_id")
+    @JoinColumn(name = "nomenclature_id", nullable = false)
     private Nomenclature nomenclature;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -52,19 +52,19 @@ public class Movement {
     @JoinColumn(name = "counterparty_id")
     private Counterparty counterparty;
 
-    @Column(name = "quantity")
+    @Column(name = "quantity", nullable = false)
     private BigDecimal quantity;
 
     @Column(name = "price")
     private BigDecimal price;
 
-    @Column(name = "document_number")
+    @Column(name = "document_number", nullable = false)
     private String number;
 
-    @Column(name = "document_date")
+    @Column(name = "document_date", nullable = false)
     private LocalDate date;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false)
     private long userId;
 
     @Column(name = "notes")

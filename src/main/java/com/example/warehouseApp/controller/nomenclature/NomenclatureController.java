@@ -77,11 +77,10 @@ public class NomenclatureController {
 
         model.addAttribute("nomenclature", dto);
         model.addAttribute("isEditMode", id != null);
-        model.addAttribute("from", from); // запоминаем, откуда пришли
+        model.addAttribute("from", from);
 
         return "nomenclature/form";
     }
-
 
     @PostMapping("/form")
     public String saveNomenclature(@ModelAttribute("nomenclature") @Valid NomenclatureDto dto,

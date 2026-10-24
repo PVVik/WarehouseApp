@@ -45,4 +45,16 @@ public class ErrorHandler {
     public ErrorResponse handleRuntimeException(RuntimeException ex) {
         return new ErrorResponse(ex.getMessage());
     }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(BusinessException.class)
+    public ErrorResponse handleBusinessException(RuntimeException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ErrorResponse handleIllegalArgument(IllegalArgumentException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
 }

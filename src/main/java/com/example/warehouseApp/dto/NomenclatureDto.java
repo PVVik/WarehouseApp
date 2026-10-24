@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,9 +34,25 @@ public class NomenclatureDto implements Comparable<NomenclatureDto> {
     private InventoryType inventoryType;
 
     private Boolean active;
+    private BigDecimal minStock;
     private String stuffCategoryLabel;
     private String unitOfMeasureLabel;
     private String inventoryTypeLabel;
+
+    public NomenclatureDto(Long id, String name, String sku, StuffCategory stuffCategory, UnitOfMeasure unitOfMeasure,
+                           InventoryType inventoryType, Boolean active, String stuffCategoryLabel,
+                           String unitOfMeasureLabel, String inventoryTypeLabel) {
+        this.id = id;
+        this.name = name;
+        this.sku = sku;
+        this.stuffCategory = stuffCategory;
+        this.unitOfMeasure = unitOfMeasure;
+        this.inventoryType = inventoryType;
+        this.active = active;
+        this.stuffCategoryLabel = stuffCategoryLabel;
+        this.unitOfMeasureLabel = unitOfMeasureLabel;
+        this.inventoryTypeLabel = inventoryTypeLabel;
+    }
 
     @Override
     public int compareTo(NomenclatureDto o) {

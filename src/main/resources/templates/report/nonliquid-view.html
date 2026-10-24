@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчёт по неликвидам</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+
+        .filter-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        select {
+            padding: 10px 12px;
+            min-width: 280px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: white;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 10px 20px;
+            border: none;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #219150;
+        }
+
+        .btn-back {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #7f8c8d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-top: 10px;
+        }
+
+        th, td {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 14px 16px;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #555;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            text-align: left;
+        }
+
+        td {
+            color: #444;
+            vertical-align: middle;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .badge-critical {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        .badge-warning {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            border: 1px solid #ffe0b2;
+        }
+
+        .badge-normal {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a th:href="@{/analytics}" class="btn btn-back" style="margin-bottom: 20px;">
+        ← Назад к аналитике
+    </a>
+
+    <form th:action="@{/report/nonliquid}" method="get" class="filter-panel">
+        <div class="form-group">
+            <label for="warehouseId">Склад:</label>
+            <select id="warehouseId" name="warehouseId" required>
+                <option value="" th:selected="${selectedWarehouseId == null}">-- Выберите склад --</option>
+                <option th:each="wh : ${warehouses}"
+                        th:value="${wh.id}"
+                        th:text="${wh.name}"
+                        th:selected="${selectedWarehouseId != null and selectedWarehouseId == wh.id}">
+                </option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Сформировать отчёт</button>
+
+        <a th:if="${selectedWarehouseId != null}"
+           th:href="@{/api/reports/nonliquid/csv(warehouseId=${selectedWarehouseId})}"
+           class="btn btn-success"
+           style="margin-left: auto;">
+            📥 Скачать отчёт (CSV)
+        </a>
+    </form>
+
+    <h2>Отчёт по неликвидам
+        <th:block th:if="${selectedWarehouseId != null}">
+            (склад №<span th:text="${selectedWarehouseId}"></span>)
+        </th:block>
+    </h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th style="width: 110px;">Статус</th>
+            <th>Номенклатура</th>
+            <th class="text-right">SKU</th>
+            <th class="text-right">Партия</th>
+            <th class="text-right">Остаток</th>
+            <th class="text-right">Мин. норма</th>
+            <th class="text-right">Дней без движения</th>
+            <th class="text-right">Критично?</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${nonliquidList}">
+            <td>
+                <span th:class="'status-badge ' + (row.status == 'КРИТИЧЕСКИЙ НЕЛИКВИД' ? 'badge-critical' : (row.status == 'НЕЛИКВИД (нет движения)' ? 'badge-warning' : 'badge-normal'))">
+                    <strong th:text="${row.status}"></strong>
+                </span>
+            </td>
+            <td th:text="${row.nomenclatureName}"></td>
+            <td class="text-right" th:text="${row.sku}"></td>
+            <td class="text-right" th:text="${row.batchNumber != null ? row.batchNumber : '-'}" style="font-family: monospace; color: #666;"></td>
+            <td class="text-right" th:text="${row.currentStock.stripTrailingZeros().toPlainString()}"></td>
+            <td class="text-right" th:text="${row.minThreshold != null ? row.minThreshold.stripTrailingZeros().toPlainString() : '-' }"></td>
+            <td class="text-right" th:text="${row.daysWithoutMovement}"></td>
+            <td class="text-right" th:text="${row.isCritical ? 'Да' : 'Нет'}"></td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(nonliquidList)}">
+            <td colspan="8" style="text-align: center; padding: 40px; color: #7f8c8d; border: none; background-color: #fafafa;">
+                Нет позиций, попадающих под критерии неликвида на выбранном складе
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

@@ -205,6 +205,7 @@
             <th>Категория</th>
             <th>Ед. изм.</th>
             <th>Тип учета</th>
+            <th>Мин. остаток</th>
             <th>Статус</th>
             <th>Действия</th>
         </tr>
@@ -217,6 +218,13 @@
             <td th:text="${item.stuffCategoryLabel}"></td>
             <td th:text="${item.unitOfMeasureLabel}"></td>
             <td th:text="${item.inventoryTypeLabel}"></td>
+            <td>
+            <span th:if="${item.minStock != null}"
+                  style="color: #2c3e50; font-weight: 500;">
+                <th:block th:text="${#numbers.formatDecimal(item.minStock, 0, 1)}"></th:block>
+            </span>
+                <span th:if="${item.minStock == null}" style="color: #95a5a6;">—</span>
+            </td>
             <td>
                 <span th:classappend="${item.active} ? 'status-active' : 'status-inactive'"
                       class="status-badge"

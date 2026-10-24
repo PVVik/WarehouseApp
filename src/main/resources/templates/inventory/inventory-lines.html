@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ввод фактических остатков</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        .table-responsive {
+            margin-bottom: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        td.text-end {
+            text-align: right;
+        }
+        .qty-input-cell input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            text-align: right;
+            font-weight: 500;
+        }
+        .qty-input-cell input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+        .badge-difference {
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            min-width: 70px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .badge-positive {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+        .badge-negative {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f1a8b0;
+        }
+        .badge-zero {
+            background-color: #fff3cd;
+            color: #664d03;
+            border: 1px solid #ffeeba;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .form-control:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #219150;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .btn-outline-secondary {
+            background-color: transparent;
+            border: 1px solid #ccc;
+            color: #555;
+        }
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .info-box {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            margin-top: 25px;
+            color: #555;
+            line-height: 1.5;
+        }
+        .error-text {
+            color: #e74c3c;
+            font-size: 0.85em;
+            margin-top: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Инвентаризация №<th:text="${check.id}"/> — ввод фактических остатков</h2>
+
+    <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
+    <div th:if="${error}" class="flash-message flash-error">
+        <b>Ошибка:</b> <span th:text="${error}"></span>
+    </div>
+
+    <form th:action="@{/inventory/{id}/lines(id=${check.id})}"
+          th:object="${lineInput}"
+          method="post">
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Партия</th>
+                    <th class="text-end">Учётное кол-во</th>
+                    <th class="text-center">Фактическое кол-во (введите)</th>
+                    <th class="text-end">Расхождение</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="line, stat : ${lines}">
+                    <input type="hidden"
+                           th:field="*{items[__${stat.index}__].id}"
+                           th:value="${line.id}" />
+
+                    <td th:text="${line.nomenclatureName}"></td>
+                    <td th:text="${line.batchNumber ?: 'Без партии'}"></td>
+
+                    <td class="text-end" th:text="${#numbers.formatDecimal(line.accountedQty, 1, 'POINT', 2, 'COMMA')}"></td>
+
+                    <td class="qty-input-cell">
+                        <input type="number" step="0.01"
+                               th:field="*{items[__${stat.index}__].actualQty}"
+                               class="form-control"
+                               placeholder="Введите факт"
+                               required />
+
+                        <div th:if="${#fields.hasErrors('items[' + stat.index + '].actualQty')}"
+                             class="error-text">
+                            <span th:errors="*{items[' + stat.index + '].actualQty}"></span>
+                        </div>
+                    </td>
+
+                    <td class="text-end">
+                        <span th:if="${line.actualQty != null}"
+                              class="badge-difference"
+                              th:classappend="${line.actualQty.subtract(line.accountedQty).compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'badge-positive' : (line.actualQty.subtract(line.accountedQty).compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'badge-negative' : 'badge-zero')}"
+                              th:text="${#numbers.formatDecimal(line.actualQty.subtract(line.accountedQty), 1, 'POINT', 2, 'COMMA')}">
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn btn-success">Сохранить фактические количества</button>
+            <a th:href="@{/inventory}" class="btn btn-outline-secondary">Отмена / Назад к списку</a>
+        </div>
+    </form>
+
+    <div class="info-box">
+        После ввода всех значений вернитесь в карточку инвентаризации и нажмите «Завершить», чтобы система сформировала акт расхождений.
+    </div>
+</div>
+
+</body>
+</html>

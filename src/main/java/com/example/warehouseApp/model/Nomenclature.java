@@ -3,6 +3,8 @@ package com.example.warehouseApp.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "nomenclature", uniqueConstraints = @UniqueConstraint(columnNames = "sku"))
 @Getter
@@ -39,8 +41,21 @@ public class Nomenclature {
     @Column(name = "active", nullable = false)
     private boolean isActive;
 
+    @Column(name = "min_stock")
+    private BigDecimal minStock;
+
     public Nomenclature(String name, String sku, StuffCategory stuffCategory, UnitOfMeasure unitOfMeasure,
                         InventoryType inventoryType, boolean isActive) {
+        this.name = name;
+        this.sku = sku;
+        this.stuffCategory = stuffCategory;
+        this.unitOfMeasure = unitOfMeasure;
+        this.inventoryType = inventoryType;
+        this.isActive = isActive;
+    }
+
+    public Nomenclature(long id, String name, String sku, StuffCategory stuffCategory, UnitOfMeasure unitOfMeasure, InventoryType inventoryType, boolean isActive) {
+        this.id = id;
         this.name = name;
         this.sku = sku;
         this.stuffCategory = stuffCategory;

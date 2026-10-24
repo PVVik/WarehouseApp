@@ -20,10 +20,10 @@ public class Batch {
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nomenclature_id")
+    @JoinColumn(name = "nomenclature_id", nullable = false)
     private Nomenclature nomenclature;
 
-    @Column(name = "batch_number")
+    @Column(name = "batch_number", nullable = false)
     private String batchNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
