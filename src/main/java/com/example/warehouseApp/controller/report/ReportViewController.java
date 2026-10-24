@@ -1,6 +1,7 @@
 package com.example.warehouseApp.controller.report;
 
 import com.example.warehouseApp.dto.WarehouseDto;
+import com.example.warehouseApp.dto.reports.DeficitReportDto;
 import com.example.warehouseApp.dto.reports.MovementReportProjection;
 import com.example.warehouseApp.dto.reports.StockBalanceReportDto;
 import com.example.warehouseApp.dto.reports.TurnoverReportDto;
@@ -143,6 +144,27 @@ public class ReportViewController {
         model.addAttribute("selectedWarehouseId", warehouseId);
 
         return "report/turnover-view";
+    }
+
+    @GetMapping("/deficit")
+    public String deficitView(
+            @RequestParam(required = false) Long warehouseId,
+            Model model) {
+
+        Page<WarehouseDto> warehouses = warehouseService.getAll(Pageable.unpaged(), null);
+        model.addAttribute("warehouses", warehouses);
+
+        if (warehouseId == null) {
+            model.addAttribute("deficitList", List.of());
+            model.addAttribute("selectedWarehouseId", null);
+            return "report/deficit-view";
+        }
+
+        List<DeficitReportDto> rows = reportService.getDeficitReport(warehouseId);
+        model.addAttribute("deficitList", rows);
+        model.addAttribute("selectedWarehouseId", warehouseId);
+
+        return "report/deficit-view";
     }
 
     private ResponseEntity<byte[]> createResponseWithBom(byte[] content, String filename) {

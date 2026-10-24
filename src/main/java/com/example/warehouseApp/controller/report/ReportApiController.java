@@ -1,9 +1,6 @@
 package com.example.warehouseApp.controller.report;
 
-import com.example.warehouseApp.dto.reports.MovementReportProjection;
-import com.example.warehouseApp.dto.reports.StockBalanceReportDto;
-import com.example.warehouseApp.dto.reports.TurnoverProjection;
-import com.example.warehouseApp.dto.reports.TurnoverReportDto;
+import com.example.warehouseApp.dto.reports.*;
 import com.example.warehouseApp.service.reports.ReportService;
 import com.example.warehouseApp.util.CsvGenerator;
 import lombok.RequiredArgsConstructor;
@@ -148,6 +145,37 @@ public class ReportApiController {
             csvBytes = csvGenerator.generateTurnoverReportCsv(data);
         }
 
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(csvBytes);
+    }
+
+    @GetMapping("/deficit")
+    public List<DeficitReportDto> getDeficitJson(@RequestParam Long warehouseId) {
+        if (warehouseId == null || warehouseId <= 0) {
+            throw new IllegalArgumentException("warehouseId должен быть положительным числом");
+        }
+        return reportService.getDeficitReport(warehouseId);
+    }
+
+    @GetMapping(value = "/deficit/csv", produces = "text/csv")
+    public ResponseEntity<byte[]> deficitCsv(@RequestParam Long warehouseId) {
+        if (warehouseId == null || warehouseId <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<DeficitReportDto> data = reportService.getDeficitReport(warehouseId);
+
+        HttpHeaders headers = createHeaders("deficit_warehouse_" + warehouseId + ".csv");
+
+        if (data == null || data.isEmpty()) {
+            byte[] emptyCsv = csvGenerator.generateEmptyDeficitCsv();
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(emptyCsv);
+        }
+
+        byte[] csvBytes = csvGenerator.generateDeficitCsv(data);
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(csvBytes);

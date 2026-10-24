@@ -14,4 +14,12 @@ public class DeficitReportDto {
     private String nomenclatureName;
     private BigDecimal currentStock;
     private BigDecimal minThreshold;
+    private DeficitLevel level;
+    private BigDecimal deficitAmount;
+
+    public enum DeficitLevel {
+        CRITICAL,
+        WARNING
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.example.warehouseApp.util;
 
+import com.example.warehouseApp.dto.reports.DeficitReportDto;
 import com.example.warehouseApp.dto.reports.MovementReportProjection;
 import com.example.warehouseApp.dto.reports.StockBalanceReportDto;
 import com.example.warehouseApp.dto.reports.TurnoverReportDto;
@@ -85,6 +86,43 @@ public class CsvGenerator {
         return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 
+    public byte[] generateDeficitCsv(List<DeficitReportDto> data) {
+        StringBuilder sb = new StringBuilder();
+        // BOM (UTF-8)
+        sb.append(BOM);
+
+        // Заголовок
+        sb.append("Статус;Номенклатура;Остаток;Мин. норма;Не хватает\n");
+
+        for (DeficitReportDto item : data) {
+            String status = switch (item.getLevel()) {
+                case CRITICAL -> "КРИТИЧЕСКИЙ";
+                case WARNING -> "ВНИМАНИЕ";
+                default -> "";
+            };
+
+            sb.append(escape(status))
+                    .append(';')
+                    .append(escape(item.getNomenclatureName()))
+                    .append(';')
+                    .append(formatNumber(item.getCurrentStock()))
+                    .append(';')
+                    .append(formatNumber(item.getMinThreshold()))
+                    .append(';')
+                    .append(formatNumber(item.getDeficitAmount()))
+                    .append('\n');
+        }
+
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public byte[] generateEmptyDeficitCsv() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(BOM); // BOM
+        sb.append("Статус;Номенклатура;Остаток;Мин. норма;Не хватает\n");
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
     public byte[] generateEmptyTurnoverCsv() {
         StringBuilder sb = new StringBuilder();
         sb.append(BOM);
@@ -95,14 +133,14 @@ public class CsvGenerator {
 
     public byte[] generateEmptyStockBalanceCsv() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\uFEFF");
+        sb.append(BOM);
         sb.append("Номенклатура;Партия;Склад;Количество;Ед.изм.\n");
         return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 
     public byte[] generateEmptyMovementCsv() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\uFEFF");
+        sb.append(BOM);
         sb.append("Дата;Тип документа;Номер документа;Номенклатура;Партия;Склад;Количество;Ед.изм.\n");
         return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
