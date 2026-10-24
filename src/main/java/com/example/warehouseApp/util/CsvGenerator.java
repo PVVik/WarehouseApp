@@ -1,9 +1,6 @@
 package com.example.warehouseApp.util;
 
-import com.example.warehouseApp.dto.reports.DeficitReportDto;
-import com.example.warehouseApp.dto.reports.MovementReportProjection;
-import com.example.warehouseApp.dto.reports.StockBalanceReportDto;
-import com.example.warehouseApp.dto.reports.TurnoverReportDto;
+import com.example.warehouseApp.dto.reports.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -88,10 +85,7 @@ public class CsvGenerator {
 
     public byte[] generateDeficitCsv(List<DeficitReportDto> data) {
         StringBuilder sb = new StringBuilder();
-        // BOM (UTF-8)
         sb.append(BOM);
-
-        // Заголовок
         sb.append("Статус;Номенклатура;Остаток;Мин. норма;Не хватает\n");
 
         for (DeficitReportDto item : data) {
@@ -116,9 +110,47 @@ public class CsvGenerator {
         return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 
+
+    public byte[] generateNonLiquidCsv(List<NonLiquidReportDto> rows) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(BOM);
+        sb.append("Статус;Номенклатура;SKU;Склад;Партия;Остаток;Мин. норма;Дней без движения;Критичность\n");
+
+        for (NonLiquidReportDto row : rows) {
+            sb.append(escape(row.getStatus()))
+                    .append(";")
+                    .append(escape(row.getNomenclatureName()))
+                    .append(";")
+                    .append(escape(row.getSku()))
+                    .append(";")
+                    .append(escape(row.getWarehouseName()))
+                    .append(";")
+                    .append(escape(row.getBatchNumber()))
+                    .append(";")
+                    .append(row.getCurrentStock() != null ? row.getCurrentStock().stripTrailingZeros().toPlainString() : "")
+                    .append(";")
+                    .append(row.getMinThreshold() != null ? row.getMinThreshold().stripTrailingZeros().toPlainString() : "")
+                    .append(";")
+                    .append(row.getDaysWithoutMovement())
+                    .append(";")
+                    .append(row.isCritical() ? "Да" : "Нет")
+                    .append("\n");
+        }
+
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public byte[] generateEmptyNonLiquidCsv() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(BOM);
+        sb.append("Статус;Номенклатура;SKU;Склад;Партия;Остаток;Мин. норма;Дней без движения;Критичность\n");
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+
     public byte[] generateEmptyDeficitCsv() {
         StringBuilder sb = new StringBuilder();
-        sb.append(BOM); // BOM
+        sb.append(BOM);
         sb.append("Статус;Номенклатура;Остаток;Мин. норма;Не хватает\n");
         return sb.toString().getBytes(StandardCharsets.UTF_8);
     }

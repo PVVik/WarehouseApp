@@ -181,6 +181,37 @@ public class ReportApiController {
                 .body(csvBytes);
     }
 
+    @GetMapping("/nonliquid")
+    public List<NonLiquidReportDto> getNonLiquidJson(@RequestParam Long warehouseId) {
+        if (warehouseId == null || warehouseId <= 0) {
+            throw new IllegalArgumentException("warehouseId должен быть положительным числом");
+        }
+        return reportService.getNonLiquidReport(warehouseId, LocalDate.now());
+    }
+
+    @GetMapping(value = "/nonliquid/csv", produces = "text/csv")
+    public ResponseEntity<byte[]> nonLiquidCsv(@RequestParam Long warehouseId) {
+        if (warehouseId == null || warehouseId <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<NonLiquidReportDto> data = reportService.getNonLiquidReport(warehouseId, LocalDate.now());
+
+        String filename = "nonliquid_warehouse_" + warehouseId + "_" + LocalDate.now() + ".csv";
+        HttpHeaders headers = createHeaders(filename);
+
+        byte[] csvBytes;
+        if (data == null || data.isEmpty()) {
+            csvBytes = csvGenerator.generateEmptyNonLiquidCsv();
+        } else {
+            csvBytes = csvGenerator.generateNonLiquidCsv(data);
+        }
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(csvBytes);
+    }
+
     private HttpHeaders createHeaders(String filename) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("text/csv;charset=UTF-8"));

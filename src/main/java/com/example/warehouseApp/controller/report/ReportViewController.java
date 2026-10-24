@@ -1,10 +1,7 @@
 package com.example.warehouseApp.controller.report;
 
 import com.example.warehouseApp.dto.WarehouseDto;
-import com.example.warehouseApp.dto.reports.DeficitReportDto;
-import com.example.warehouseApp.dto.reports.MovementReportProjection;
-import com.example.warehouseApp.dto.reports.StockBalanceReportDto;
-import com.example.warehouseApp.dto.reports.TurnoverReportDto;
+import com.example.warehouseApp.dto.reports.*;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.reports.ReportService;
 import com.example.warehouseApp.util.CsvGenerator;
@@ -165,6 +162,28 @@ public class ReportViewController {
         model.addAttribute("selectedWarehouseId", warehouseId);
 
         return "report/deficit-view";
+    }
+
+
+    @GetMapping("/nonliquid")
+    public String nonliquidView(
+            @RequestParam(required = false) Long warehouseId,
+            Model model) {
+
+        Page<WarehouseDto> warehouses = warehouseService.getAll(Pageable.unpaged(), null);
+        model.addAttribute("warehouses", warehouses);
+
+        if (warehouseId == null) {
+            model.addAttribute("nonliquidList", List.of());
+            model.addAttribute("selectedWarehouseId", null);
+            return "report/nonliquid-view";
+        }
+
+        List<NonLiquidReportDto> rows = reportService.getNonLiquidReport(warehouseId, LocalDate.now());
+        model.addAttribute("nonliquidList", rows);
+        model.addAttribute("selectedWarehouseId", warehouseId);
+
+        return "report/nonliquid-view";
     }
 
     private ResponseEntity<byte[]> createResponseWithBom(byte[] content, String filename) {

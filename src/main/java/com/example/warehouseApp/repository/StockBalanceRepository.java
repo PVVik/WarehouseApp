@@ -1,6 +1,7 @@
 package com.example.warehouseApp.repository;
 
 import com.example.warehouseApp.dto.reports.DeficitProjection;
+import com.example.warehouseApp.dto.reports.NonLiquidProjection;
 import com.example.warehouseApp.dto.reports.StockBalanceReportDto;
 import com.example.warehouseApp.model.StockBalance;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -55,4 +56,31 @@ public interface StockBalanceRepository extends JpaRepository<StockBalance, Long
                 ORDER BY n.name
             """)
     List<DeficitProjection> findDeficitsByWarehouse(@Param("warehouseId") Long warehouseId);
+
+    @Query("""
+                SELECT NEW com.example.warehouseApp.dto.reports.NonLiquidProjection(
+                    n.id,
+                    n.name,
+                    n.sku,
+                    w.name,
+                    b.batchNumber,
+                    sb.quantity,
+                    n.minStock,
+                    MAX(m.date)
+                )
+                FROM StockBalance sb
+                JOIN sb.nomenclature n
+                JOIN sb.warehouse w
+                LEFT JOIN sb.batch b
+                LEFT JOIN Movement m ON m.nomenclature = n
+                                     AND (m.batch = b OR b IS NULL)
+                                     AND (m.warehouseFrom = w OR m.warehouseTo = w)
+                WHERE (:warehouseId IS NULL OR w.id = :warehouseId)
+                  AND sb.quantity > 0
+                GROUP BY n.id, n.name, n.sku, w.name, b.batchNumber, sb.quantity, n.minStock
+                ORDER BY MAX(m.date) ASC
+            """)
+    List<NonLiquidProjection> findNonLiquidReport(Long warehouseId);
+
+
 }

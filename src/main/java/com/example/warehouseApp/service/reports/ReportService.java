@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -72,6 +73,7 @@ public class ReportService {
         return list;
     }
 
+    @Transactional(readOnly = true)
     public List<DeficitReportDto> getDeficitReport(Long warehouseId) {
         if (warehouseId == null) {
             return List.of();
@@ -86,6 +88,43 @@ public class ReportService {
                     return 1;
                 })
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<NonLiquidReportDto> getNonLiquidReport(Long warehouseId, LocalDate referenceDate) {
+        List<NonLiquidProjection> raw = stockBalanceRepository.findNonLiquidReport(warehouseId);
+        List<NonLiquidReportDto> result = new ArrayList<>();
+
+        for (NonLiquidProjection p : raw) {
+            int days = calculateDaysWithoutMovement(p, referenceDate);
+            String status = determineStatus(p, days);
+            boolean isCritical = determineCriticality(p, days, status);
+
+            NonLiquidReportDto dto = new NonLiquidReportDto(
+                    p.getNomenclatureId(), p.getNomenclatureName(), p.getSku(),
+                    p.getWarehouseName(), p.getBatchNumber(),
+                    p.getCurrentStock(), p.getMinThreshold(), p.getLastMovementDate(),
+                    days, isCritical, status
+            );
+            result.add(dto);
+        }
+        return result;
+    }
+
+    private int calculateDaysWithoutMovement(NonLiquidProjection p, LocalDate ref) {
+        return (int) ChronoUnit.DAYS.between(p.getLastMovementDate(), ref);
+    }
+
+    private String determineStatus(NonLiquidProjection p, int days) {
+        boolean belowMin = (p.getMinThreshold() != null && p.getCurrentStock().compareTo(p.getMinThreshold()) < 0);
+
+        if (belowMin && days > 90) return "КРИТИЧЕСКИЙ НЕЛИКВИД";
+        if (days > 90) return "НЕЛИКВИД (нет движения)";
+        return "НОРМА";
+    }
+
+    private boolean determineCriticality(NonLiquidProjection p, int days, String status) {
+        return status.equals("КРИТИЧЕСКИЙ НЕЛИКВИД");
     }
 
     private DeficitReportDto mapToDtoWithLogic(DeficitProjection p) {
