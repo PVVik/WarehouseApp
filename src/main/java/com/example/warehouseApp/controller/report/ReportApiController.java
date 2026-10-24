@@ -4,6 +4,7 @@ import com.example.warehouseApp.dto.reports.*;
 import com.example.warehouseApp.service.reports.ReportService;
 import com.example.warehouseApp.util.CsvGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +61,10 @@ public class ReportApiController {
             @RequestParam(required = false) Long warehouseId,
             @RequestParam LocalDate startDate,
             @RequestParam LocalDate endDate) {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("startDate не может быть позже endDate");
+        }
+
         return reportService.getMovementReport(warehouseId, startDate, endDate);
     }
 
@@ -215,7 +220,12 @@ public class ReportApiController {
     private HttpHeaders createHeaders(String filename) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("text/csv;charset=UTF-8"));
-        headers.setContentDispositionFormData("attachment", filename);
+        headers.setContentDisposition(
+                ContentDisposition
+                        .builder("attachment")
+                        .filename(filename)
+                        .build()
+        );
         return headers;
     }
 }
