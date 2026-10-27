@@ -1,10 +1,8 @@
 package com.example.warehouseApp.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public enum UnitOfMeasure {
 
     METER("Метр"),
@@ -14,5 +12,8 @@ public enum UnitOfMeasure {
 
     private final String label;
 
+    UnitOfMeasure(String label) {
+        this.label = label;
+    }
 }
 

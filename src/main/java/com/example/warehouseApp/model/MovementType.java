@@ -1,9 +1,7 @@
 package com.example.warehouseApp.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public enum MovementType {
 
@@ -13,4 +11,8 @@ public enum MovementType {
     WRITE_OFF("Списание");
 
     private final String label;
+
+    MovementType(String label) {
+        this.label = label;
+    }
 }

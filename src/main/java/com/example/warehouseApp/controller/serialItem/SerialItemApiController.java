@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/serial-item/api")
+@RequestMapping("/api/serial-item")
 public class SerialItemApiController {
 
     private final SerialItemService serialItemService;

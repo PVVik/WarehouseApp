@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface BatchRepository extends JpaRepository<Batch, Long>, JpaSpecificationExecutor<Batch> {
 
@@ -37,4 +38,5 @@ public interface BatchRepository extends JpaRepository<Batch, Long>, JpaSpecific
 
     long countByExpiryDateBetween(LocalDate from, LocalDate to);
 
+    Optional<Batch> findByBatchNumberAndNomenclatureId(String batchNumber, Long nomenclatureId);
 }

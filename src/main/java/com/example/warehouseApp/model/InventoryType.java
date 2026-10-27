@@ -1,10 +1,8 @@
 package com.example.warehouseApp.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public enum InventoryType {
     BATCH("Партионный"),
     SERIAL("Серийный"),
@@ -12,5 +10,8 @@ public enum InventoryType {
 
     private final String label;
 
+    InventoryType(String label) {
+        this.label = label;
+    }
 }
 

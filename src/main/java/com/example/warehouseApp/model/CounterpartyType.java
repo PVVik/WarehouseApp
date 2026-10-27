@@ -1,10 +1,8 @@
 package com.example.warehouseApp.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public enum CounterpartyType {
 
     SUPPLIER("Поставщик"),
@@ -12,4 +10,7 @@ public enum CounterpartyType {
 
     private final String label;
 
+    CounterpartyType(String label) {
+        this.label = label;
+    }
 }

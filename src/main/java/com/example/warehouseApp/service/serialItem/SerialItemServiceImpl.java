@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -145,6 +146,11 @@ public class SerialItemServiceImpl implements SerialItemService {
                 .filter(si -> inStockIds.contains(si.getId()))
                 .map(SerialItemMapper::mapToDto)
                 .toList();
+    }
+
+    @Override
+    public Optional<SerialItem> findBySerialNumber(String serialNumber) {
+        return serialItemRepository.findBySerialNumber(serialNumber);
     }
 
     private SerialItem getEntityById(long id) {

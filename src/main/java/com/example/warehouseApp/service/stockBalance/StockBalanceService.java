@@ -7,6 +7,7 @@ import com.example.warehouseApp.mapper.*;
 import com.example.warehouseApp.model.MovementType;
 import com.example.warehouseApp.model.StockBalance;
 import com.example.warehouseApp.repository.StockBalanceRepository;
+import com.example.warehouseApp.service.BaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.List;
 public class StockBalanceService {
 
     private final StockBalanceRepository stockBalanceRepository;
+    private final BaseService<WarehouseDto> warehouseService;
 
     @Transactional
     public StockBalance saveStockBalance(NomenclatureDto nomenclature, BatchDto batch, SerialItemDto serialItem,
@@ -28,9 +30,8 @@ public class StockBalanceService {
                                          MovementType movementType) {
         StockBalance stockBalance = batch != null
                 ? getByNomenclatureIdAndBatchIdAndWarehouseId(nomenclature.getId(), batch.getId(),
-                warehouse.getId(), storageLocation.getId())
-                : getByNomenclatureIdAndWarehouseIdAndStorageLocationId(nomenclature.getId(), warehouse.getId(),
-                storageLocation.getId());
+                warehouse.getId())
+                : getByNomenclatureIdAndWarehouseIdAndStorageLocationId(nomenclature.getId(), warehouse.getId());
 
         if (stockBalance == null) {
             stockBalance = create(nomenclature, batch, serialItem, warehouse, storageLocation, quantity);
@@ -49,14 +50,25 @@ public class StockBalanceService {
         return stockBalance;
     }
 
+    public List<StockBalanceResponseDto> getBalances(Long warehouseId) {
+        var warehouse = warehouseService.getById(warehouseId);
+        log.info("Вернули дто остатков со склада {}", warehouse.getId());
+
+        return findPositiveBalancesByWarehouse(warehouse.getId()).stream()
+                .map(StockBalanceMapper::mapToDto)
+                .toList();
+    }
+
     public List<StockBalance> findPositiveBalancesByWarehouse(Long warehouseId) {
+        var warehouse = warehouseService.getById(warehouseId);
+        log.info("Вернули остатки со склада {}", warehouse.getId());
+
         return stockBalanceRepository.findPositiveBalancesByWarehouse(warehouseId);
     }
 
-    public void checkNomenclatureExistsOnWarehouseAndPositiveQuantity(NomenclatureDto nomenclature, WarehouseDto warehouse,
-                                                                      StorageLocationDto storageLocation) {
-        StockBalance stockBalance = stockBalanceRepository.findByNomenclatureIdAndWarehouseIdAndStorageLocationId(
-                nomenclature.getId(), warehouse.getId(), storageLocation.getId()).orElseGet(() -> {
+    public void checkNomenclatureExistsOnWarehouseAndPositiveQuantity(NomenclatureDto nomenclature, WarehouseDto warehouse) {
+        StockBalance stockBalance = stockBalanceRepository.findByNomenclatureIdAndWarehouseId(
+                nomenclature.getId(), warehouse.getId()).orElseGet(() -> {
             log.warn("На складе с id {} не найдена позиция с id {}", warehouse.getId(), nomenclature.getId());
             throw new NotFoundException(String.format("На выбранном складе нет номенклатуры %s", nomenclature.getName()));
         });
@@ -67,16 +79,14 @@ public class StockBalanceService {
         }
     }
 
-    private StockBalance getByNomenclatureIdAndWarehouseIdAndStorageLocationId(long nomenclatureId, long warehouseId,
-                                                                               long storageLocationId) {
-        return stockBalanceRepository.findByNomenclatureIdAndWarehouseIdAndStorageLocationId(
-                nomenclatureId, warehouseId, storageLocationId).orElse(null);
+    private StockBalance getByNomenclatureIdAndWarehouseIdAndStorageLocationId(long nomenclatureId, long warehouseId) {
+        return stockBalanceRepository.findByNomenclatureIdAndWarehouseId(
+                nomenclatureId, warehouseId).orElse(null);
     }
 
-    private StockBalance getByNomenclatureIdAndBatchIdAndWarehouseId(long nomenclatureId, long batchId, long warehouseId,
-                                                                     long storageLocationId) {
-        return stockBalanceRepository.findByNomenclatureIdAndBatchIdAndWarehouseIdAndStorageLocationId(
-                        nomenclatureId, batchId, warehouseId, storageLocationId)
+    private StockBalance getByNomenclatureIdAndBatchIdAndWarehouseId(long nomenclatureId, long batchId, long warehouseId) {
+        return stockBalanceRepository.findByNomenclatureIdAndBatchIdAndWarehouseId(
+                        nomenclatureId, batchId, warehouseId)
                 .orElse(null);
     }
 

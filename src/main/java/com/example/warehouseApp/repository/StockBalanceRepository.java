@@ -13,13 +13,11 @@ import java.util.Optional;
 
 public interface StockBalanceRepository extends JpaRepository<StockBalance, Long> {
 
-    Optional<StockBalance> findByNomenclatureIdAndWarehouseIdAndStorageLocationId(Long nomenclatureId, Long warehouseId,
-                                                                                  Long storageLocationId);
+    Optional<StockBalance> findByNomenclatureIdAndWarehouseId(Long nomenclatureId, Long warehouseId);
 
-    Optional<StockBalance> findByNomenclatureIdAndBatchIdAndWarehouseIdAndStorageLocationId(Long nomenclatureId,
-                                                                                            Long batchId,
-                                                                                            Long warehouseId,
-                                                                                            Long storageLocationId);
+    Optional<StockBalance> findByNomenclatureIdAndBatchIdAndWarehouseId(Long nomenclatureId,
+                                                                        Long batchId,
+                                                                        Long warehouseId);
 
     @Query("SELECT sb FROM StockBalance sb " +
             "WHERE sb.warehouse.id = :warehouseId AND sb.quantity > 0")

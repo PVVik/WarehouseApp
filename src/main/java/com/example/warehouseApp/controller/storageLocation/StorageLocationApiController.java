@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/storageLocation/api")
+@RequestMapping("/api/storageLocation")
 @RequiredArgsConstructor
 public class StorageLocationApiController {
 

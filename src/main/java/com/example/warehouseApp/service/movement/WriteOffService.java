@@ -46,7 +46,7 @@ public class WriteOffService {
                 ? serialItemService.getById(movementDtoWriteOff.getSerialItemId())
                 : null;
 
-        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse, storageLocation);
+        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
         checkQuantitySerialItem(serialItem, movementDtoWriteOff.getQuantity());
 
         var updatedSerialItem = updateSerialItemStatus(serialItem);

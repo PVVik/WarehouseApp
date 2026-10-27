@@ -45,7 +45,7 @@ public class TransferService {
         var serialItem = movementDtoTransfer.getSerialItemId() != null
                 ? serialItemService.getById(movementDtoTransfer.getSerialItemId())
                 : null;
-        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouseFrom, storageLocation);
+        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouseFrom);
         checkQuantitySerialItem(serialItem, movementDtoTransfer.getQuantity());
 
         var movement = TransferMapper.mapToEntity(movementDtoTransfer);

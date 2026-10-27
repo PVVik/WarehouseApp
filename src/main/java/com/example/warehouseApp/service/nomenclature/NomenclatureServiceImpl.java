@@ -6,7 +6,6 @@ import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.mapper.NomenclatureMapper;
 import com.example.warehouseApp.model.Nomenclature;
 import com.example.warehouseApp.repository.NomenclatureRepository;
-import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.specification.nomenclature.NomenclatureSpecificationsBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,7 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class NomenclatureServiceImpl implements BaseService<NomenclatureDto> {
+public class NomenclatureServiceImpl implements NomenclatureService {
 
     private final NomenclatureRepository nomenclatureRepository;
 
@@ -95,6 +94,16 @@ public class NomenclatureServiceImpl implements BaseService<NomenclatureDto> {
         return NomenclatureMapper.mapToDto(nomenclature);
     }
 
+    @Override
+    public NomenclatureDto getBySku(String sku) {
+        var nomenclature = nomenclatureRepository.findBySku(sku).orElseGet(() -> {
+            log.warn("Не найдена позиция с артикулом: {}", sku);
+            throw new NotFoundException(String.format("Не найдено позиции с артикулом %s", sku));
+        });
+
+        return NomenclatureMapper.mapToDto(nomenclature);
+    }
+
     private void checkUniqueSku(String sku) {
         if (nomenclatureRepository.existsBySku(sku)) {
             log.warn("Проверка на уникальность sku провалилась");
@@ -105,7 +114,7 @@ public class NomenclatureServiceImpl implements BaseService<NomenclatureDto> {
     private Nomenclature getEntityById(long id) {
         return nomenclatureRepository.findById(id).orElseGet(() -> {
             log.warn("Не найдена позиция с id: {}", id);
-            throw new NotFoundException(String.format("Не найдено позиции с артикулом %d", id));
+            throw new NotFoundException(String.format("Не найдено позиции с id %d", id));
         });
     }
 

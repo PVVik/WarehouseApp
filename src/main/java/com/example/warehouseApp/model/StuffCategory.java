@@ -1,10 +1,8 @@
 package com.example.warehouseApp.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public enum StuffCategory {
     MATERIAL("Материал"),
     EQUIPMENT("Оборудование"),
@@ -14,4 +12,7 @@ public enum StuffCategory {
 
     private final String label;
 
+    StuffCategory(String label) {
+        this.label = label;
+    }
 }
