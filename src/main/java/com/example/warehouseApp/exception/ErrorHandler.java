@@ -48,7 +48,7 @@ public class ErrorHandler {
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(BusinessException.class)
-    public ErrorResponse handleBusinessException(RuntimeException ex) {
+    public ErrorResponse handleBusinessException(BusinessException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 

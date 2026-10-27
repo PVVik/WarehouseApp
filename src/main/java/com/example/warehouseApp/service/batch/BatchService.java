@@ -7,9 +7,12 @@ import com.example.warehouseApp.service.BaseService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface BatchService extends BaseService<BatchDto> {
 
     List<BatchWithStockDto> getBatchesWithStockOnWarehouse(Long nomenclatureId, Long warehouseId);
+
+    Optional<Batch> findByBatchNumberAndNomenclatureId(String batchNumber, Long nomenclatureId);
 
 }

@@ -5,7 +5,6 @@ import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.mapper.WarehouseMapper;
 import com.example.warehouseApp.model.Warehouse;
 import com.example.warehouseApp.repository.WarehouseRepository;
-import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.specification.warehouse.WarehouseSpecificationBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,7 @@ import java.util.regex.Pattern;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class WarehouseServiceImpl implements BaseService<WarehouseDto> {
+public class WarehouseServiceImpl implements WarehouseService {
 
     private final WarehouseRepository warehouseRepository;
 
@@ -93,5 +92,16 @@ public class WarehouseServiceImpl implements BaseService<WarehouseDto> {
         log.info("Удалили склад с id {}", warehouse.getId());
 
         warehouseRepository.deleteById(warehouse.getId());
+    }
+
+    @Override
+    public WarehouseDto getByName(String name) {
+        var warehouse = warehouseRepository.findByName(name).orElseGet(() -> {
+            log.warn("Не найдено склада по названию {}", name);
+            throw new NotFoundException(String.format("Склад с названием %s не найден", name));
+        });
+        log.info("Вернули склад по названию {}", name);
+
+        return WarehouseMapper.mapToDto(warehouse);
     }
 }

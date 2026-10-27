@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/writeoff/api")
+@RequestMapping("/api/writeoff")
 public class WriteOffApiController {
 
     private final WriteOffService writeOffService;

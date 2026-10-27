@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -116,6 +117,11 @@ public class BatchServiceImpl implements BatchService {
     @Override
     public List<BatchWithStockDto> getBatchesWithStockOnWarehouse(Long nomenclatureId, Long warehouseId) {
         return batchRepository.findBatchesWithStockOnWarehouse(nomenclatureId, warehouseId);
+    }
+
+    @Override
+    public Optional<Batch> findByBatchNumberAndNomenclatureId(String batchNumber, Long nomenclatureId) {
+        return batchRepository.findByBatchNumberAndNomenclatureId(batchNumber, nomenclatureId);
     }
 
     private Batch getEntityById(long id) {
