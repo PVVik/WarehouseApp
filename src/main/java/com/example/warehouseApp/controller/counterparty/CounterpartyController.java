@@ -22,7 +22,7 @@ public class CounterpartyController {
     private final BaseService<CounterpartyDto> counterpartyService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String listPage(@RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "10") int size,
                            @RequestParam(required = false) String name,

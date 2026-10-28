@@ -20,7 +20,7 @@ public class MovementApiController {
     private final MovementService movementService;
 
     @GetMapping("/api/movements")
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public ResponseEntity<Page<MovementResponseDto>> getMovements(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,

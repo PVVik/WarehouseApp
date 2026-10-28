@@ -32,14 +32,14 @@ public class NomenclatureApiController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public Page<NomenclatureDto> getAll(@PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
                                         @RequestParam(value = "search", required = false) String search) {
         return nomenclatureService.getAll(pageable, search);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public NomenclatureDto getNomenclatureById(@PathVariable long id) {
         return nomenclatureService.getById(id);
     }

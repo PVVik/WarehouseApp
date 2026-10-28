@@ -24,7 +24,7 @@ public class MovementController {
     private final BaseService<WarehouseDto> warehouseService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String showActions() {
         return "movements/movements-actions";
     }

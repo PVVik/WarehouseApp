@@ -32,14 +32,14 @@ public class BatchApiController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public Page<BatchDto> getAll(@PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
                                  @RequestParam(value = "search", required = false) String search) {
         return batchService.getAll(pageable, search);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public BatchDto getBatchById(@PathVariable long id) {
         return batchService.getById(id);
     }

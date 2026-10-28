@@ -23,7 +23,7 @@ public class WarehouseController {
     private final StorageLocationService storageLocationService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
                        @RequestParam(required = false) String name, Model model) {
 
@@ -95,7 +95,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String viewWarehouse(@PathVariable long id,
                                 @RequestParam(defaultValue = "0") int page,
                                 @RequestParam(defaultValue = "10") int size,

@@ -20,7 +20,7 @@ public class WarehouseApiController {
 
     @GetMapping
     @ResponseBody
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public Page<WarehouseDto> getWarehousesApi(@PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
                                                @RequestParam(value = "search", required = false) String search) {
         return warehouseService.getAll(pageable, search);
@@ -28,7 +28,7 @@ public class WarehouseApiController {
 
     @GetMapping("/{id}")
     @ResponseBody
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public WarehouseDto getWarehouseByIdApi(@PathVariable long id) {
         return warehouseService.getById(id);
     }

@@ -5,54 +5,65 @@ import com.example.warehouseApp.domain.User.Role;
 import com.example.warehouseApp.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-public class DatabaseInitializer {
+@Slf4j
+public class DatabaseInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @PostConstruct
-    public void init() {
+    public DatabaseInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public void run(String... args) {
+        createInitialUsers();
+    }
+
+    private void createInitialUsers() {
         if (userRepository.findByUsername("admin").isEmpty()) {
             User admin = new User();
             admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setFullName("Главный Администратор");
-            admin.setRole(Role.ADMIN);
+            admin.setEmail("admin@warehouse.local");
+            admin.setRole(User.Role.ADMIN);
             admin.setActive(true);
-
+            admin.setPassword(passwordEncoder.encode("admin123"));
             userRepository.save(admin);
-            System.out.println("✅ Создан пользователь: admin / admin123");
+            log.info("✅ Создан тестовый пользователь: admin");
         } else {
-            System.out.println("⚠️ Пользователь 'admin' уже существует.");
+            log.info("⚠️ Пользователь 'admin' уже существует.");
         }
 
-        if (userRepository.findByUsername("manager").isEmpty()) {
-            User manager = new User();
-            manager.setUsername("manager");
-            manager.setPassword(passwordEncoder.encode("man123"));
-            manager.setFullName("Администратор");
-            manager.setRole(Role.MANAGER);
-            manager.setActive(true);
-
-            userRepository.save(manager);
-            System.out.println("✅ Создан пользователь: manager / man123");
+        if (userRepository.findByUsername("storekeeper").isEmpty()) {
+            User sk = new User();
+            sk.setUsername("storekeeper");
+            sk.setFullName("Кладовщик");
+            sk.setEmail("store@warehouse.local");
+            sk.setRole(User.Role.STOREKEEPER);
+            sk.setActive(true);
+            sk.setPassword(passwordEncoder.encode("store123"));
+            userRepository.save(sk);
+            log.info("✅ Создан тестовый пользователь: storekeeper");
         }
 
         if (userRepository.findByUsername("viewer").isEmpty()) {
-            User viewer = new User();
-            viewer.setUsername("viewer");
-            viewer.setPassword(passwordEncoder.encode("viewer123"));
-            viewer.setFullName("просмотр");
-            viewer.setRole(Role.VIEWER);
-            viewer.setActive(true);
-
-            userRepository.save(viewer);
-            System.out.println("✅ Создан пользователь: viewer / viewer123");
+            User vw = new User();
+            vw.setUsername("viewer");
+            vw.setFullName("Аналитик");
+            vw.setEmail("view@warehouse.local");
+            vw.setRole(User.Role.VIEWER);
+            vw.setActive(true);
+            vw.setPassword(passwordEncoder.encode("view123"));
+            userRepository.save(vw);
+            log.info("✅ Создан тестовый пользователь: viewer");
         }
     }
 }

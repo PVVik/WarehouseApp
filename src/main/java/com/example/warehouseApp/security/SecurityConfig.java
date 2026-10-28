@@ -20,6 +20,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/api/reports/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/analytics/expiry-control").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/stock-balances").authenticated()
@@ -57,21 +58,79 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/batch/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.POST, "/api/inventory/checks").hasAnyRole("ADMIN", "STOREKEEPER")
-                        .requestMatchers(HttpMethod.POST, "/api/inventory/checks/*/complete").hasAnyRole("ADMIN", "STOREKEEPER")
-                        .requestMatchers(HttpMethod.PUT, "/api/inventory/lines/*/actual-qty").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/api/inventory/checks/{id}/complete").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.PUT, "/api/inventory/lines/{id}/actual-qty").hasAnyRole("ADMIN", "STOREKEEPER")
 
                         .requestMatchers(HttpMethod.POST, "/api/receipt").hasAnyRole("ADMIN", "STOREKEEPER")
                         .requestMatchers(HttpMethod.POST, "/api/issue").hasAnyRole("ADMIN", "STOREKEEPER")
-
                         .requestMatchers(HttpMethod.POST, "/api/writeoff").hasAnyRole("ADMIN", "STOREKEEPER")
-
                         .requestMatchers(HttpMethod.POST, "/api/transfer").hasAnyRole("ADMIN", "STOREKEEPER")
 
-                    //    .requestMatchers(HttpMethod.POST, "/api/acts/*/settle").hasAnyRole("ADMIN", "MANAGER", "STOREKEEPER")
-
                         .requestMatchers(HttpMethod.POST, "/api/sync").hasRole("ADMIN")
-
                         .requestMatchers(HttpMethod.DELETE, "/api/movements/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/analytics").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/analytics/expiry-control").authenticated()
+
+                        .requestMatchers(HttpMethod.GET, "/counterparty").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/counterparty/create").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/counterparty/{id}/edit").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/counterparty/save").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/counterparty/{id}/delete").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/inventory").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/inventory/create").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/inventory").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/inventory/{id}/lines").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/inventory/{id}/lines").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/inventory/{id}/complete").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/inventory/{id}/acts").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/inventory/{inventoryId}/acts/{actId}/settle").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/inventory/{id}/review").authenticated()
+
+                        .requestMatchers(HttpMethod.GET, "/movements").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/movements/nomenclature/list").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/movements/counterparty/list").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/movements/warehouse/list").hasAnyRole("ADMIN", "STOREKEEPER")
+
+                        .requestMatchers(HttpMethod.GET, "/nomenclature").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/nomenclature/form").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/nomenclature/form").hasAnyRole("ADMIN", "STOREKEEPER")
+
+                        .requestMatchers(HttpMethod.GET, "/report").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/report/stock-form").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/report/download-stock").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/report/stock-view").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/report/movement-form").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/report/download-movement").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/report/movement-view").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/report/turnover").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/report/deficit").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/report/nonliquid").authenticated()
+
+                        .requestMatchers(HttpMethod.GET, "/storageLocation/create").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/storageLocation/{id}/edit").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/storageLocation/save").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/storageLocation/{id}/delete").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/warehouse").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/warehouse/new").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/warehouse/{id}/edit").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/warehouse").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/warehouse/{id}/delete").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/warehouse/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/warehouse/{id}/locations/bulk").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/warehouse/{id}/locations/bulk").hasAnyRole("ADMIN", "STOREKEEPER")
+
+                        .requestMatchers(HttpMethod.GET, "/movements/receipt/form").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/movements/receipt").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/movements/issue/form").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/movements/issue").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/movements/transfer/form").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/movements/transfer").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.GET, "/movements/write-off/form").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.POST, "/movements/write-off").hasAnyRole("ADMIN", "STOREKEEPER")
 
                         .anyRequest().authenticated()
                 )
@@ -80,6 +139,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

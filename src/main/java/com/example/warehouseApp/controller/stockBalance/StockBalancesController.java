@@ -19,7 +19,7 @@ public class StockBalancesController {
     private final StockBalanceService stockBalanceService;
 
     @GetMapping("/stock-balances")
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public List<StockBalanceResponseDto> getStockBalances(@RequestParam(required = false) Long warehouseId) {
         return stockBalanceService.getBalances(warehouseId);
     }

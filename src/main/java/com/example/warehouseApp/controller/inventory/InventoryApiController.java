@@ -41,13 +41,13 @@ public class InventoryApiController {
     }
 
     @GetMapping("/checks")
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public List<InventoryCheckDtoResponse> getAllChecks() {
         return inventoryService.getAllChecks();
     }
 
     @GetMapping("/checks/{id}")
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public InventoryCheckDtoResponse getCheckById(@PathVariable Long id) {
         return inventoryService.getById(id);
     }

@@ -11,7 +11,7 @@ import java.util.List;
 @Table(name = "users")
 @Getter
 @Setter
-@EqualsAndHashCode(of = {"id", "username"})
+@EqualsAndHashCode(of = {"id", "username", "email"})
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,6 +26,9 @@ public class User {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Column(name = "email", unique = true, nullable = false)
+    private String email;
 
     @Column(name = "full_name")
     private String fullName;

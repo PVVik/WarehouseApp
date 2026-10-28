@@ -32,7 +32,7 @@ public class StorageLocationApiController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public StorageLocationDto getStorageLocationById(@PathVariable long id) {
         return storageLocationService.getById(id);
     }
@@ -45,7 +45,7 @@ public class StorageLocationApiController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public Page<StorageLocationDto> getAll(@PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
                                            @RequestParam(value = "search", required = false) String search) {
         return storageLocationService.getAll(pageable, search);

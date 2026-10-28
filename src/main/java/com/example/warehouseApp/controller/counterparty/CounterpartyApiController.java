@@ -26,7 +26,7 @@ public class CounterpartyApiController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public CounterpartyDto getCounterpartyById(@PathVariable long id) {
         return counterpartyService.getById(id);
     }
@@ -38,7 +38,7 @@ public class CounterpartyApiController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public Page<CounterpartyDto> getAll(@PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
                                         @RequestParam(value = "search", required = false) String search) {
         return counterpartyService.getAll(pageable, search);

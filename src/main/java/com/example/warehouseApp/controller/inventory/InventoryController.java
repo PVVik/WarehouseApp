@@ -66,7 +66,7 @@ public class InventoryController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String listInventory(Model model) {
         List<InventoryCheckDtoResponse> list = inventoryService.getAllChecks();
         model.addAttribute("checks", list);
@@ -164,7 +164,7 @@ public class InventoryController {
     }
 
     @GetMapping("/{id}/review")
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String reviewCheck(@PathVariable Long id, Model model) {
 
         InventoryCheckDtoResponse dto = inventoryService.getById(id);
@@ -178,7 +178,7 @@ public class InventoryController {
     }
 
     @GetMapping("/acts/{actId}")
-    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String showAct(@PathVariable Long actId, Model model) {
         InventoryDiscrepancyActDto actDto = inventoryService.getActById(actId);
 

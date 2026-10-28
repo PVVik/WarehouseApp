@@ -25,7 +25,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/report")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
+@PreAuthorize("hasAnyRole('ROLE_VIEWER', 'ROLE_ADMIN', 'ROLE_STOREKEEPER')")
 public class ReportViewController {
 
     private final BaseService<WarehouseDto> warehouseService;
