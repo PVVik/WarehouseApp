@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Форма склада</title>
@@ -14,46 +15,54 @@
         .btn-save { padding: 10px 24px; background-color: #007bff; color: white;
             border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
         .btn-cancel { margin-left: 10px; color: #555; text-decoration: none; }
+        .access-denied-container { text-align: center; padding: 60px 20px; background: #f8f9fa; border-radius: 8px; }
+        .access-denied-icon { font-size: 48px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
 
-<h1 th:text="${warehouseDto.id != null ? 'Редактировать склад' : 'Новый склад'}"></h1>
+<div sec:authorize="hasAnyRole('ADMIN')">
+    <h1 th:text="${warehouseDto.id != null ? 'Редактировать склад' : 'Новый склад'}"></h1>
 
-<form th:action="@{/warehouse}" th:object="${warehouseDto}" method="post">
+    <form th:action="@{/warehouse}" th:object="${warehouseDto}" method="post">
+        <input type="hidden" th:if="${warehouseDto.id != null}" th:field="*{id}"/>
+        <input type="hidden" name="from" th:value="${from}">
 
-    <input type="hidden" th:if="${warehouseDto.id != null}" th:field="*{id}"/>
-    <input type="hidden" name="from" th:value="${from}">
+        <label for="name">Название</label>
+        <input type="text" id="name" th:field="*{name}" placeholder="Название склада"/>
+        <span class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
 
-    <label for="name">Название</label>
-    <input type="text" id="name" th:field="*{name}" placeholder="Название склада"/>
-    <span class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+        <label for="address">Адрес</label>
+        <input type="text" id="address" th:field="*{address}" placeholder="Адрес склада"/>
+        <span class="error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></span>
 
-    <label for="address">Адрес</label>
-    <input type="text" id="address" th:field="*{address}" placeholder="Адрес склада"/>
-    <span class="error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></span>
+        <label for="type">Тип склада</label>
+        <select id="type" th:field="*{type}">
+            <option value="" selected disabled>Выберите тип</option>
+            <option th:each="t : ${T(com.example.warehouseApp.model.WarehouseType).values()}"
+                    th:value="${t}" th:text="${t}"></option>
+        </select>
+        <span class="error" th:if="${#fields.hasErrors('type')}" th:errors="*{type}"></span>
 
-    <label for="type">Тип склада</label>
-    <select id="type" th:field="*{type}">
-        <option value="" selected disabled>Выберите тип</option>
-        <option th:each="t : ${T(com.example.warehouseApp.model.WarehouseType).values()}"
-                th:value="${t}" th:text="${t}"></option>
-    </select>
-    <span class="error" th:if="${#fields.hasErrors('type')}" th:errors="*{type}"></span>
+        <div class="checkbox-row">
+            <input type="checkbox" id="active" th:field="*{active}"/>
+            <label for="active">Активен</label>
+        </div>
 
-    <div class="checkbox-row">
-        <input type="checkbox" id="active" th:field="*{active}"/>
-        <label for="active">Активен</label>
-    </div>
+        <div class="actions">
+            <button type="submit" class="btn-save">Сохранить</button>
+            <a th:href="${from == 'movements'} ? @{/movements/warehouse/list} : @{/warehouse}"
+               class="btn-cancel">Отмена</a>
+        </div>
+    </form>
+</div>
 
-    <div class="actions">
-        <button type="submit" class="btn-save">Сохранить</button>
-        <a th:href="${from == 'movements'} ? @{/movements/warehouse/list} : @{/warehouse}"
-           class="btn-cancel">Отмена</a>
-    </div>
-
-</form>
-
+<div sec:authorize="!hasAnyRole('ADMIN')" class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для создания или редактирования склада.</p>
+    <a th:href="@{/warehouse}" class="btn-cancel">Вернуться к списку складов</a>
+</div>
 
 </body>
 </html>

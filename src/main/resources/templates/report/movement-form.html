@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Параметры отчёта по движениям — Складская система</title>
@@ -96,47 +97,70 @@
         .page-header {
             margin-bottom: 30px;
         }
+
+        .access-denied-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .access-denied-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="page-header">
-        <h1>Отчёт по движениям товаров</h1>
+<div sec:authorize="hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')">
+    <div class="container">
+        <div class="page-header">
+            <h1>Отчёт по движениям товаров</h1>
+        </div>
+
+        <div class="form-wrapper">
+            <p class="text-muted" style="color: #7f8c8d; margin-bottom: 25px; line-height: 1.5;">
+                Укажите период и склад. Данные сначала отобразятся на экране — затем их можно будет скачать в CSV.
+            </p>
+
+            <form th:action="@{/report/movement-view}" method="GET">
+
+                <div class="form-group">
+                    <label for="startDate">Дата начала периода</label>
+                    <input type="date" id="startDate" name="startDate" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate">Дата окончания периода</label>
+                    <input type="date" id="endDate" name="endDate" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="warehouseId">Склад (опционально)</label>
+                    <select id="warehouseId" name="warehouseId">
+                        <option value="">Все склады</option>
+                        <option th:each="w : ${warehouses}" th:value="${w.id}" th:text="${w.name}"></option>
+                    </select>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary">Показать отчёт</button>
+
+                    <a th:href="@{/analytics}" class="btn btn-secondary">Отмена</a>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 
-    <div class="form-wrapper">
-        <p class="text-muted" style="color: #7f8c8d; margin-bottom: 25px; line-height: 1.5;">
-            Укажите период и склад. Данные сначала отобразятся на экране — затем их можно будет скачать в CSV.
-        </p>
-
-        <form th:action="@{/report/movement-view}" method="GET">
-
-            <div class="form-group">
-                <label for="startDate">Дата начала периода</label>
-                <input type="date" id="startDate" name="startDate" required />
-            </div>
-
-            <div class="form-group">
-                <label for="endDate">Дата окончания периода</label>
-                <input type="date" id="endDate" name="endDate" required />
-            </div>
-
-            <div class="form-group">
-                <label for="warehouseId">Склад (опционально)</label>
-                <select id="warehouseId" name="warehouseId">
-                    <option value="">Все склады</option>
-                    <option th:each="w : ${warehouses}" th:value="${w.id}" th:text="${w.name}"></option>
-                </select>
-            </div>
-
-            <div class="actions">
-                <button type="submit" class="btn btn-primary">Показать отчёт</button>
-
-                <a th:href="@{/analytics}" class="btn btn-secondary">Отмена</a>
-            </div>
-        </form>
-    </div>
+<div sec:authorize="!hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')" class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для формирования отчёта по движениям товаров.</p>
+    <a th:href="@{/}" class="btn" style="
+        background-color: #95a5a6; color: white; margin-top:10px; display:inline-block; padding:10px 20px; text-decoration:none;">
+        Вернуться на главную
+    </a>
 </div>
 
 </body>

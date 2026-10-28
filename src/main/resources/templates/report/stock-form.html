@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Отчёты — Складская система</title>
@@ -85,33 +86,73 @@
         .btn-primary:hover {
             background-color: #2980b9;
         }
+
+        .btn-outline-secondary {
+            background-color: transparent;
+            border: 1px solid #ccc;
+            color: #555;
+            width: auto;
+            display: inline-block;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            border-color: #999;
+        }
+
+        .access-denied-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .access-denied-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <a href="javascript:history.go(-1)" class="back-link">Назад</a>
 
-    <h2 class="page-title">Отчёт остатков по складу</h2>
+<div sec:authorize="hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')">
+    <div class="container">
+        <a th:href="@{/analytics}" class="back-link" style="
+            display:inline-block; margin-bottom:15px; color:#3498db; text-decoration:none; font-weight:600;">
+            ← Назад
+        </a>
 
-    <form th:action="@{/report/stock-view}" method="get" class="custom-card mb-4">
-        <div>
-            <label for="warehouseId">Выберите склад:</label>
-            <select name="warehouseId" id="warehouseId" class="form-control">
-                <option value="" disabled selected>-- Выберите склад --</option>
-                <option th:each="w : ${warehouses}"
-                        th:value="${w.id}"
-                        th:text="${w.name}"
-                        th:selected="${selectedWarehouseId == w.id}"></option>
-            </select>
+        <h2 class="page-title">Отчёт остатков по складу</h2>
+
+        <form th:action="@{/report/stock-view}" method="get" class="custom-card">
+            <div>
+                <label for="warehouseId">Выберите склад:</label>
+                <select name="warehouseId" id="warehouseId">
+                    <option value="" disabled selected>-- Выберите склад --</option>
+                    <option th:each="w : ${warehouses}"
+                            th:value="${w.id}"
+                            th:text="${w.name}"
+                            th:selected="${selectedWarehouseId != null and selectedWarehouseId == w.id}"></option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Показать на экране</button>
+        </form>
+
+        <div style="margin-top:20px; text-align:center;">
+            <a th:href="@{/report/download-stock(warehouseId=${selectedWarehouseId})}"
+               class="btn btn-outline-secondary"
+               th:if="${selectedWarehouseId != null}">
+                📥 Скачать отчёт (CSV)
+            </a>
         </div>
-        <button type="submit" class="btn btn-primary">Показать на экране</button>
-    </form>
-
-    <a th:href="@{/report/download-stock(warehouseId=${selectedWarehouseId})}"
-       class="btn btn-outline-secondary"
-       th:if="${selectedWarehouseId != null}">
-        📥 Скачать отчёт (CSV)
-    </a>
+    </div>
 </div>
+
+<div sec:authorize="!hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')" class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для работы с отчётами по остаткам.</p>
+    <a th:href="@{/}" class="btn btn-outline-secondary" style="margin-top:10px;">Вернуться на главную</a>
+</div>
+
 </body>
 </html>

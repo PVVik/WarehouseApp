@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Оформление списания - Складская система</title>
@@ -67,118 +68,171 @@
             border-radius: 6px;
             margin-bottom: 20px;
         }
+        .warning-text { color: #c0392b; font-size: 0.9em; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Оформление списания</h2>
+<div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
+    <div class="container">
+        <h2>Оформление списания</h2>
 
-    <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
+        <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
 
-    <form th:action="@{/movements/write-off}" method="post">
-        <div class="form-group">
-            <label for="nomenclatureId" class="required">Номенклатура</label>
-            <div class="input-with-button">
-                <input type="text" id="nomenclatureNameDisplay" class="form-control"
-                       value="выберите номенклатуру" disabled
-                       th:value="${selectedNomenclatureName != null ? selectedNomenclatureName : 'выберите номенклатуру'}">
+        <form th:action="@{/movements/write-off}" method="post" id="writeOffForm">
+            <div class="form-group">
+                <label for="nomenclatureId" class="required">Номенклатура</label>
+                <div class="input-with-button">
+                    <input type="text" id="nomenclatureNameDisplay" class="form-control"
+                           value="выберите номенклатуру" disabled
+                           th:value="${selectedNomenclatureName != null ? selectedNomenclatureName : 'выберите номенклатуру'}">
 
-                <input type="hidden" id="nomenclatureId" name="nomenclatureId"
-                       th:value="${selectedNomenclatureId}">
+                    <input type="hidden" id="nomenclatureId" name="nomenclatureId"
+                           th:value="${selectedNomenclatureId}">
 
-                <a th:href="@{/movements/nomenclature/list(fromOperation='WRITE_OFF', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName})}"
-                   class="btn btn-primary">Найти</a>
+                    <a th:href="@{/movements/nomenclature/list(fromOperation='WRITE_OFF', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName})}"
+                       class="btn btn-primary">Найти</a>
+                </div>
+                <small style="color: #7f8c8d;">Выберите позицию из справочника.</small>
             </div>
-            <small style="color: #7f8c8d;">Выберите позицию из справочника.</small>
-        </div>
 
-        <div class="form-group">
-            <label for="warehouseFrom" class="required">Склад списания</label>
-            <div class="input-with-button">
-                <input type="text" id="warehouseFromNameDisplay" class="form-control"
-                       value="выберите склад" disabled
-                       th:value="${selectedWarehouseFromName != null ? selectedWarehouseFromName : 'выберите склад'}">
-                <input type="hidden" id="warehouseFrom" name="warehouseFrom"
-                       th:value="${selectedWarehouseFromId}">
+            <div class="form-group">
+                <label for="warehouseFrom" class="required">Склад списания</label>
+                <div class="input-with-button">
+                    <input type="text" id="warehouseFromNameDisplay" class="form-control"
+                           value="выберите склад" disabled
+                           th:value="${selectedWarehouseFromName != null ? selectedWarehouseFromName : 'выберите склад'}">
+                    <input type="hidden" id="warehouseFrom" name="warehouseFrom"
+                           th:value="${selectedWarehouseFromId}">
 
-                <a th:href="@{/movements/warehouse/list(fromOperation='WRITE_OFF', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, inventoryType=${selectedInventoryType})}"
-                   class="btn btn-primary">Найти</a>
+                    <a th:href="@{/movements/warehouse/list(fromOperation='WRITE_OFF', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, inventoryType=${selectedInventoryType})}"
+                       class="btn btn-primary">Найти</a>
+                </div>
+                <small style="color: #7f8c8d;">Склад, с которого списывается товар.</small>
             </div>
-            <small style="color: #7f8c8d;">Склад, с которого списывается товар.</small>
-        </div>
 
-        <div class="form-group"
-             th:if="${isBatchRequired and batchesWithStock != null and !#lists.isEmpty(batchesWithStock)}">
-            <label for="batchId" class="required">Партия</label>
-            <select id="batchId" name="batchId" class="form-control">
-                <option value="">Выберите партию</option>
-                <option th:each="batch : ${batchesWithStock}"
-                        th:value="${batch.id}"
-                        th:text="${batch.number + ' (остаток: ' + batch.totalQuantity + ')'}">
-                </option>
-            </select>
-            <small class="text-muted">Обязательный выбор партии для партионного учёта</small>
-        </div>
+            <div class="form-group"
+                 th:if="${isBatchRequired and batchesWithStock != null and !#lists.isEmpty(batchesWithStock)}">
+                <label for="batchId" class="required">Партия</label>
+                <select id="batchId" name="batchId" class="form-control" required>
+                    <option value="">Выберите партию</option>
+                    <option th:each="batch : ${batchesWithStock}"
+                            th:value="${batch.id}"
+                            th:text="${batch.number + ' (остаток: ' + batch.totalQuantity + ')'}">
+                    </option>
+                </select>
+                <small class="text-muted">Обязательный выбор партии для партионного учёта.</small>
+            </div>
 
-        <div th:if="${isSerialRequired}" class="form-group">
-            <label for="serialItemId" class="required">Серийная единица</label>
-            <select id="serialItemId" name="serialItemId" class="form-control" required>
-                <option value="">Выберите серийную единицу</option>
-                <option th:each="serial : ${serialItemsWithStock}"
-                        th:value="${serial.id}"
-                        th:text="${serial.serialNumber + ' (статус: ' + serial.status + ')'}">
-                </option>
-            </select>
-            <small class="text-muted">Выберите конкретный серийный номер оборудования</small>
-        </div>
+            <div th:if="${isSerialRequired}" class="form-group">
+                <label for="serialItemId" class="required">Серийная единица</label>
+                <select id="serialItemId" name="serialItemId" class="form-control" required>
+                    <option value="">Выберите серийную единицу</option>
+                    <option th:each="serial : ${serialItemsWithStock}"
+                            th:value="${serial.id}"
+                            th:text="${serial.serialNumber + ' (статус: ' + serial.status + ')'}">
+                    </option>
+                </select>
+                <small class="text-muted">Выберите конкретный серийный номер оборудования. Для серийного учёта количество всегда 1.</small>
+            </div>
 
-        <div class="form-group">
-            <label for="storageLocationId" class="required">Место хранения (ячейка)</label>
-            <select id="storageLocationId" name="storageLocationId" class="form-control" required>
-                <option value="">Не выбрано</option>
-                <option th:each="loc : ${storageLocations}"
-                        th:value="${loc.id}"
-                        th:text="${loc.code + ' (остаток: ' + loc.quantity + ' шт.)'}"
-                        th:selected="${selectedStorageLocationId != null and selectedStorageLocationId == loc.id}">
-                </option>
-            </select>
-            <small id="storageLocationHint" style="color: #7f8c8d;">
-                <span th:if="${#lists.isEmpty(storageLocations)}">
-                    Для выбранной номенклатуры на этом складе остатков нет.
-                </span>
-                <span th:unless="${#lists.isEmpty(storageLocations)}">
-                    Выберите ячейку с товаром.
-                </span>
-            </small>
-        </div>
+            <div class="form-group">
+                <label for="storageLocationId">Место хранения (ячейка)</label>
+                <select id="storageLocationId" name="storageLocationId" class="form-control">
+                    <option value="">Не выбрано (можно оставить пустым)</option>
+                    <option th:each="loc : ${storageLocations}"
+                            th:value="${loc.id}"
+                            th:text="${loc.code + ' (остаток: ' + loc.quantity + ' шт.)'}"
+                            th:selected="${selectedStorageLocationId != null and selectedStorageLocationId == loc.id}">
+                    </option>
+                </select>
+                <small id="storageLocationHint" style="color: #7f8c8d;">
+                    <span th:if="${#lists.isEmpty(storageLocations)}">Для выбранной номенклатуры на этом складе остатков нет.</span>
+                </small>
+            </div>
 
-        <div class="form-group">
-            <label for="quantity" class="required">Количество</label>
-            <input type="number" id="quantity" name="quantity" step="0.01"
-                   class="form-control" required placeholder="0.00" min="0.01">
-            <small style="color: #7f8c8d;" th:if="${isSerialRequired}">
-                Для серийного учёта количество должно быть равно 1.
-            </small>
-        </div>
+            <div class="form-group">
+                <label for="quantity" class="required">Количество</label>
+                <input type="number" id="quantity" name="quantity" step="0.01"
+                       class="form-control" required placeholder="0.00" min="0.01">
+                <small style="color: #7f8c8d;" th:if="${isSerialRequired}">
+                    Для серийного учёта количество должно быть равно 1.
+                </small>
+                <small th:unless="${isSerialRequired}" style="color: #7f8c8d;">
+                    Укажите количество для списания.
+                </small>
+            </div>
 
-        <div class="form-group">
-            <label for="userId" class="required">ID сотрудника</label>
-            <input type="number" id="userId" name="userId" step="1" min="1"
-                   class="form-control" required placeholder="Например, 1">
-        </div>
+            <div class="form-group">
+                <label for="userId" class="required">ID сотрудника</label>
+                <input type="number" id="userId" name="userId" step="1" min="1"
+                       class="form-control" required placeholder="Например, 1">
+            </div>
 
-        <div class="form-group">
-            <label for="notes" class="required">Причина списания</label>
-            <textarea id="notes" name="notes" class="form-control" rows="3"
-                      required placeholder="Обязательно укажите причину списания (порча, утеря, истечение срока и т.п.)"></textarea>
-            <small style="color: #7f8c8d;">Это поле обязательно для заполнения.</small>
-        </div>
+            <div class="form-group">
+                <label for="notes" class="required">Причина списания</label>
+                <textarea id="notes" name="notes" class="form-control" rows="3"
+                          required placeholder="Обязательно укажите причину списания (порча, утеря, истечение срока и т.п.)"></textarea>
+                <small style="color: #7f8c8d;">Это поле обязательно для заполнения — оно будет отражено в акте списания.</small>
+            </div>
 
-        <div class="button-group">
-            <button type="submit" class="btn btn-danger">Оформить списание</button>
-            <a th:href="@{/movements}" class="btn btn-outline-secondary">Отмена</a>
-        </div>
-    </form>
+            <div class="button-group">
+                <button type="submit" class="btn btn-danger">Оформить списание</button>
+                <a th:href="@{/movements}" class="btn btn-outline-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
 </div>
+
+<div sec:authorize="!hasAnyRole('ADMIN','STOREKEEPER')" style="text-align:center; padding:60px; background:#f8f9fa; border-radius:8px;">
+    <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для оформления списания. Эта операция доступна только администраторам и кладовщикам.</p>
+    <a th:href="@{/}" class="btn" style="background-color:#95a5a6; color:white; margin-top:10px; padding:10px 20px; text-decoration:none;">Вернуться на главную</a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('writeOffForm');
+        const quantityInput = document.getElementById('quantity');
+        const serialItemSelect = document.getElementById('serialItemId');
+
+        if (serialItemSelect && serialItemSelect.options.length > 1) {
+            quantityInput.value = '1';
+            quantityInput.min = '1';
+            quantityInput.max = '1';
+            quantityInput.step = '1';
+            quantityInput.readOnly = true;
+        }
+
+        function validateQuantity() {
+            if (serialItemSelect && serialItemSelect.value) {
+                const qty = parseFloat(quantityInput.value);
+                if (qty !== 1) {
+                    alert('Для серийной единицы количество должно быть ровно 1.');
+                    quantityInput.focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        form.addEventListener('submit', function (e) {
+            if (!validateQuantity()) {
+                e.preventDefault();
+                return;
+            }
+
+            const batchIdSelect = document.getElementById('batchId');
+            if (batchIdSelect && batchIdSelect.value === '') {
+                alert('Пожалуйста, выберите партию для списания.');
+                batchIdSelect.focus();
+                e.preventDefault();
+                return;
+            }
+        });
+    });
+</script>
+</body>
+</html>

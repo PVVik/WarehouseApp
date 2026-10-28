@@ -7,6 +7,7 @@ import com.example.warehouseApp.service.BaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,24 +24,13 @@ public class MovementController {
     private final BaseService<WarehouseDto> warehouseService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public String showActions() {
         return "movements/movements-actions";
     }
 
-
-    @GetMapping("/write-off/stub")
-    public String writeOffStub(Model model) {
-        model.addAttribute("message", "Списание — функционал в разработке");
-        return "stub";
-    }
-
-    @GetMapping("/transfer/stub")
-    public String transferStub(Model model) {
-        model.addAttribute("message", "Между складами — функционал в разработке");
-        return "stub";
-    }
-
     @GetMapping("/nomenclature/list")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String nomenclatureSearchList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -62,6 +52,7 @@ public class MovementController {
     }
 
     @GetMapping("/counterparty/list")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String supplierSearchList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -90,6 +81,7 @@ public class MovementController {
     }
 
     @GetMapping("/warehouse/list")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String warehouseSearchList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Оформление прихода - Складская система</title>
@@ -67,144 +68,166 @@
             border-radius: 6px;
             margin-bottom: 20px;
         }
+
+        .access-denied-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .access-denied-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Оформление прихода товара</h2>
+<div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
+    <div class="container">
+        <h2>Оформление прихода товара</h2>
 
-    <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
+        <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
 
-    <form th:action="@{/movements/receipt}" method="post">
-        <div class="form-group">
-            <label for="nomenclatureId" class="required">Номенклатура</label>
-            <div class="input-with-button">
-                <input type="text" id="nomenclatureNameDisplay" class="form-control"
-                       value="выберите номенклатуру" disabled
-                       th:value="${selectedNomenclatureName != null ? selectedNomenclatureName : 'выберите номенклатуру'}">
-
-                <input type="hidden" id="nomenclatureId" name="nomenclatureId"
-                       th:value="${selectedNomenclatureId}">
-
-                <input type="hidden" name="inventoryType" th:value="${selectedInventoryType}" />
-
-                <a th:href="@{/movements/nomenclature/list(fromOperation='RECEIPT')}" class="btn btn-primary">Найти</a>
-            </div>
-            <small style="color: #7f8c8d;">Выберите позицию из справочника, чтобы заполнить поле.</small>
-        </div>
-
-        <div class="form-group">
-            <label for="counterpartyId" class="required">Поставщик (контрагент)</label>
-            <div class="input-with-button">
-                <input type="text" id="counterpartyNameDisplay" class="form-control"
-                       value="выберите поставщика" disabled
-                       th:value="${selectedCounterpartyName != null ? selectedCounterpartyName : 'выберите поставщика'}">
-                <input type="hidden" id="counterpartyId" name="counterpartyId"
-                       th:value="${selectedCounterpartyId}">
-                <a th:href="@{/movements/counterparty/list(fromOperation='RECEIPT', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, inventoryType=${selectedInventoryType})}"
-                   class="btn btn-primary">Найти</a>
-
-            </div>
-            <small style="color: #7f8c8d;">Выберите поставщика из справочника контрагентов.</small>
-        </div>
-
-        <div class="form-group">
-            <label for="warehouseTo" class="required">Склад (куда)</label>
-            <div class="input-with-button">
-                <input type="text" id="warehouseNameDisplay" class="form-control"
-                       value="выберите склад" disabled
-                       th:value="${selectedWarehouseName != null ? selectedWarehouseName : 'выберите склад'}">
-                <input type="hidden" id="warehouseTo" name="warehouseTo"
-                       th:value="${selectedWarehouseId}">
-                <a th:href="@{/movements/warehouse/list(fromOperation='RECEIPT', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, counterpartyId=${selectedCounterpartyId}, counterpartyName=${selectedCounterpartyName}, inventoryType=${selectedInventoryType})}"
-                   class="btn btn-primary">Найти</a>
-
-            </div>
-            <small style="color: #7f8c8d;">Выберите склад назначения.</small>
-        </div>
-
-        <div th:if="${selectedInventoryType != null and selectedInventoryType == 'BATCH'}" class="info-box">
-            <h4>Партия</h4>
+        <form th:action="@{/movements/receipt}" method="post" id="receiptForm">
             <div class="form-group">
-                <label for="batchNumber">Номер партии</label>
-                <input type="text" id="batchNumber" name="batchNumber" class="form-control" placeholder="Например, P-2026-001">
+                <label for="nomenclatureId" class="required">Номенклатура</label>
+                <div class="input-with-button">
+                    <input type="text" id="nomenclatureNameDisplay" class="form-control"
+                           value="выберите номенклатуру" disabled
+                           th:value="${selectedNomenclatureName != null ? selectedNomenclatureName : 'выберите номенклатуру'}">
+
+                    <input type="hidden" id="nomenclatureId" name="nomenclatureId"
+                           th:value="${selectedNomenclatureId}">
+
+                    <input type="hidden" name="inventoryType" th:value="${selectedInventoryType}" />
+
+                    <a th:href="@{/movements/nomenclature/list(fromOperation='RECEIPT')}" class="btn btn-primary">Найти</a>
+                </div>
+                <small style="color: #7f8c8d;">Выберите позицию из справочника, чтобы заполнить поле.</small>
             </div>
+
             <div class="form-group">
-                <label for="batchManufactureDate">Дата производства</label>
-                <input type="date" id="batchManufactureDate" name="batchManufactureDate" class="form-control">
+                <label for="counterpartyId" class="required">Поставщик (контрагент)</label>
+                <div class="input-with-button">
+                    <input type="text" id="counterpartyNameDisplay" class="form-control"
+                           value="выберите поставщика" disabled
+                           th:value="${selectedCounterpartyName != null ? selectedCounterpartyName : 'выберите поставщика'}">
+                    <input type="hidden" id="counterpartyId" name="counterpartyId"
+                           th:value="${selectedCounterpartyId}">
+                    <a th:href="@{/movements/counterparty/list(fromOperation='RECEIPT', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, inventoryType=${selectedInventoryType})}"
+                       class="btn btn-primary">Найти</a>
+                </div>
+                <small style="color: #7f8c8d;">Выберите поставщика из справочника контрагентов.</small>
             </div>
+
             <div class="form-group">
-                <label for="batchExpiryDate">Срок годности</label>
-                <input type="date" id="batchExpiryDate" name="batchExpiryDate" class="form-control">
+                <label for="warehouseTo" class="required">Склад (куда)</label>
+                <div class="input-with-button">
+                    <input type="text" id="warehouseNameDisplay" class="form-control"
+                           value="выберите склад" disabled
+                           th:value="${selectedWarehouseName != null ? selectedWarehouseName : 'выберите склад'}">
+                    <input type="hidden" id="warehouseTo" name="warehouseTo"
+                           th:value="${selectedWarehouseId}">
+                    <a th:href="@{/movements/warehouse/list(fromOperation='RECEIPT', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, counterpartyId=${selectedCounterpartyId}, counterpartyName=${selectedCounterpartyName}, inventoryType=${selectedInventoryType})}"
+                       class="btn btn-primary">Найти</a>
+                </div>
+                <small style="color: #7f8c8d;">Выберите склад назначения.</small>
             </div>
-        </div>
 
-        <div th:if="${selectedInventoryType != null and selectedInventoryType == 'SERIAL'}" class="info-box">
-            <h4>Серийная единица</h4>
+            <div th:if="${selectedInventoryType != null and selectedInventoryType == 'BATCH'}" class="info-box">
+                <h4>Партия</h4>
+                <div class="form-group">
+                    <label for="batchNumber" class="required">Номер партии</label>
+                    <input type="text" id="batchNumber" name="batchNumber" class="form-control" placeholder="Например, P-2026-001" required>
+                </div>
+                <div class="form-group">
+                    <label for="batchManufactureDate" class="required">Дата производства</label>
+                    <input type="date" id="batchManufactureDate" name="batchManufactureDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="batchExpiryDate" class="required">Срок годности</label>
+                    <input type="date" id="batchExpiryDate" name="batchExpiryDate" class="form-control" required>
+                    <small style="color: #7f8c8d;">Срок годности должен быть позже даты производства.</small>
+                </div>
+            </div>
+
+            <div th:if="${selectedInventoryType != null and selectedInventoryType == 'SERIAL'}" class="info-box">
+                <h4>Серийная единица</h4>
+                <div class="form-group">
+                    <label for="serialNumber" class="required">Серийный номер</label>
+                    <input type="text" id="serialNumber" name="serialNumber" class="form-control" placeholder="Например, SN-000123" required>
+                </div>
+                <div class="form-group">
+                    <label for="passportNumber" class="required">Номер паспорта</label>
+                    <input type="text" id="passportNumber" name="passportNumber" class="form-control" placeholder="Например, ПС-2026-045" required>
+                </div>
+                <div class="form-group">
+                    <label for="serialNotes">Заметки к единице (необязательно)</label>
+                    <textarea id="serialNotes" name="serialNotes" class="form-control" rows="2"
+                              placeholder="Комментарий к серийной единице"></textarea>
+                </div>
+            </div>
+
             <div class="form-group">
-                <label for="serialNumber" class="required">Серийный номер</label>
-                <input type="text" id="serialNumber" name="serialNumber" class="form-control" placeholder="Например, SN-000123">
+                <label for="storageLocationId" class="required">Место хранения</label>
+                <select id="storageLocationId" name="storageLocationId" class="form-control" required>
+                    <option value="">Не указано</option>
+                    <option th:each="sl : ${storageLocations}"
+                            th:value="${sl.id}"
+                            th:attr="data-warehouse-id=${sl.warehouseId}"
+                            th:text="${sl.code != null and !sl.code.isEmpty() ? sl.code : 'Зона ' + sl.zone + '-' + sl.rack + '-' + sl.shelf}"></option>
+                </select>
+                <small id="storageLocationHint" style="color: #7f8c8d;">Сначала выберите склад, чтобы увидеть доступные ячейки.</small>
             </div>
+
             <div class="form-group">
-                <label for="passportNumber" class="required">Номер паспорта</label>
-                <input type="text" id="passportNumber" name="passportNumber" class="form-control" placeholder="Например, ПС-2026-045">
+                <label for="quantity" class="required">Количество</label>
+                <input type="number" id="quantity" name="quantity" step="0.01"
+                       class="form-control" required placeholder="0.00" min="0.01"
+                       th:value="${selectedInventoryType != null and selectedInventoryType == 'SERIAL' ? '1' : ''}"
+                       th:readonly="${selectedInventoryType != null and selectedInventoryType == 'SERIAL'}">
+                <small th:if="${selectedInventoryType != null and selectedInventoryType == 'SERIAL'}"
+                       style="color: #7f8c8d;">
+                    Для серийного учёта количество всегда равно 1: каждая единица имеет свой серийный номер.
+                </small>
             </div>
+
             <div class="form-group">
-                <label for="serialNotes">Заметки к единице (необязательно)</label>
-                <textarea id="serialNotes" name="serialNotes" class="form-control" rows="2"
-                          placeholder="Комментарий к серийной единице"></textarea>
+                <label for="price" class="required">Закупочная стоимость</label>
+                <input type="number" id="price" name="price" step="0.01"
+                       class="form-control" required placeholder="0.00" min="0">
             </div>
-        </div>
 
-        <div class="form-group">
-            <label for="storageLocationId" class="required">Место хранения</label>
-            <select id="storageLocationId" name="storageLocationId" class="form-control" required>
-                <option value="">Не указано</option>
-                <option th:each="sl : ${storageLocations}"
-                        th:value="${sl.id}"
-                        th:attr="data-warehouse-id=${sl.warehouseId}"
-                        th:text="${sl.code != null and !sl.code.isEmpty() ? sl.code : 'Зона ' + sl.zone + '-' + sl.rack + '-' + sl.shelf}"></option>
-            </select>
-            <small id="storageLocationHint" style="color: #7f8c8d;">Сначала выберите склад, чтобы увидеть доступные ячейки.</small>
-        </div>
+            <div class="form-group">
+                <label for="userId" class="required">ID сотрудника</label>
+                <input type="number" id="userId" name="userId" step="1" min="1"
+                       class="form-control" required placeholder="Например, 1">
+            </div>
 
-        <div class="form-group">
-            <label for="quantity" class="required">Количество</label>
-            <input type="number" id="quantity" name="quantity" step="0.01"
-                   class="form-control" required placeholder="0.00" min="0.01"
-                   th:value="${selectedInventoryType != null and selectedInventoryType == 'SERIAL' ? '1' : ''}"
-                   th:readonly="${selectedInventoryType != null and selectedInventoryType == 'SERIAL'}">
-            <small th:if="${selectedInventoryType != null and selectedInventoryType == 'SERIAL'}"
-                   style="color: #7f8c8d;">
-                Для серийного учёта количество всегда равно 1: каждая единица имеет свой серийный номер.
-            </small>
-        </div>
+            <div class="form-group">
+                <label for="notes">Заметки</label>
+                <textarea id="notes" name="notes" class="form-control" rows="3"
+                          placeholder="Комментарий к документу (необязательно)"></textarea>
+            </div>
 
-        <div class="form-group">
-            <label for="price" class="required">Закупочная стоимость</label>
-            <input type="number" id="price" name="price" step="0.01"
-                   class="form-control" required placeholder="0.00" min="0">
-        </div>
+            <div class="button-group">
+                <button type="submit" class="btn btn-success">Оформить приход</button>
+                <a th:href="@{/movements}" class="btn btn-outline-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
 
-        <div class="form-group">
-            <label for="userId" class="required">ID сотрудника</label>
-            <input type="number" id="userId" name="userId" step="1" min="1"
-                   class="form-control" required placeholder="Например, 1">
-        </div>
-
-        <div class="form-group">
-            <label for="notes">Заметки</label>
-            <textarea id="notes" name="notes" class="form-control" rows="3"
-                      placeholder="Комментарий к документу (необязательно)"></textarea>
-        </div>
-
-        <div class="button-group">
-            <button type="submit" class="btn btn-success">Оформить приход</button>
-            <a th:href="@{/movements}" class="btn btn-outline-secondary">Отмена</a>
-        </div>
-    </form>
+<div sec:authorize="!hasAnyRole('ADMIN','STOREKEEPER')" class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для оформления прихода. Эта операция доступна только администраторам и кладовщикам.</p>
+    <a th:href="@{/}" class="btn" style="
+        background-color: #95a5a6; color: white; margin-top:10px; display:inline-block; padding:10px 20px; text-decoration:none;">
+        Вернуться на главную
+    </a>
 </div>
 
 <script>
@@ -247,22 +270,49 @@
 
         filterLocations();
 
+        function validateBatchDates() {
+            var manufactureDate = document.getElementById('batchManufactureDate').value;
+            var expiryDate = document.getElementById('batchExpiryDate').value;
+
+            if (!manufactureDate || !expiryDate) {
+                return true;
+            }
+
+            var mDate = new Date(manufactureDate);
+            var eDate = new Date(expiryDate);
+
+            if (eDate <= mDate) {
+                alert('Срок годности должен быть позже даты производства.');
+                return false;
+            }
+            return true;
+        }
+
         function validateForm() {
             if (locationSelect.value === '') {
                 alert('Пожалуйста, выберите ячейку хранения.');
                 locationSelect.focus();
                 return false;
             }
+
+            var batchBlock = document.querySelector('.info-box h4:contains("Партия")');
+            if (batchBlock) {
+                if (!validateBatchDates()) {
+                    return false;
+                }
+            }
+
             return true;
         }
 
-        document.querySelector('form').addEventListener('submit', function (event) {
+        document.getElementById('receiptForm').addEventListener('submit', function (event) {
             if (!validateForm()) {
                 event.preventDefault();
             }
         });
+
+        warehouseInput.addEventListener('change', filterLocations);
     });
 </script>
-
 </body>
 </html>

@@ -42,5 +42,17 @@ public class DatabaseInitializer {
             userRepository.save(manager);
             System.out.println("✅ Создан пользователь: manager / man123");
         }
+
+        if (userRepository.findByUsername("viewer").isEmpty()) {
+            User viewer = new User();
+            viewer.setUsername("viewer");
+            viewer.setPassword(passwordEncoder.encode("viewer123"));
+            viewer.setFullName("просмотр");
+            viewer.setRole(Role.VIEWER);
+            viewer.setActive(true);
+
+            userRepository.save(viewer);
+            System.out.println("✅ Создан пользователь: viewer / viewer123");
+        }
     }
 }

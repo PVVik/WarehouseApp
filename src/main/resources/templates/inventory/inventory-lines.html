@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Ввод фактических остатков</title>
@@ -174,74 +175,83 @@
 </head>
 <body>
 
-<div class="container">
-    <h2>Инвентаризация №<th:text="${check.id}"/> — ввод фактических остатков</h2>
+<div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
+    <div class="container">
+        <h2>Инвентаризация №<span th:text="${check.id}">—</span> — ввод фактических остатков</h2>
 
-    <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
-    <div th:if="${error}" class="flash-message flash-error">
-        <b>Ошибка:</b> <span th:text="${error}"></span>
-    </div>
-
-    <form th:action="@{/inventory/{id}/lines(id=${check.id})}"
-          th:object="${lineInput}"
-          method="post">
-
-        <div class="table-responsive">
-            <table>
-                <thead>
-                <tr>
-                    <th>Товар</th>
-                    <th>Партия</th>
-                    <th class="text-end">Учётное кол-во</th>
-                    <th class="text-center">Фактическое кол-во (введите)</th>
-                    <th class="text-end">Расхождение</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="line, stat : ${lines}">
-                    <input type="hidden"
-                           th:field="*{items[__${stat.index}__].id}"
-                           th:value="${line.id}" />
-
-                    <td th:text="${line.nomenclatureName}"></td>
-                    <td th:text="${line.batchNumber ?: 'Без партии'}"></td>
-
-                    <td class="text-end" th:text="${#numbers.formatDecimal(line.accountedQty, 1, 'POINT', 2, 'COMMA')}"></td>
-
-                    <td class="qty-input-cell">
-                        <input type="number" step="0.01"
-                               th:field="*{items[__${stat.index}__].actualQty}"
-                               class="form-control"
-                               placeholder="Введите факт"
-                               required />
-
-                        <div th:if="${#fields.hasErrors('items[' + stat.index + '].actualQty')}"
-                             class="error-text">
-                            <span th:errors="*{items[' + stat.index + '].actualQty}"></span>
-                        </div>
-                    </td>
-
-                    <td class="text-end">
-                        <span th:if="${line.actualQty != null}"
-                              class="badge-difference"
-                              th:classappend="${line.actualQty.subtract(line.accountedQty).compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'badge-positive' : (line.actualQty.subtract(line.accountedQty).compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'badge-negative' : 'badge-zero')}"
-                              th:text="${#numbers.formatDecimal(line.actualQty.subtract(line.accountedQty), 1, 'POINT', 2, 'COMMA')}">
-                        </span>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
+        <div th:if="${error}" class="flash-message flash-error">
+            <b>Ошибка:</b> <span th:text="${error}"></span>
         </div>
 
-        <div class="button-group">
-            <button type="submit" class="btn btn-success">Сохранить фактические количества</button>
-            <a th:href="@{/inventory}" class="btn btn-outline-secondary">Отмена / Назад к списку</a>
-        </div>
-    </form>
+        <form th:action="@{/inventory/{id}/lines(id=${check.id})}"
+              th:object="${lineInput}"
+              method="post">
 
-    <div class="info-box">
-        После ввода всех значений вернитесь в карточку инвентаризации и нажмите «Завершить», чтобы система сформировала акт расхождений.
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Товар</th>
+                        <th>Партия</th>
+                        <th class="text-end">Учётное кол-во</th>
+                        <th class="text-center">Фактическое кол-во (введите)</th>
+                        <th class="text-end">Расхождение</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="line, stat : ${lines}">
+                        <input type="hidden"
+                               th:field="*{items[__${stat.index}__].id}"
+                               th:value="${line.id}" />
+
+                        <td th:text="${line.nomenclatureName}"></td>
+                        <td th:text="${line.batchNumber ?: 'Без партии'}"></td>
+
+                        <td class="text-end" th:text="${#numbers.formatDecimal(line.accountedQty, 1, 'POINT', 2, 'COMMA')}"></td>
+
+                        <td class="qty-input-cell">
+                            <input type="number" step="0.01"
+                                   th:field="*{items[__${stat.index}__].actualQty}"
+                                   class="form-control"
+                                   placeholder="Введите факт"
+                                   required />
+
+                            <div th:if="${#fields.hasErrors('items[' + stat.index + '].actualQty')}"
+                                 class="error-text">
+                                <span th:errors="*{items[' + stat.index + '].actualQty}"></span>
+                            </div>
+                        </td>
+
+                        <td class="text-end">
+                            <span th:if="${line.actualQty != null}"
+                                  class="badge-difference"
+                                  th:classappend="${line.actualQty.subtract(line.accountedQty).compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'badge-positive' : (line.actualQty.subtract(line.accountedQty).compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'badge-negative' : 'badge-zero')}"
+                                  th:text="${#numbers.formatDecimal(line.actualQty.subtract(line.accountedQty), 1, 'POINT', 2, 'COMMA')}">
+                            </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn btn-success">Сохранить фактические количества</button>
+                <a th:href="@{/inventory}" class="btn btn-outline-secondary">Отмена / Назад к списку</a>
+            </div>
+        </form>
+
+        <div class="info-box">
+            После ввода всех значений вернитесь в карточку инвентаризации и нажмите «Завершить», чтобы система сформировала акт расхождений.
+        </div>
     </div>
+</div>
+
+<div sec:authorize="!hasAnyRole('ADMIN','STOREKEEPER')" style="text-align:center; padding:60px; background:#f8f9fa; border-radius:8px;">
+    <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для ввода фактических остатков. Эта операция доступна только администраторам и кладовщикам.</p>
+    <a th:href="@{/}" class="btn" style="background-color:#95a5a6; color:white; margin-top:10px; padding:10px 20px; text-decoration:none;">Вернуться на главную</a>
 </div>
 
 </body>

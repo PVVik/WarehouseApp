@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,6 +21,7 @@ public class NomenclatureController {
     private final BaseService<NomenclatureDto> nomenclatureService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public String nomenclaturePage(@RequestParam(defaultValue = "0") int page,
                                    @RequestParam(defaultValue = "10") int size,
                                    @RequestParam(required = false) String name,
@@ -60,6 +62,7 @@ public class NomenclatureController {
     }
 
     @GetMapping("/form")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String nomenclatureForm(@RequestParam(required = false) Long id,
                                    @RequestParam(required = false) String from,
                                    @RequestParam(required = false) String name,
@@ -83,6 +86,7 @@ public class NomenclatureController {
     }
 
     @PostMapping("/form")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String saveNomenclature(@ModelAttribute("nomenclature") @Valid NomenclatureDto dto,
                                    BindingResult result,
                                    @RequestParam(required = false) String from,

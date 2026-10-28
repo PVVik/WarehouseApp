@@ -10,6 +10,7 @@ import com.example.warehouseApp.service.storageLocation.StorageLocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,7 @@ import java.time.LocalDate;
 @Controller
 @RequestMapping("/movements/receipt")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
 public class ReceiptController {
 
     private final ReceiptService receiptService;

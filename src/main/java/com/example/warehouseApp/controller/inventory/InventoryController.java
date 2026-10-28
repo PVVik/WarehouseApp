@@ -9,6 +9,7 @@ import com.example.warehouseApp.service.inventory.InventoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,6 +28,7 @@ public class InventoryController {
     private final BaseService<WarehouseDto> warehouseService;
 
     @GetMapping("/create")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String showCreateForm(Model model) {
         model.addAttribute("inventoryForm", new InventoryCheckCreateDto());
         model.addAttribute("warehouses", warehouseService.getAll(Pageable.unpaged(), null));
@@ -34,6 +36,7 @@ public class InventoryController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String createCheck(@Valid @ModelAttribute("inventoryForm") InventoryCheckCreateDto dto,
                               BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
@@ -63,6 +66,7 @@ public class InventoryController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public String listInventory(Model model) {
         List<InventoryCheckDtoResponse> list = inventoryService.getAllChecks();
         model.addAttribute("checks", list);
@@ -70,6 +74,7 @@ public class InventoryController {
     }
 
     @GetMapping("/{id}/lines")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String showLines(@PathVariable Long id, Model model) {
         InventoryCheckDtoResponse check = inventoryService.getById(id);
         List<InventoryLineDto> lines = inventoryService.getLinesByCheckId(id);
@@ -87,6 +92,7 @@ public class InventoryController {
     }
 
     @PostMapping("/{id}/lines")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String saveActualQuantities(@PathVariable Long id,
                                        @ModelAttribute("lineInput") LineInputForm form,
                                        BindingResult bindingResult,
@@ -136,6 +142,7 @@ public class InventoryController {
     }
 
     @PostMapping("/{id}/complete")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String completeCheck(
             @PathVariable Long id,
             RedirectAttributes redirectAttributes
@@ -157,6 +164,7 @@ public class InventoryController {
     }
 
     @GetMapping("/{id}/review")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public String reviewCheck(@PathVariable Long id, Model model) {
 
         InventoryCheckDtoResponse dto = inventoryService.getById(id);
@@ -170,6 +178,7 @@ public class InventoryController {
     }
 
     @GetMapping("/acts/{actId}")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public String showAct(@PathVariable Long actId, Model model) {
         InventoryDiscrepancyActDto actDto = inventoryService.getActById(actId);
 
@@ -178,6 +187,7 @@ public class InventoryController {
     }
 
     @PostMapping("/acts/{actId}/settle")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String settleAct(@PathVariable Long actId, RedirectAttributes redirectAttributes) {
         try {
             inventoryService.settleDiscrepancies(actId);

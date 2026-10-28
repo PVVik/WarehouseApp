@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,6 +22,7 @@ public class CounterpartyController {
     private final BaseService<CounterpartyDto> counterpartyService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public String listPage(@RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "10") int size,
                            @RequestParam(required = false) String name,
@@ -57,6 +59,7 @@ public class CounterpartyController {
     }
 
     @GetMapping("/create")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String createForm(@RequestParam(required = false) String from,
                              @RequestParam(required = false) String name,
                              Model model) {
@@ -71,6 +74,7 @@ public class CounterpartyController {
     }
 
     @GetMapping("/edit/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String editForm(@PathVariable long id, Model model) {
         CounterpartyDto dto = counterpartyService.getById(id);
         model.addAttribute("counterpartyDto", dto);
@@ -79,6 +83,7 @@ public class CounterpartyController {
     }
 
     @PostMapping("/save")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String save(@ModelAttribute("counterpartyDto") @Valid CounterpartyDto dto,
                        BindingResult result,
                        @RequestParam(required = false) String from,
@@ -106,6 +111,7 @@ public class CounterpartyController {
     }
 
     @GetMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String delete(@PathVariable long id, RedirectAttributes redirectAttributes) {
         try {
             counterpartyService.delete(id);

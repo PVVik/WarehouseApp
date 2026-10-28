@@ -1,91 +1,201 @@
-<style>
-    .status-badge {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        display: inline-block;
-    }
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Контроль сроков годности — WarehouseApp</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
 
-    .status-expiring {
-        background-color: #fff3cd;
-        color: #856404;
-    }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-    .status-expired {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
+        h3 {
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-        font-size: 0.95rem;
-    }
+        .toolbar {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    th, td {
-        border: 1px solid #dee2e6;
-        padding: 10px 12px;
-        text-align: left;
-    }
+        .btn {
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-block;
+        }
 
-    th {
-        background-color: #f8f9fa;
-        color: #495057;
-        font-weight: 600;
-    }
-</style>
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
 
-<h3>Контроль сроков годности партий</h3>
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
 
-<div style="margin-bottom: 15px;">
-    <a th:href="@{/analytics}" class="btn btn-secondary">← Назад</a>
+        .status-expiring {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-expired {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pagination a, .pagination span {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: #333;
+            border-radius: 4px;
+        }
+
+        .pagination .active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            background: white;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div sec:authorize="hasAnyRole('VIEWER','ADMIN','STOREKEEPER')">
+    <div class="container">
+        <h3>Контроль сроков годности партий</h3>
+
+        <div class="toolbar">
+            <a th:href="@{/analytics}" class="btn btn-secondary">← Назад</a>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Номенклатура</th>
+                    <th>Номер партии</th>
+                    <th>Срок годности</th>
+                    <th>Статус</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${batches.content}">
+                    <td th:text="${item.nomenclatureName}">Название</td>
+                    <td th:text="${item.batchNumber}">Номер партии</td>
+                    <td th:text="${#temporals.format(item.expiryDate, 'dd.MM.yyyy')}">Дата</td>
+                    <td>
+                        <span th:if="${item.status == 'EXPIRING_SOON'}"
+                              class="status-badge status-expiring">
+                            Срок годности скоро истекает
+                        </span>
+
+                        <span th:if="${item.status == 'EXPIRED'}"
+                              class="status-badge status-expired">
+                            Срок годности истёк
+                        </span>
+
+                        <span th:unless="${item.status == 'EXPIRING_SOON' or item.status == 'EXPIRED'}"
+                              class="status-badge status-active">
+                            В норме
+                        </span>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(batches.content)}">
+                    <td colspan="4" class="empty-state">
+                        Нет партий для отображения.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${batches.totalPages > 1}" class="pagination">
+            <a th:if="${batches.hasPrevious()}"
+               th:href="@{/analytics/expiry-control(page=${batches.number - 1}, size=${batches.size})}"
+               class="btn">← Назад</a>
+            <span th:unless="${batches.hasPrevious()}">← Назад</span>
+
+            <span th:text="'Страница ' + (batches.number + 1) + ' из ' + batches.totalPages"></span>
+
+            <a th:if="${batches.hasNext()}"
+               th:href="@{/analytics/expiry-control(page=${batches.number + 1}, size=${batches.size})}"
+               class="btn">Вперёд →</a>
+            <span th:unless="${batches.hasNext()}">Вперёд →</span>
+        </div>
+    </div>
 </div>
 
-<div class="table-container">
-    <table>
-        <thead>
-        <tr>
-            <th>Номенклатура</th>
-            <th>Номер партии</th>
-            <th>Срок годности</th>
-            <th>Статус</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="item : ${batches}">
-            <td th:text="${item.nomenclatureName}">Название</td>
-
-            <td th:text="${item.batchNumber}">Номер партии</td>
-
-            <td th:text="${#temporals.format(item.expiryDate, 'dd.MM.yyyy')}">Дата</td>
-
-            <td>
-                    <span th:if="${item.status == 'EXPIRING_SOON'}"
-                          class="status-badge status-expiring">
-                        Срок годности скоро истекает
-                    </span>
-
-                <span th:if="${item.status == 'EXPIRED'}"
-                      class="status-badge status-expired">
-                        Срок годности истек
-                    </span>
-
-                <span th:unless="${item.status == 'EXPIRING_SOON' or item.status == 'EXPIRED'}"
-                      class="status-badge status-active">
-                        В норме
-                    </span>
-            </td>
-        </tr>
-
-        <tr th:if="${#lists.isEmpty(batches.content)}">
-            <td colspan="4" style="text-align: center; padding: 20px; color: #6c757d;">
-                Нет партий для отображения.
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <div th:if="${!batches.hasPrevious() and !batches.hasNext()}"></div>
+<div sec:authorize="!hasAnyRole('VIEWER','ADMIN','STOREKEEPER')" style="text-align:center; padding:60px; background:#f8f9fa; border-radius:8px;">
+    <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для просмотра отчётов.</p>
+    <a th:href="@{/}" class="btn" style="background-color:#6c757d; color:white; margin-top:10px; padding:10px 20px; text-decoration:none;">Вернуться на главную</a>
 </div>
+
+</body>
+</html>

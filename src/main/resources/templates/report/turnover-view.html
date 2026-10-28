@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Отчёт по оборачиваемости (ABC)</title>
@@ -13,6 +14,7 @@
             gap: 15px;
             margin-bottom: 20px;
             flex-wrap: wrap;
+            border: 1px solid #ddd;
         }
 
         .form-group {
@@ -33,6 +35,13 @@
             font-size: 14px;
         }
 
+        select {
+            padding: 6px 10px;
+            min-width: 220px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
         .submit-btn {
             padding: 8px 20px;
             background-color: #007bff;
@@ -45,6 +54,25 @@
 
         .submit-btn:hover {
             background-color: #0056b3;
+        }
+
+        .download-btn {
+            padding: 7px 18px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #f0f0f0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 4px;
+            border: 1px solid #ccc;
         }
 
         table {
@@ -83,138 +111,136 @@
             padding: 4px 8px;
             border-radius: 4px;
         }
+
+        .access-denied-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .access-denied-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
 
-<div style="margin-bottom: 15px;">
-    <a href="/analytics" class="back-btn" style="
-        display: inline-block;
-        padding: 8px 16px;
-        background-color: #f0f0f0;
-        color: #333;
-        text-decoration: none;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-    ">← Назад</a>
+<div sec:authorize="hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')">
+    <div style="margin-bottom: 15px;">
+        <a href="/analytics" class="back-btn">← Назад</a>
+    </div>
+
+    <form th:action="@{/report/turnover}" method="get" class="filter-panel">
+        <div class="form-group">
+            <label for="warehouseId">Склад:</label>
+            <select id="warehouseId" name="warehouseId">
+                <option value="" th:selected="${selectedWarehouseId == null}">-- Все склады --</option>
+                <option th:each="wh : ${warehouses}"
+                        th:value="${wh.id}"
+                        th:text="${wh.name}"
+                        th:selected="${selectedWarehouseId != null and selectedWarehouseId == wh.id}">
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="start">С:</label>
+            <input type="date" id="start" name="start"
+                   th:value="${#temporals.format(selectedStart, 'yyyy-MM-dd')}"
+                   required/>
+        </div>
+
+        <div class="form-group">
+            <label for="end">По:</label>
+            <input type="date" id="end" name="end"
+                   th:value="${#temporals.format(selectedEnd, 'yyyy-MM-dd')}"
+                   required/>
+        </div>
+
+        <button type="submit" class="submit-btn">Сформировать отчёт</button>
+
+        <button type="button" class="download-btn"
+                onclick="downloadCsv()" style="margin-left: 10px;">
+            📥 Скачать отчёт (CSV)
+        </button>
+    </form>
+
+    <h2>Отчёт по оборачиваемости и ABC-анализу
+        <th:block th:if="${selectedWarehouseId != null}">
+            (склад №<span th:text="${selectedWarehouseId}"></span>)
+        </th:block>
+        <br>
+        <small>Период:
+            <span th:text="${#temporals.format(selectedStart, 'dd.MM.yyyy')}"></span>
+            –
+            <span th:text="${#temporals.format(selectedEnd, 'dd.MM.yyyy')}"></span>
+        </small>
+    </h2>
+
+    <table>
+        <thead>
+        <tr style="background-color: #f8f9fa;">
+            <th style="width: 80px; padding: 8px; text-align: left;">Группа ABC</th>
+            <th style="padding: 8px; text-align: left;">Номенклатура</th>
+            <th style="padding: 8px; text-align: right;">Расход (шт)</th>
+            <th style="padding: 8px; text-align: right;">Ср. мес. расход (шт)</th>
+            <th style="padding: 8px; text-align: right;">Сумма расхода (руб)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${turnoverList}">
+            <td style="padding: 8px;">
+                <span th:class="'badge-' + ${row.group.toLowerCase()}"
+                      style="padding: 3px 6px; border-radius: 4px; font-weight: bold;">
+                    <strong th:text="${row.group}"></strong>
+                </span>
+            </td>
+            <td style="padding: 8px;" th:text="${row.nomenclatureName}"></td>
+
+            <td style="padding: 8px; text-align: right;">
+                <th:block th:if="${row.totalQuantity != null}">
+                    <span th:text="${row.totalQuantity}"></span>
+                </th:block>
+                <th:block th:unless="${row.totalQuantity != null}">—</th:block>
+            </td>
+
+            <td style="padding: 8px; text-align: right;">
+                <th:block th:if="${row.avgMonthlyQuantity != null}">
+                    <span th:text="${row.avgMonthlyQuantity}"></span>
+                </th:block>
+                <th:block th:unless="${row.avgMonthlyQuantity != null}">—</th:block>
+            </td>
+
+            <td style="padding: 8px; text-align: right;">
+                <th:block th:if="${row.totalAmount != null}">
+                    <span th:text="${row.totalAmount}"></span>&nbsp;₽
+                </th:block>
+                <th:block th:unless="${row.totalAmount != null}">—</th:block>
+            </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(turnoverList)}">
+            <td colspan="5" style="text-align: center; padding: 20px; color: #666;">
+                Нет данных за выбранный период
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 
-<form th:action="@{/report/turnover}" method="get" class="filter-panel"
-      style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 6px;">
-
-    <div class="form-group" style="display: inline-block;">
-        <label for="warehouseId">Склад:</label>
-        <select id="warehouseId" name="warehouseId" style="padding: 6px 10px; min-width: 220px;">
-            <option value="" th:selected="${selectedWarehouseId == null}">-- Все склады --</option>
-            <option th:each="wh : ${warehouses}"
-                    th:value="${wh.id}"
-                    th:text="${wh.name}"
-                    th:selected="${selectedWarehouseId != null and selectedWarehouseId == wh.id}">
-            </option>
-        </select>
-    </div>
-
-    <div class="form-group" style="display: inline-block; margin-left: 15px;">
-        <label for="start">С:</label>
-        <input type="date" id="start" name="start"
-               th:value="${#temporals.format(selectedStart, 'yyyy-MM-dd')}"
-               required style="padding: 5px;"/>
-    </div>
-
-    <div class="form-group" style="display: inline-block; margin-left: 15px;">
-        <label for="end">По:</label>
-        <input type="date" id="end" name="end"
-               th:value="${#temporals.format(selectedEnd, 'yyyy-MM-dd')}"
-               required style="padding: 5px;"/>
-    </div>
-
-    <button type="submit" class="submit-btn" style="
-        margin-left: 20px;
-        padding: 7px 18px;
-        background-color: #007bff;
+<div sec:authorize="!hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')" class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для просмотра отчётов по оборачиваемости.</p>
+    <a th:href="@{/}" class="btn btn-primary" style="
+        padding: 9px 20px;
+        background-color: #3498db;
         color: white;
-        border: none;
         border-radius: 4px;
-        cursor: pointer;
-    ">Сформировать отчёт
-    </button>
+        text-decoration: none;">Вернуться на главную</a>
+</div>
 
-    <button type="button" class="download-btn"
-            onclick="downloadCsv()"
-            style="
-            margin-left: 10px;
-            padding: 7px 18px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        ">
-        📥 Скачать отчёт (CSV)
-    </button>
-</form>
-
-<h2>Отчёт по оборачиваемости и ABC-анализу
-    <th:block th:if="${selectedWarehouseId != null}">
-        (склад №<span th:text="${selectedWarehouseId}"></span>)
-    </th:block>
-    <br>
-    <small>Период:
-        <span th:text="${#temporals.format(selectedStart, 'dd.MM.yyyy')}"></span>
-        –
-        <span th:text="${#temporals.format(selectedEnd, 'dd.MM.yyyy')}"></span>
-    </small>
-</h2>
-
-<table style="width: 100%; border-collapse: collapse;">
-    <thead>
-    <tr style="background-color: #f8f9fa;">
-        <th style="width: 80px; padding: 8px; text-align: left; border: 1px solid #ddd;">Группа ABC</th>
-        <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Номенклатура</th>
-        <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Расход (шт)</th>
-        <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Ср. мес. расход (шт)</th>
-        <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Сумма расхода (руб)</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="row : ${turnoverList}">
-        <td style="padding: 8px; border: 1px solid #ddd;">
-            <span th:class="'badge-' + ${row.group.toLowerCase()}"
-                  style="padding: 3px 6px; border-radius: 4px; color: white; font-weight: bold;">
-                <strong th:text="${row.group}"></strong>
-            </span>
-        </td>
-        <td style="padding: 8px; border: 1px solid #ddd;" th:text="${row.nomenclatureName}"></td>
-
-        <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">
-            <th:block th:if="${row.totalQuantity != null}">
-                <span th:text="${row.totalQuantity}"></span>
-            </th:block>
-            <th:block th:unless="${row.totalQuantity != null}">—</th:block>
-        </td>
-
-        <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">
-            <th:block th:if="${row.avgMonthlyQuantity != null}">
-                <span th:text="${row.avgMonthlyQuantity}"></span>
-            </th:block>
-            <th:block th:unless="${row.avgMonthlyQuantity != null}">—</th:block>
-        </td>
-
-        <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">
-            <th:block th:if="${row.totalAmount != null}">
-                <span th:text="${row.totalAmount}"></span>&nbsp;₽
-            </th:block>
-            <th:block th:unless="${row.totalAmount != null}">—</th:block>
-        </td>
-    </tr>
-
-    <tr th:if="${#lists.isEmpty(turnoverList)}">
-        <td colspan="5" style="text-align: center; padding: 20px; color: #666; border: 1px solid #ddd;">
-            Нет данных за выбранный период
-        </td>
-    </tr>
-    </tbody>
-</table>
 <script>
     function downloadCsv() {
         const warehouseId = document.getElementById('warehouseId').value;
@@ -236,5 +262,4 @@
     }
 </script>
 </body>
-
 </html>

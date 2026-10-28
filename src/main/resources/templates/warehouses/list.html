@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Склады</title>
@@ -20,26 +21,48 @@
             flex-wrap: wrap;
         }
 
-        .btn-back-custom {
-            background-color: #6c757d !important;
-            color: white !important;
-            padding: 10px 20px !important;
-            text-decoration: none !important;
-            border-radius: 4px !important;
+        .btn {
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
             font-weight: bold;
             font-size: 14px;
+            cursor: pointer;
             display: inline-block;
+            border: none;
         }
 
-        .btn-create-custom {
-            background-color: #28a745 !important;
-            color: white !important;
-            padding: 10px 20px !important;
-            text-decoration: none !important;
-            border-radius: 4px !important;
-            font-weight: bold;
-            font-size: 14px;
-            display: inline-block;
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-create {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-view {
+            background-color: #6c757d;
+            color: white;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-edit {
+            background-color: #007bff;
+            color: white;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            padding: 6px 12px;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
         }
 
         h1 { margin-top: 0; color: #333; }
@@ -97,13 +120,13 @@
             cursor: pointer;
         }
 
-        .btn-search-custom {
+        .btn-search {
             background-color: #007bff;
             color: white;
             border: none;
         }
 
-        .btn-reset-custom {
+        .btn-reset {
             background-color: #6c757d;
             color: white;
             border: none;
@@ -131,21 +154,30 @@
             color: white;
             border-color: #007bff;
         }
+
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
     </style>
 </head>
 <body>
 
 <div class="top-controls">
-    <a th:href="@{/}" class="btn-back-custom">← Назад к операциям</a>
-    <a th:href="@{/warehouse/new}" class="btn-create-custom">+ Добавить склад</a>
+    <a th:href="@{/}" class="btn btn-back">← Назад к операциям</a>
+
+    <div sec:authorize="hasAnyRole('ADMIN')">
+        <a th:href="@{/warehouse/new}" class="btn btn-create">+ Добавить склад</a>
+    </div>
 </div>
 
 <h1>Склады</h1>
 
 <form th:action="@{/warehouse}" method="get" class="search-form">
-    <input type="text" name="name" th:value="${filterName}" placeholder="Название склада"/>
-    <button type="submit" class="btn-search-custom">Искать</button>
-    <a th:href="@{/warehouse}" class="btn-reset-custom">Сбросить</a>
+    <input type="text" name="name" th:value="${filterName != null ? filterName : ''}" placeholder="Название склада"/>
+    <button type="submit" class="btn btn-search">Искать</button>
+    <a th:href="@{/warehouse}" class="btn btn-reset">Сбросить</a>
 </form>
 
 <table>
@@ -161,11 +193,11 @@
     </thead>
     <tbody>
 
-    <tr th:if="${#lists.isEmpty(warehouses)}">
+    <tr th:if="${warehouses == null or #lists.isEmpty(warehouses)}">
         <td colspan="6" style="text-align:center; padding: 20px;">Складов пока нет</td>
     </tr>
 
-    <tr th:each="w : ${warehouses}">
+    <tr th:each="w : ${warehouses}" th:unless="${warehouses == null}">
         <td th:text="${w.id}"></td>
         <td th:text="${w.name}"></td>
         <td th:text="${w.address}"></td>
@@ -174,27 +206,18 @@
             <span th:if="${w.active}" class="status-active">Активен</span>
             <span th:unless="${w.active}" class="status-inactive">Неактивен</span>
         </td>
-        <td>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <td class="actions-cell">
+            <a th:href="@{/warehouse/{id}(id=${w.id})}" class="btn btn-view">Просмотр</a>
 
-                <a th:href="@{/warehouse/{id}(id=${w.id})}"
-                   style="background-color: #6c757d; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-size: 13px;">
-                    Просмотр
-                </a>
-
-                <a th:href="@{/warehouse/{id}/edit(id=${w.id})}"
-                   style="background-color: #007bff; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-size: 13px;">
-                    Редактировать
-                </a>
+            <div sec:authorize="hasAnyRole('ADMIN')">
+                <a th:href="@{/warehouse/{id}/edit(id=${w.id})}" class="btn btn-edit">Редактировать</a>
 
                 <form th:action="@{/warehouse/{id}/delete(id=${w.id})}" method="post" style="display: inline;">
-                    <button type="submit"
-                            style="background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 13px; cursor: pointer;"
-                            onclick="return confirm('Вы уверены, что хотите удалить склад?');">
+                    <button type="submit" class="btn btn-delete"
+                            onclick="return confirm('Вы уверены, что хотите удалить склад ID: ' + ${w.id} + '?');">
                         Удалить
                     </button>
                 </form>
-
             </div>
         </td>
     </tr>
@@ -202,21 +225,24 @@
     </tbody>
 </table>
 
-<div th:if="${totalPages > 1}">
+<div th:if="${totalPages != null and totalPages > 1}">
     <ul class="pagination">
-        <li th:if="${currentPage > 0}">
-            <a th:href="@{/warehouse(page=${currentPage - 1}, size=${pageSize}, name=${filterName})}">&laquo; Назад</a>
+        <li th:if="${currentPage != null and currentPage > 0}">
+            <a th:href="@{/warehouse(page=${currentPage - 1}, size=${pageSize != null ? pageSize : 10}, name=${filterName != null ? filterName : ''})}">&laquo; Назад</a>
         </li>
 
-        <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+        <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+            th:unless="${totalPages == null}">
+
             <a th:if="${i != currentPage}"
-               th:href="@{/warehouse(page=${i}, size=${pageSize}, name=${filterName})}"
+               th:href="@{/warehouse(page=${i}, size=${pageSize != null ? pageSize : 10}, name=${filterName != null ? filterName : ''})}"
                th:text="${i + 1}"></a>
+
             <span th:unless="${i != currentPage}" class="current" th:text="${i + 1}"></span>
         </li>
 
-        <li th:if="${currentPage < totalPages - 1}">
-            <a th:href="@{/warehouse(page=${currentPage + 1}, size=${pageSize}, name=${filterName})}">Вперёд &raquo;</a>
+        <li th:if="${currentPage != null and currentPage < totalPages - 1}">
+            <a th:href="@{/warehouse(page=${currentPage + 1}, size=${pageSize != null ? pageSize : 10}, name=${filterName != null ? filterName : ''})}">Вперёд &raquo;</a>
         </li>
     </ul>
 </div>

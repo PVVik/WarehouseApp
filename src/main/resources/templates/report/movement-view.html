@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Отчёт по движениям — Складская система</title>
@@ -71,53 +72,77 @@
         .btn-primary:hover {
             background-color: #2980b9;
         }
+
+        .access-denied-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .access-denied-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <a href="/report/movement-form" style="display:inline-block; margin-bottom:20px; color:#3498db; text-decoration:none; font-weight:600;">
-        ← Назад к выбору параметров
-    </a>
 
-    <h2>Отчёт по движениям товаров</h2>
-
-    <div style="margin-bottom:15px; color:#666; font-size:14px;">
-        Период: <b th:text="${#temporals.format(startDate, 'dd.MM.yyyy')}"></b> – <b th:text="${#temporals.format(endDate, 'dd.MM.yyyy')}"></b>
-        <span>, Склад: <b th:text="${selectedWarehouseName}"></b></span>
-    </div>
-
-    <table>
-        <thead>
-        <tr>
-            <th class="col-date">Дата</th>
-            <th class="col-type">Тип документа</th>
-            <th class="col-doc">Номер документа</th>
-            <th class="col-name">Номенклатура</th>
-            <th class="col-qty">Количество</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:if="${#lists.isEmpty(reportRows)}">
-            <td colspan="5" class="empty-message">Нет данных за выбранный период</td>
-        </tr>
-
-        <tr th:each="row : ${reportRows}">
-
-            <td th:text="${#temporals.format(row.date, 'dd.MM.yyyy')}"></td>
-            <td class="col-type" th:text="${row.documentType}"></td>
-            <td class="col-doc" th:text="${row.documentNumber}"></td>
-            <td class="col-name" th:text="${row.nomenclatureName}"></td>
-            <td class="col-qty" th:text="${row.qty}"></td>
-        </tr>
-        </tbody>
-    </table>
-
-    <p style="margin-top:30px; text-align:center;">
-        <a th:href="@{/report/download-movement(warehouseId=${selectedWarehouseId}, startDate=${startDate}, endDate=${endDate})}"
-           class="btn btn-primary">
-            📥 Скачать отчёт (CSV) для 1С
+<div sec:authorize="hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')">
+    <div class="container">
+        <a href="/report/movement-form" style="display:inline-block; margin-bottom:20px; color:#3498db; text-decoration:none; font-weight:600;">
+            ← Назад к выбору параметров
         </a>
-    </p>
+
+        <h2>Отчёт по движениям товаров</h2>
+
+        <div style="margin-bottom:15px; color:#666; font-size:14px;">
+            Период: <b th:text="${#temporals.format(startDate, 'dd.MM.yyyy')}"></b> – <b th:text="${#temporals.format(endDate, 'dd.MM.yyyy')}"></b>
+            <span>, Склад: <b th:text="${selectedWarehouseName}"></b></span>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th class="col-date">Дата</th>
+                <th class="col-type">Тип документа</th>
+                <th class="col-doc">Номер документа</th>
+                <th class="col-name">Номенклатура</th>
+                <th class="col-qty">Количество</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(reportRows)}">
+                <td colspan="5" class="empty-message">Нет данных за выбранный период</td>
+            </tr>
+
+            <tr th:each="row : ${reportRows}">
+                <td th:text="${#temporals.format(row.date, 'dd.MM.yyyy')}"></td>
+                <td class="col-type" th:text="${row.documentType}"></td>
+                <td class="col-doc" th:text="${row.documentNumber}"></td>
+                <td class="col-name" th:text="${row.nomenclatureName}"></td>
+                <td class="col-qty" th:text="${row.qty}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p style="margin-top:30px; text-align:center;">
+            <a th:href="@{/report/download-movement(warehouseId=${selectedWarehouseId}, startDate=${startDate}, endDate=${endDate})}"
+               class="btn btn-primary">
+                📥 Скачать отчёт (CSV)
+            </a>
+        </p>
+    </div>
 </div>
+
+<div sec:authorize="!hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')" class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для просмотра отчёта по движениям товаров.</p>
+    <a th:href="@{/}" class="btn" style="
+        background-color: #95a5a6; color: white; margin-top:10px; display:inline-block; padding:10px 20px; text-decoration:none;">
+        Вернуться на главную
+    </a>
+</div>
+
 </body>
 </html>

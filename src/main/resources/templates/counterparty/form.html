@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title th:text="${counterpartyDto.id != null ? 'Редактировать' : 'Создать'} + ' контрагента'">Контрагент</title>
@@ -22,70 +23,81 @@
 </head>
 <body>
 
-<h1 th:text="${counterpartyDto.id != null ? 'Редактировать' : 'Создать'} + ' контрагента'"></h1>
+<div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
+    <h1 th:text="${counterpartyDto.id != null ? 'Редактировать' : 'Создать'} + ' контрагента'"></h1>
 
-<div class="form-card">
-    <form th:action="@{/counterparty/save}" method="post" th:object="${counterpartyDto}">
-        <input type="hidden" name="from" th:value="${from}">
+    <div class="form-card">
+        <form th:action="@{/counterparty/save}" method="post" th:object="${counterpartyDto}">
+            <input type="hidden" name="from" th:value="${from}">
 
-        <div class="field">
-            <label>Название организации</label>
-            <input type="text" th:field="*{name}" required>
-            <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error"></span>
-        </div>
+            <div class="field">
+                <label>Название организации</label>
+                <input type="text" th:field="*{name}" required placeholder="ООО «Вектор»">
+                <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error"></span>
+            </div>
 
-        <div class="field">
-            <label>ИНН</label>
-            <input type="text" th:field="*{inn}" required>
-            <span th:if="${#fields.hasErrors('inn')}" th:errors="*{inn}" class="error"></span>
-        </div>
+            <div class="field">
+                <label>ИНН</label>
+                <input type="text" th:field="*{inn}" required placeholder="1234567890">
+                <span th:if="${#fields.hasErrors('inn')}" th:errors="*{inn}" class="error"></span>
+            </div>
 
-        <div class="field">
-            <label>КПП</label>
-            <input type="text" th:field="*{kpp}" required>
-            <span th:if="${#fields.hasErrors('kpp')}" th:errors="*{kpp}" class="error"></span>
-        </div>
+            <div class="field">
+                <label>КПП</label>
+                <input type="text" th:field="*{kpp}" required placeholder="123456789">
+                <span th:if="${#fields.hasErrors('kpp')}" th:errors="*{kpp}" class="error"></span>
+            </div>
 
-        <div class="field">
-            <label>Тип контрагента</label>
-            <select th:field="*{counterpartyType}" required>
-                <option value="" disabled>— Выберите тип —</option>
-                <option th:each="t : ${types}"
-                        th:value="${t}"
-                        th:text="${t.label}"
-                        th:selected="${t == counterpartyDto.counterpartyType}">
-                </option>
-            </select>
-        </div>
+            <div class="field">
+                <label>Тип контрагента</label>
+                <select th:field="*{counterpartyType}" required>
+                    <option value="" disabled>— Выберите тип —</option>
+                    <option th:each="t : ${types}"
+                            th:value="${t}"
+                            th:text="${t.label}"
+                            th:selected="${t == counterpartyDto.counterpartyType}">
+                    </option>
+                </select>
+            </div>
 
-        <div class="field">
-            <label>Телефон</label>
-            <input type="text" th:field="*{phone}" placeholder="+7XXXXXXXXXX" required>
-            <span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="error"></span>
-        </div>
+            <div class="field">
+                <label>Телефон</label>
+                <input type="text" th:field="*{phone}" placeholder="+7XXXXXXXXXX" required>
+                <span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="error"></span>
+            </div>
 
-        <div class="field">
-            <label>Контактное лицо</label>
-            <input type="text" th:field="*{contact}" required>
-            <span th:if="${#fields.hasErrors('contact')}" th:errors="*{contact}" class="error"></span>
-        </div>
+            <div class="field">
+                <label>Контактное лицо</label>
+                <input type="text" th:field="*{contact}" required placeholder="Иванов И.И.">
+                <span th:if="${#fields.hasErrors('contact')}" th:errors="*{contact}" class="error"></span>
+            </div>
 
-        <div class="field checkbox-field">
-            <input type="checkbox" th:field="*{isActive}" th:checked="${counterpartyDto.isActive}">
-            <label>Активен</label>
-        </div>
+            <div class="field checkbox-field">
+                <input type="checkbox" th:field="*{isActive}" th:checked="${counterpartyDto.isActive}">
+                <label>Активен</label>
+            </div>
 
-        <div class="actions">
-            <button type="submit" class="btn btn-save">Сохранить</button>
-            <a th:href="@{/counterparty}" class="btn btn-back">Отмена</a>
-        </div>
-    </form>
+            <div class="actions">
+                <button type="submit" class="btn btn-save">Сохранить</button>
+                <a th:href="@{/counterparty}" class="btn btn-back">Отмена</a>
+            </div>
+        </form>
 
-    <a th:href="${from == 'movements'} ? @{/movements/counterparty/list} : @{/counterparty}"
-       class="btn btn-back">Назад</a>
+        <a th:if="${from == 'movements'}"
+           th:href="@{/movements/counterparty/list}"
+           class="btn btn-back" style="margin-top:10px;">← Назад к выбору контрагента (в движениях)</a>
+        <a th:unless="${from == 'movements'}"
+           th:href="@{/counterparty}"
+           class="btn btn-back" style="margin-top:10px;">← Назад к списку контрагентов</a>
+    </div>
+</div>
 
+<div sec:authorize="!hasAnyRole('ADMIN','STOREKEEPER')" style="text-align:center; padding:60px; background:#f8f9fa; border-radius:8px;">
+    <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для создания или редактирования контрагентов.</p>
+    <a th:href="@{/}" class="btn" style="background-color:#6c757d; color:white; margin-top:10px; padding:10px 20px; text-decoration:none;">Вернуться на главную</a>
 </div>
 
 </body>
 </html>
-

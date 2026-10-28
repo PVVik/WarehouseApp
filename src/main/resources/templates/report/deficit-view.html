@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Отчёт по дефициту</title>
@@ -139,74 +140,97 @@
         .text-right {
             text-align: right;
         }
+
+        .access-denied-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .access-denied-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <a th:href="@{/analytics}" class="btn btn-primary" style="margin-bottom: 20px;">
-        ← Назад к аналитике
-    </a>
-
-    <form th:action="@{/report/deficit}" method="get" class="filter-panel">
-        <div class="form-group">
-            <label for="warehouseId">Склад:</label>
-            <select id="warehouseId" name="warehouseId" required>
-                <option value="" th:selected="${selectedWarehouseId == null}">-- Выберите склад --</option>
-                <option th:each="wh : ${warehouses}"
-                        th:value="${wh.id}"
-                        th:text="${wh.name}"
-                        th:selected="${selectedWarehouseId != null and selectedWarehouseId == wh.id}">
-                </option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Сформировать отчёт</button>
-
-        <a th:if="${selectedWarehouseId != null}"
-           th:href="@{/api/reports/deficit/csv(warehouseId=${selectedWarehouseId})}"
-           class="btn btn-success"
-           style="margin-left: auto;">
-            📥 Скачать отчёт (CSV)
+<div sec:authorize="hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')">
+    <div class="container">
+        <a th:href="@{/analytics}" class="btn btn-primary" style="margin-bottom: 20px;">
+            ← Назад к аналитике
         </a>
-    </form>
 
-    <h2>Отчёт по дефициту
-        <th:block th:if="${selectedWarehouseId != null}">
-            (склад №<span th:text="${selectedWarehouseId}"></span>)
-        </th:block>
-    </h2>
+        <form th:action="@{/report/deficit}" method="get" class="filter-panel">
+            <div class="form-group">
+                <label for="warehouseId">Склад:</label>
+                <select id="warehouseId" name="warehouseId" required>
+                    <option value="" th:selected="${selectedWarehouseId == null}">-- Выберите склад --</option>
+                    <option th:each="wh : ${warehouses}"
+                            th:value="${wh.id}"
+                            th:text="${wh.name}"
+                            th:selected="${selectedWarehouseId != null and selectedWarehouseId == wh.id}">
+                    </option>
+                </select>
+            </div>
 
-    <table>
-        <thead>
-        <tr>
-            <th style="width: 90px;">Статус</th>
-            <th>Номенклатура</th>
-            <th class="text-right">Остаток</th>
-            <th class="text-right">Мин. норма</th>
-            <th class="text-right">Не хватает</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="row : ${deficitList}">
-            <td>
-                <span th:class="${row.level.toString() == 'CRITICAL' ? 'badge-critical' : 'badge-warning'}">
-                    <strong th:text="${row.level.toString() == 'CRITICAL' ? 'КРИТИЧЕСКИЙ' : 'ВНИМАНИЕ'}"></strong>
-                </span>
-            </td>
-            <td th:text="${row.nomenclatureName}"></td>
-            <td class="text-right" th:text="${row.currentStock.stripTrailingZeros().toPlainString()}"></td>
-            <td class="text-right" th:text="${row.minThreshold.stripTrailingZeros().toPlainString()}"></td>
-            <td class="text-right" th:text="${row.deficitAmount.stripTrailingZeros().toPlainString()}"></td>
-        </tr>
+            <button type="submit" class="btn btn-primary">Сформировать отчёт</button>
 
-        <tr th:if="${#lists.isEmpty(deficitList)}">
-            <td colspan="5" style="text-align: center; padding: 30px; color: #7f8c8d; border: none;">
-                Нет позиций с дефицитом на выбранном складе
-            </td>
-        </tr>
-        </tbody>
-    </table>
+            <a th:if="${selectedWarehouseId != null}"
+               th:href="@{/api/reports/deficit/csv(warehouseId=${selectedWarehouseId})}"
+               class="btn btn-success"
+               style="margin-left: auto;">
+                📥 Скачать отчёт (CSV)
+            </a>
+        </form>
+
+        <h2>Отчёт по дефициту
+            <th:block th:if="${selectedWarehouseId != null}">
+                (склад №<span th:text="${selectedWarehouseId}"></span>)
+            </th:block>
+        </h2>
+
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 90px;">Статус</th>
+                <th>Номенклатура</th>
+                <th class="text-right">Остаток</th>
+                <th class="text-right">Мин. норма</th>
+                <th class="text-right">Не хватает</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row : ${deficitList}">
+                <td>
+                    <span th:class="${row.level.toString() == 'CRITICAL' ? 'badge-critical' : 'badge-warning'}">
+                        <strong th:text="${row.level.toString() == 'CRITICAL' ? 'КРИТИЧЕСКИЙ' : 'ВНИМАНИЕ'}"></strong>
+                    </span>
+                </td>
+                <td th:text="${row.nomenclatureName}"></td>
+                <td class="text-right" th:text="${row.currentStock.stripTrailingZeros().toPlainString()}"></td>
+                <td class="text-right" th:text="${row.minThreshold.stripTrailingZeros().toPlainString()}"></td>
+                <td class="text-right" th:text="${row.deficitAmount.stripTrailingZeros().toPlainString()}"></td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(deficitList)}">
+                <td colspan="5" style="text-align: center; padding: 30px; color: #7f8c8d; border: none;">
+                    Нет позиций с дефицитом на выбранном складе
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div sec:authorize="!hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')" class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для просмотра отчёта по дефициту.</p>
+    <a th:href="@{/}" class="btn" style="
+        background-color: #95a5a6; color: white; margin-top:10px; display:inline-block; padding:10px 20px; text-decoration:none;">
+        Вернуться на главную
+    </a>
 </div>
 
 </body>

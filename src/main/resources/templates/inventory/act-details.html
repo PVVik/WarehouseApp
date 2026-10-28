@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Акт расхождений №<span th:text="${act.id}"></span> - WarehouseApp</title>
@@ -65,7 +66,6 @@
             border: 1px solid #f5c6cb;
         }
 
-        /* Карточка-обёртка для акта */
         .card-wrapper {
             background: white;
             padding: 24px;
@@ -109,7 +109,6 @@
             margin-bottom: 6px;
         }
 
-        /* Таблица */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -164,83 +163,99 @@
 </head>
 <body>
 
-<div class="container">
-    <h4>Акт расхождений №<span th:text="${act.id}"></span></h4>
-    <a href="/inventory" class="btn btn-back">← Назад к инвентаризациям</a>
+<div sec:authorize="hasAnyRole('VIEWER','ADMIN','STOREKEEPER')">
+    <div class="container">
+        <h4>Акт расхождений №<span th:text="${act.id}"></span></h4>
+        <a href="/inventory" class="btn btn-back">← Назад к инвентаризациям</a>
 
-    <div th:if="${successMessage}" class="flash-message flash-success">
-        <b th:text="${successMessage}"></b>
-    </div>
-    <div th:if="${error}" class="flash-message flash-error">
-        <b th:text="${error}"></b>
-    </div>
-
-    <div class="card-wrapper">
-        <div class="card-header-row">
-            <h4>Расхождения по товарам</h4>
-            <span class="status-badge"
-                  th:classappend="${act.status.name() == 'COMPLETED'} ? 'bg-success' : 'bg-warning'">
-                <span th:if="${act.status.name() == 'DRAFT'}">Черновик</span>
-                <span th:if="${act.status.name() == 'COMPLETED'}">Урегулирован</span>
-            </span>
+        <div th:if="${successMessage}" class="flash-message flash-success">
+            <b th:text="${successMessage}"></b>
+        </div>
+        <div th:if="${error}" class="flash-message flash-error">
+            <b th:text="${error}"></b>
         </div>
 
-        <div class="meta-info">
-            <div class="meta-row">Инвентаризация №<strong th:text="${act.checkId}"></strong> | Статус: <strong th:text="${act.checkStatus}"></strong></div>
-            <div class="meta-row">Создан: <span th:text="${#temporals.format(act.createdAt, 'dd.MM.yyyy')}"></span></div>
+        <div class="card-wrapper">
+            <div class="card-header-row">
+                <h4>Расхождения по товарам</h4>
+                <span class="status-badge"
+                      th:classappend="${act.status.name() == 'COMPLETED'} ? 'bg-success' : 'bg-warning'">
+                    <span th:if="${act.status.name() == 'DRAFT'}">Черновик</span>
+                    <span th:if="${act.status.name() == 'COMPLETED'}">Урегулирован</span>
+                </span>
+            </div>
+
+            <div class="meta-info">
+                <div class="meta-row">Инвентаризация №<strong th:text="${act.checkId}"></strong> | Статус: <strong th:text="${act.checkStatus}"></strong></div>
+                <div class="meta-row">Создан: <span th:text="${#temporals.format(act.createdAt, 'dd.MM.yyyy')}"></span></div>
+            </div>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th class="text-end">Учётное кол-во</th>
+                    <th class="text-end">Фактическое кол-во</th>
+                    <th class="text-end">Разница</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="line : ${act.lines}">
+                    <td>
+                        <strong th:text="${line.nomenclatureName}"></strong><br>
+                        <small class="text-muted"
+                               th:text="${line.batchNumber != null ? 'Партия: ' + line.batchNumber : ''}">
+                        </small>
+                    </td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(line.accountedQty, 0, 2)}"></td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(line.actualQty, 0, 2)}"></td>
+
+                    <td class="text-end"
+                        th:class="${line.type.name() == 'WRITE_OFF'} ? 'difference-negative' : 'difference-positive'">
+                        <span th:if="${line.type.name() == 'WRITE_OFF'}">
+                            −<span th:text="${#strings.replace(line.difference.toPlainString(), '.', ',')}"></span>
+                        </span>
+                        <span th:if="${line.type.name() == 'RECEIPT'}">
+                            <span th:text="${#strings.replace(line.difference.toPlainString(), '.', ',')}"></span>
+                        </span>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(act.lines)}">
+                    <td colspan="4" class="no-data-message">Расхождений не обнаружено</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <form sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')"
+                  th:if="${act.status.name() == 'DRAFT'}"
+                  th:action="@{/inventory/acts/{actId}/settle(actId=${act.id})}"
+                  method="POST"
+                  onsubmit="return confirm('Вы уверены? Будут созданы черновики документов списания и оприходования.');">
+                <button type="submit" class="btn btn-primary btn-lg mt-3">
+                    📄 Урегулировать расхождения
+                </button>
+            </form>
+
+            <p th:if="${act.status.name() == 'COMPLETED'}" class="mt-3 text-muted">
+                ✅ Расхождения уже урегулированы. Статус акта: <b>COMPLETED</b>.<br>
+                Теперь необходимо проверить и провести созданные документы списания и оприходования.
+            </p>
+
+            <p sec:authorize="hasRole('VIEWER')"
+               th:if="${act.status.name() == 'DRAFT'}"
+               class="mt-3 text-muted small">
+                👁️ Вы просматриваете акт в режиме «Только чтение». Урегулирование расхождений доступно только администратору и кладовщику.
+            </p>
         </div>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Товар</th>
-                <th class="text-end">Учётное кол-во</th>
-                <th class="text-end">Фактическое кол-во</th>
-                <th class="text-end">Разница</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="line : ${act.lines}">
-                <td>
-                    <strong th:text="${line.nomenclatureName}"></strong><br>
-                    <small class="text-muted"
-                           th:text="${line.batchNumber != null ? 'Партия: ' + line.batchNumber : ''}">
-                    </small>
-                </td>
-                <td class="text-end" th:text="${#numbers.formatDecimal(line.accountedQty, 0, 2)}"></td>
-                <td class="text-end" th:text="${#numbers.formatDecimal(line.actualQty, 0, 2)}"></td>
-
-                <td class="text-end"
-                    th:class="${line.type.name() == 'WRITE_OFF'} ? 'difference-negative' : 'difference-positive'">
-                     <span th:if="${line.type.name() == 'WRITE_OFF'}">
-                    −<span th:text="${#strings.replace(line.difference.toPlainString(), '.', ',')}"></span>
-                     </span>
-                     <span th:if="${line.type.name() == 'RECEIPT'}">
-                     <span th:text="${#strings.replace(line.difference.toPlainString(), '.', ',')}"></span>
-                     </span>
-                </td>
-            </tr>
-
-            <tr th:if="${#lists.isEmpty(act.lines)}">
-                <td colspan="4" class="no-data-message">Расхождений не обнаружено</td>
-            </tr>
-            </tbody>
-        </table>
-
-        <form th:if="${act.status.name() == 'DRAFT'}"
-              th:action="@{/inventory/acts/{actId}/settle(actId=${act.id})}"
-              method="POST"
-              onsubmit="return confirm('Вы уверены? Будут созданы черновики документов списания и оприходования.');">
-            <button type="submit" class="btn btn-primary btn-lg mt-3">
-                📄 Урегулировать расхождения
-            </button>
-        </form>
-
-        <p th:if="${act.status.name() == 'COMPLETED'}" class="mt-3 text-muted">
-            ✅ Расхождения уже урегулированы. Статус акта: <b>COMPLETED</b>.<br>
-            Теперь необходимо проверить и провести созданные документы списания и оприходования.
-        </p>
     </div>
+</div>
+
+<div sec:authorize="!hasAnyRole('VIEWER','ADMIN','STOREKEEPER')" style="text-align:center; padding:60px; background:#f8f9fa; border-radius:8px;">
+    <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для просмотра акта расхождений.</p>
+    <a th:href="@{/}" class="btn" style="background-color:#95a5a6; color:white; margin-top:10px; padding:10px 20px; text-decoration:none;">Вернуться на главную</a>
 </div>
 
 </body>

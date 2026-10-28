@@ -1,175 +1,230 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Выбор склада</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 960px; margin: 0 auto; background-color: #f4f6f9; }
-        h1 { color: #2c3e50; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f5f5f5; }
-        tr:hover { background-color: #fafafa; }
-        .active { color: green; font-weight: bold; }
-        .inactive { color: #999; }
-        .btn { padding: 6px 14px; text-decoration: none; color: white; border-radius: 4px; font-size: 14px; }
-        .btn-select { background-color: #2ecc71; }
-        .btn-create { background-color: #28a745; display: inline-block; padding: 8px 16px; }
-        .btn-back { background-color: #6c757d; }
-        .search-form { margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .search-form input[type="text"] { padding: 6px 10px; width: 200px; border: 1px solid #ddd; border-radius: 4px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 960px; margin: 0 auto; background-color: #f4f6f9; }
+        h1 { color: #2c3e50; margin-bottom: 20px; }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .search-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .search-form input[type="text"] { padding: 6px 10px; width: 220px; border: 1px solid #ddd; border-radius: 4px; }
         .search-form button { padding: 6px 14px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
         .search-form a { padding: 6px 14px; background-color: #95a5a6; color: white; border-radius: 4px; text-decoration: none; font-size: 14px; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .pagination { display: flex; gap: 8px; margin-top: 20px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: middle; }
+        th { background-color: #f5f5f5; color: #555; font-weight: 600; }
+        tr:hover { background-color: #fafafa; }
+
+        .active { color: #27ae60; font-weight: bold; }
+        .inactive { color: #999; font-weight: bold; }
+
+        .btn { padding: 7px 14px; text-decoration: none; color: white; border-radius: 4px; font-size: 13px; display: inline-block; white-space: nowrap; }
+        .btn-select { background-color: #2ecc71; }
+        .btn-create { background-color: #28a745; display: inline-block; padding: 8px 16px; margin-top: 5px; }
+        .btn-back { background-color: #6c757d; }
+        .btn-warning { background-color: #f39c12; }
+        .btn-success { background-color: #27ae60; }
+        .btn-secondary { background-color: #95a5a6; }
+
+        .pagination { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
         .pagination a, .pagination span { padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333; background: white; }
         .pagination .current { background-color: #3498db; color: white; border-color: #3498db; }
-        .alert { padding: 12px 20px; border-radius: 4px; margin-top: 15px; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .not-found { text-align: center; padding: 20px; color: #7f8c8d; }
-        .btn-warning { background-color: #f39c12; color: white; }
-        .btn-success { background-color: #27ae60; color: white; }
-        .btn-secondary { background-color: #95a5a6; color: white; }
+
+        .alert { padding: 12px 20px; border-radius: 4px; margin-bottom: 15px; border: 1px solid; }
+        .alert-success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .not-found { text-align: center; padding: 30px; color: #7f8c8d; background: #f9fbfd; border-radius: 6px; }
     </style>
 </head>
 <body>
 
-<h1>Выберите склад</h1>
+<div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
+    <h1>Выберите склад</h1>
 
-<div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-<div class="top-bar">
-    <form class="search-form" th:action="@{/movements/warehouse/list}" method="get">
-        <input type="hidden" name="nomenclatureId" th:value="${nomenclatureId}">
-        <input type="hidden" name="nomenclatureName" th:value="${nomenclatureName}">
-        <input type="hidden" name="counterpartyId" th:value="${counterpartyId}">
-        <input type="hidden" name="counterpartyName" th:value="${counterpartyName}">
-        <input type="hidden" name="inventoryType" th:value="${inventoryType}">
-        <input type="text" name="name" th:value="${filterName}" placeholder="Название"/>
-        <button type="submit">Искать</button>
-        <a th:href="@{/movements/warehouse/list(nomenclatureId=${nomenclatureId}, nomenclatureName=${nomenclatureName}, counterpartyId=${counterpartyId}, counterpartyName=${counterpartyName}, inventoryType=${inventoryType})}">Сбросить</a>
-        <a th:if="${fromOperation == 'RECEIPT'}"
-           th:href="@{/movements/receipt/form}"
-           class="btn btn-outline-secondary">Назад</a>
+    <div class="top-bar">
+        <form class="search-form" th:action="@{/movements/warehouse/list}" method="get">
+            <input type="hidden" name="nomenclatureId" th:value="${nomenclatureId}">
+            <input type="hidden" name="nomenclatureName" th:value="${nomenclatureName}">
+            <input type="hidden" name="counterpartyId" th:value="${counterpartyId}">
+            <input type="hidden" name="counterpartyName" th:value="${counterpartyName}">
+            <input type="hidden" name="inventoryType" th:value="${inventoryType}">
+            <input type="hidden" name="fromOperation" th:value="${fromOperation}">
 
-        <a th:if="${fromOperation == 'ISSUE'}"
-           th:href="@{/movements/issue/form}"
-           class="btn btn-outline-secondary">Назад</a>
+            <input type="text" name="name" th:value="${filterName}" placeholder="Название склада"/>
+            <button type="submit">Искать</button>
+            <a th:href="@{/movements/warehouse/list(
+                nomenclatureId=${nomenclatureId},
+                nomenclatureName=${nomenclatureName},
+                counterpartyId=${counterpartyId},
+                counterpartyName=${counterpartyName},
+                inventoryType=${inventoryType},
+                fromOperation=${fromOperation}
+            )}">Сбросить</a>
 
-        <a th:if="${fromOperation == 'TRANSFER'}"
-           th:href="@{/movements/transfer/form}"
-           class="btn btn-outline-secondary">Назад</a>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <a th:if="${fromOperation == 'RECEIPT'}"
+                   th:href="@{/movements/receipt/form}"
+                   class="btn btn-back">Назад к приходу</a>
+                <a th:if="${fromOperation == 'ISSUE'}"
+                   th:href="@{/movements/issue/form}"
+                   class="btn btn-back">Назад к расходу</a>
+                <a th:if="${fromOperation == 'TRANSFER'}"
+                   th:href="@{/movements/transfer/form}"
+                   class="btn btn-back">Назад к перемещению</a>
+                <a th:if="${fromOperation == 'WRITE_OFF'}"
+                   th:href="@{/movements/write-off/form}"
+                   class="btn btn-back">Назад к списанию</a>
+            </div>
+        </form>
+    </div>
 
-        <a th:if="${fromOperation == 'WRITE-OFF'}"
-           th:href="@{/movements/write-off/form}"
-           class="btn btn-outline-secondary">Назад</a>
-    </form>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Адрес</th>
+            <th>Тип</th>
+            <th>Статус</th>
+            <th>Действие</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="w : ${warehouses}">
+            <td th:text="${w.id}"></td>
+            <td th:text="${w.name}"></td>
+            <td th:text="${w.address}"></td>
+            <td th:text="${w.type}"></td>
+            <td>
+                <span th:if="${w.active}" class="active">Активен</span>
+                <span th:unless="${w.active}" class="inactive">Неактивен</span>
+            </td>
+            <td>
+                <a th:if="${fromOperation == 'ISSUE'}"
+                   th:href="@{/movements/issue/form(
+                       nomenclatureId=${nomenclatureId},
+                       nomenclatureName=${nomenclatureName},
+                       customerId=${counterpartyId},
+                       customerName=${counterpartyName},
+                       warehouseFromId=${w.id},
+                       warehouseFromName=${w.name},
+                       inventoryType=${inventoryType}
+                   )}"
+                   class="btn btn-warning">Выбрать склад для расхода</a>
+
+                <a th:if="${fromOperation == 'WRITE_OFF'}"
+                   th:href="@{/movements/write-off/form(
+                       nomenclatureId=${nomenclatureId},
+                       nomenclatureName=${nomenclatureName},
+                       customerId=${counterpartyId},
+                       customerName=${counterpartyName},
+                       warehouseFromId=${w.id},
+                       warehouseFromName=${w.name},
+                       inventoryType=${inventoryType}
+                   )}"
+                   class="btn btn-warning">Выбрать склад для списания</a>
+
+                <a th:if="${fromOperation == 'TRANSFER'}"
+                   th:href="@{/movements/transfer/form(
+                       nomenclatureId=${nomenclatureId},
+                       nomenclatureName=${nomenclatureName},
+                       warehouseFromId=${w.id},
+                       warehouseFromName=${w.name},
+                       inventoryType=${inventoryType}
+                   )}"
+                   class="btn btn-warning">Выбрать как «откуда»</a>
+
+                <a th:if="${fromOperation == 'TRANSFER-TO'}"
+                   th:href="@{/movements/transfer/form(
+                       nomenclatureId=${nomenclatureId},
+                       nomenclatureName=${nomenclatureName},
+                       warehouseFromId=${warehouseFromId},
+                       warehouseFromName=${warehouseFromName},
+                       storageLocationId=${storageLocationId},
+                       warehouseToId=${w.id},
+                       warehouseToName=${w.name},
+                       inventoryType=${inventoryType}
+                   )}"
+                   class="btn btn-success">Выбрать как «куда»</a>
+
+                <a th:if="${fromOperation == 'RECEIPT' or fromOperation == null}"
+                   th:href="@{/movements/receipt/form(
+                       nomenclatureId=${nomenclatureId},
+                       nomenclatureName=${nomenclatureName},
+                       counterpartyId=${counterpartyId},
+                       counterpartyName=${counterpartyName},
+                       warehouseTo=${w.id},
+                       warehouseName=${w.name},
+                       inventoryType=${inventoryType}
+                   )}"
+                   class="btn btn-success">Выбрать склад для прихода</a>
+            </td>
+        </tr>
+
+        <tr th:if="${searchPerformed and #lists.isEmpty(warehouses)}">
+            <td colspan="6" class="not-found">
+                По запросу «<b th:text="${filterName}"></b>» ничего не найдено.
+                <br>
+                <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'')')}"
+                   th:href="@{/warehouse/new(from='movements', name=${filterName})}"
+                   class="btn btn-create">Создать склад</a>
+                <span th:unless="${#authorization.expression('hasAnyRole(''ADMIN'')')}">
+                    Чтобы добавить склад, обратитесь к администратору.
+                </span>
+            </td>
+        </tr>
+
+        <tr th:if="${not searchPerformed and #lists.isEmpty(warehouses)}">
+            <td colspan="6" class="not-found">
+                Складов пока нет.
+                <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'')')}"
+                   th:href="@{/warehouse/new(from='movements')}"
+                   class="btn btn-create">Создать первый склад</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 0}"
+           th:href="@{/movements/warehouse/list(
+               page=${currentPage - 1},
+               size=${pageSize},
+               name=${filterName},
+               nomenclatureId=${nomenclatureId},
+               nomenclatureName=${nomenclatureName},
+               counterpartyId=${counterpartyId},
+               counterpartyName=${counterpartyName},
+               inventoryType=${inventoryType},
+               fromOperation=${fromOperation}
+           )}">&laquo; Назад</a>
+        <span class="current">Стр. <span th:text="${currentPage + 1}"></span> из <span th:text="${totalPages}"></span></span>
+        <a th:if="${currentPage < totalPages - 1}"
+           th:href="@{/movements/warehouse/list(
+               page=${currentPage + 1},
+               size=${pageSize},
+               name=${filterName},
+               nomenclatureId=${nomenclatureId},
+               nomenclatureName=${nomenclatureName},
+               counterpartyId=${counterpartyId},
+               counterpartyName=${counterpartyName},
+               inventoryType=${inventoryType},
+               fromOperation=${fromOperation}
+           )}">Вперёд &raquo;</a>
+    </div>
 </div>
-
-<table>
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Название</th>
-        <th>Адрес</th>
-        <th>Тип</th>
-        <th>Статус</th>
-        <th>Действие</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="w : ${warehouses}">
-        <td th:text="${w.id}"></td>
-        <td th:text="${w.name}"></td>
-        <td th:text="${w.address}"></td>
-        <td th:text="${w.type}"></td>
-        <td>
-            <span th:if="${w.active}" class="active">Активен</span>
-            <span th:unless="${w.active}" class="inactive">Неактивен</span>
-        </td>
-        <td>
-
-            <a th:if="${fromOperation == 'ISSUE'}"
-               th:href="@{/movements/issue/form(
-       nomenclatureId=${nomenclatureId},
-       nomenclatureName=${nomenclatureName},
-       customerId=${counterpartyId},
-       customerName=${counterpartyName},
-       warehouseFromId=${w.id},
-       warehouseFromName=${w.name},
-       inventoryType=${inventoryType}
-   )}"
-               class="btn btn-warning">Выбрать склад для расхода</a>
-
-            <a th:if="${fromOperation == 'WRITE_OFF'}"
-               th:href="@{/movements/write-off/form(
-       nomenclatureId=${nomenclatureId},
-       nomenclatureName=${nomenclatureName},
-       customerId=${counterpartyId},
-       customerName=${counterpartyName},
-       warehouseFromId=${w.id},
-       warehouseFromName=${w.name},
-       inventoryType=${inventoryType}
-   )}"
-               class="btn btn-warning">Выбрать склад для списания</a>
-
-            <a th:if="${fromOperation == 'TRANSFER'}"
-               th:href="@{/movements/transfer/form(
-       nomenclatureId=${nomenclatureId},
-       nomenclatureName=${nomenclatureName},
-       warehouseFromId=${w.id},
-       warehouseFromName=${w.name},
-       inventoryType=${inventoryType}
-   )}"
-               class="btn btn-warning">Выбрать склад для транспортировки</a>
-
-            <a th:if="${fromOperation == 'TRANSFER-TO'}"
-               th:href="@{/movements/transfer/form(
-       nomenclatureId=${nomenclatureId},
-       nomenclatureName=${nomenclatureName},
-       warehouseFromId=${warehouseFromId},
-       warehouseFromName=${warehouseFromName},
-       storageLocationId=${storageLocationId},
-       warehouseToId=${w.id},
-       warehouseToName=${w.name},
-       inventoryType=${inventoryType}
-   )}"
-               class="btn btn-warning">Выбрать склад для транспортировки</a>
-
-            <a th:if="${fromOperation == 'RECEIPT' or fromOperation == null}"
-               th:href="@{/movements/receipt/form(
-           nomenclatureId=${nomenclatureId},
-           nomenclatureName=${nomenclatureName},
-           counterpartyId=${counterpartyId},
-           counterpartyName=${counterpartyName},
-           warehouseTo=${w.id},
-           warehouseName=${w.name},
-           inventoryType=${inventoryType}
-       )}"
-               class="btn btn-success">Выбрать склад для прихода</a>
-        </td>
-    </tr>
-    <tr th:if="${searchPerformed and #lists.isEmpty(warehouses)}">
-        <td colspan="6" class="not-found">
-            По запросу «<b th:text="${filterName}"></b>» ничего не найдено.
-            <a th:href="@{/warehouse/new(from='movements', name=${filterName})}"
-               class="btn btn-create">Создать склад</a>
-        </td>
-    </tr>
-    <tr th:if="${not searchPerformed and #lists.isEmpty(warehouses)}">
-        <td colspan="6" class="not-found">Складов пока нет</td>
-    </tr>
-    </tbody>
-</table>
-
-<div class="pagination" th:if="${totalPages > 1}">
-    <a th:if="${currentPage > 0}"
-       th:href="@{/movements/warehouse/list(page=${currentPage - 1}, size=${pageSize}, name=${filterName}, nomenclatureId=${nomenclatureId}, nomenclatureName=${nomenclatureName}, counterpartyId=${counterpartyId}, counterpartyName=${counterpartyName}, inventoryType=${inventoryType})}">&laquo; Назад</a>
-    <span class="current">Стр. <span th:text="${currentPage + 1}"></span> из <span th:text="${totalPages}"></span></span>
-    <a th:if="${currentPage < totalPages - 1}"
-       th:href="@{/movements/warehouse/list(page=${currentPage + 1}, size=${pageSize}, name=${filterName}, nomenclatureId=${nomenclatureId}, nomenclatureName=${nomenclatureName}, counterpartyId=${counterpartyId}, counterpartyName=${counterpartyName}, inventoryType=${inventoryType})}">Вперёд &raquo;</a>
+<div sec:authorize="!hasAnyRole('ADMIN','STOREKEEPER')" style="text-align:center; padding:60px; background:#f8f9fa; border-radius:8px;">
+    <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для выбора склада.</p>
+    <a th:href="@{/}" class="btn" style="background-color:#95a5a6; color:white; margin-top:10px; padding:10px 20px; text-decoration:none;">Вернуться на главную</a>
 </div>
 
 </body>

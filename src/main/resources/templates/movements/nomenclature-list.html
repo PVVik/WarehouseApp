@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Выбор номенклатуры</title>
@@ -110,125 +111,149 @@
         .btn-outline-secondary:hover {
             background-color: #e9ecef;
         }
+
+        .access-denied-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .access-denied-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Выберите номенклатуру</h1>
+<div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
+    <div class="container">
+        <h1>Выберите номенклатуру</h1>
 
-    <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
+        <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
 
-    <div class="toolbar">
-        <div>
-            <h2>Поиск позиции</h2>
-        </div>
-        <form th:action="@{/movements/nomenclature/list}" method="get" class="filter-form">
-            <input type="text" name="name" th:value="${filterName}" placeholder="Название (например, Болт)" />
-            <div style="display: flex; gap: 8px;">
-                <button type="submit" class="btn btn-primary">Найти</button>
-                <a th:if="${fromOperation == 'RECEIPT'}"
-                   th:href="@{/movements/receipt/form}"
-                   class="btn btn-outline-secondary">Назад</a>
-
-                <a th:if="${fromOperation == 'ISSUE'}"
-                   th:href="@{/movements/issue/form}"
-                   class="btn btn-outline-secondary">Назад</a>
-
-                <a th:if="${fromOperation == 'TRANSFER'}"
-                   th:href="@{/movements/transfer/form}"
-                   class="btn btn-outline-secondary">Назад</a>
-
-                <a th:if="${fromOperation == 'WRITE_OFF'}"
-                   th:href="@{/movements/write-off/form}"
-                   class="btn btn-outline-secondary">Назад</a>
+        <div class="toolbar">
+            <div>
+                <h2>Поиск позиции</h2>
             </div>
-        </form>
-    </div>
+            <form th:action="@{/movements/nomenclature/list}" method="get" class="filter-form">
+                <input type="text" name="name" th:value="${filterName}" placeholder="Название (например, Болт)" />
+                <div style="display: flex; gap: 8px;">
+                    <button type="submit" class="btn btn-primary">Найти</button>
 
-    <table>
-        <thead>
-        <tr>
-            <th>SKU</th>
-            <th>Название</th>
-            <th>Категория</th>
-            <th>Ед. изм.</th>
-            <th>Тип учёта</th>
-            <th>Статус</th>
-            <th>Действие</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:if="${#lists.isEmpty(nomenclatureList)}">
-            <td colspan="7" style="text-align:center; padding: 20px; color:#7f8c8d;">
-                Ничего не найдено.
-                <a th:href="@{/nomenclature/form(from='movements', name=${filterName})}"
-                   class="btn btn-primary" style="margin-left: 10px;">Создать позицию</a>
-            </td>
-        </tr>
+                    <a th:if="${fromOperation == 'RECEIPT'}"
+                       th:href="@{/movements/receipt/form}"
+                       class="btn btn-outline-secondary">Назад</a>
 
-        <tr th:each="item : ${nomenclatureList}">
-            <td th:text="${item.sku}"></td>
-            <td th:text="${item.name}"></td>
-            <td th:text="${item.stuffCategoryLabel}"></td>
-            <td th:text="${item.unitOfMeasureLabel}"></td>
-            <td th:text="${item.inventoryTypeLabel}"></td>
+                    <a th:if="${fromOperation == 'ISSUE'}"
+                       th:href="@{/movements/issue/form}"
+                       class="btn btn-outline-secondary">Назад</a>
 
-            <td>
+                    <a th:if="${fromOperation == 'TRANSFER'}"
+                       th:href="@{/movements/transfer/form}"
+                       class="btn btn-outline-secondary">Назад</a>
+
+                    <a th:if="${fromOperation == 'WRITE_OFF'}"
+                       th:href="@{/movements/write-off/form}"
+                       class="btn btn-outline-secondary">Назад</a>
+                </div>
+            </form>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Название</th>
+                <th>Категория</th>
+                <th>Ед. изм.</th>
+                <th>Тип учёта</th>
+                <th>Статус</th>
+                <th>Действие</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(nomenclatureList)}">
+                <td colspan="7" style="text-align:center; padding: 20px; color:#7f8c8d;">
+                    Ничего не найдено.
+                    <a th:href="@{/nomenclature/form(from='movements', name=${filterName})}"
+                       class="btn btn-primary" style="margin-left: 10px;">Создать позицию</a>
+                </td>
+            </tr>
+
+            <tr th:each="item : ${nomenclatureList}">
+                <td th:text="${item.sku}"></td>
+                <td th:text="${item.name}"></td>
+                <td th:text="${item.stuffCategoryLabel}"></td>
+                <td th:text="${item.unitOfMeasureLabel}"></td>
+                <td th:text="${item.inventoryTypeLabel}"></td>
+
+                <td>
                     <span th:classappend="${item.active} ? 'status-active' : 'status-inactive'"
                           class="status-badge"
                           th:text="${item.active} ? 'Активен' : 'Неактивен'">
                     </span>
-            </td>
+                </td>
 
-            <td>
-                <a th:if="${fromOperation == 'ISSUE'}"
-                   th:href="@{/movements/issue/form(
-                           nomenclatureId=${item.id},
-                           nomenclatureName=${item.name},
-                           inventoryType=${item.inventoryType}
-                       )}"
-                   class="btn btn-sm btn-warning">Выбрать для расхода</a>
+                <td>
+                    <a th:if="${fromOperation == 'ISSUE'}"
+                       th:href="@{/movements/issue/form(
+                               nomenclatureId=${item.id},
+                               nomenclatureName=${item.name},
+                               inventoryType=${item.inventoryType}
+                           )}"
+                       class="btn btn-sm btn-warning">Выбрать для расхода</a>
 
-                <a th:if="${fromOperation == 'RECEIPT'}"
-                   th:href="@{/movements/receipt/form(
-                           nomenclatureId=${item.id},
-                           nomenclatureName=${item.name},
-                           inventoryType=${item.inventoryType}
-                       )}"
-                   class="btn btn-sm btn-success">Выбрать для прихода</a>
+                    <a th:if="${fromOperation == 'RECEIPT'}"
+                       th:href="@{/movements/receipt/form(
+                               nomenclatureId=${item.id},
+                               nomenclatureName=${item.name},
+                               inventoryType=${item.inventoryType}
+                           )}"
+                       class="btn btn-sm btn-success">Выбрать для прихода</a>
 
-                <a th:if="${fromOperation == 'TRANSFER'}"
-                   th:href="@{/movements/transfer/form(
-                           nomenclatureId=${item.id},
-                           nomenclatureName=${item.name},
-                           inventoryType=${item.inventoryType}
-                       )}"
-                   class="btn btn-sm btn-success">Выбрать для транспортировки</a>
+                    <a th:if="${fromOperation == 'TRANSFER'}"
+                       th:href="@{/movements/transfer/form(
+                               nomenclatureId=${item.id},
+                               nomenclatureName=${item.name},
+                               inventoryType=${item.inventoryType}
+                           )}"
+                       class="btn btn-sm btn-success">Выбрать для транспортировки</a>
 
-                <a th:if="${fromOperation == 'WRITE_OFF'}"
-                   th:href="@{/movements/write-off/form(
-                           nomenclatureId=${item.id},
-                           nomenclatureName=${item.name},
-                           inventoryType=${item.inventoryType}
-                       )}"
-                   class="btn btn-sm btn-success">Выбрать для списания</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+                    <a th:if="${fromOperation == 'WRITE_OFF'}"
+                       th:href="@{/movements/write-off/form(
+                               nomenclatureId=${item.id},
+                               nomenclatureName=${item.name},
+                               inventoryType=${item.inventoryType}
+                           )}"
+                       class="btn btn-sm btn-success">Выбрать для списания</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
-    <div class="pagination" th:if="${totalPages > 1}">
-        <a th:if="${currentPage > 0}"
-           th:href="@{/movements/nomenclature/list(page=${currentPage - 1}, size=${pageSize}, name=${filterName})}">
-            ← Назад
-        </a>
-        <a th:if="${currentPage < totalPages - 1}"
-           th:href="@{/movements/nomenclature/list(page=${currentPage + 1}, size=${pageSize}, name=${filterName})}">
-            Вперед →
-        </a>
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/movements/nomenclature/list(page=${currentPage - 1}, size=${pageSize}, name=${filterName})}">
+                ← Назад
+            </a>
+            <a th:if="${currentPage < totalPages - 1}"
+               th:href="@{/movements/nomenclature/list(page=${currentPage + 1}, size=${pageSize}, name=${filterName})}">
+                Вперед →
+            </a>
+        </div>
     </div>
+</div>
+
+<div sec:authorize="!hasAnyRole('ADMIN','STOREKEEPER')" class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для выбора номенклатуры.</p>
+    <a th:href="@{/}" class="btn" style="
+        background-color: #95a5a6; color: white; margin-top:10px; display:inline-block; padding:10px 20px; text-decoration:none;">
+        Вернуться на главную
+    </a>
 </div>
 
 </body>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Панель управления - Складская система</title>
@@ -37,10 +38,20 @@
             color: #2c3e50;
         }
 
-        .org-info p {
-            margin: 5px 0;
-            color: #555;
+        .user-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9rem;
+            margin-left: 8px;
         }
+
+        .role-admin { background-color: #e74c3c; }
+        .role-storekeeper { background-color: #f39c12; }
+        .role-manager { background-color: #3498db; }
+        .role-viewer { background-color: #95a5a6; }
 
         .dashboard-grid {
             display: grid;
@@ -94,40 +105,46 @@
         .btn-primary:hover {
             background-color: #2980b9;
         }
-
-        .btn-secondary {
-            background-color: #bdc3c7;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background-color: #95a5a6;
-            color: white;
-        }
-
-        .btn-disabled {
-            background-color: #e0e0e0;
-            color: #999;
-            cursor: not-allowed;
-            text-decoration: none;
-        }
     </style>
-
 </head>
 <body>
 
 <div class="container">
+    <div sec:authorize="isAuthenticated()">
+        <div style="margin-bottom: 24px; text-align: right;">
+            <span style="font-weight: 500;">Вы вошли как:</span>
+            <strong sec:authentication="name"></strong>
+
+            <span th:each="authority : ${#authentication.getAuthorities()}">
+                <th:block th:if="${authority.authority.startsWith('ROLE_')}">
+                    <span class="user-badge"
+                          th:classappend="${'role-' + authority.authority.substring(5).toLowerCase()}">
+                        <th:block th:text="${authority.authority.substring(5)}"></th:block>
+                    </span>
+                </th:block>
+            </span>
+
+            <div sec:authorize="isAuthenticated()" style="margin-left: auto;">
+                <form th:action="@{/logout}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-back">Выйти</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <h1>Панель управления</h1>
 
     <div class="org-info">
         <h3>ООО «ННП» WarehouseApp</h3>
     </div>
 
-    <div th:if="${expiringSoonCount > 0}"
+    <div th:if="${expiringSoonCount != null and expiringSoonCount > 0}"
          class="alert alert-warning"
-         role="alert">
+         role="alert"
+         style="padding: 14px; background: #fff3cd; color: #856404; border-radius: 6px; margin-bottom: 24px;">
         Внимание: <b th:text="${expiringSoonCount}"></b> партий истекают в течение 30 дней.
-        <a th:href="@{/analytics/expiry-control}" class="alert-link">Посмотреть список</a>
+        <a th:href="@{/analytics/expiry-control}" class="alert-link" style="color: #856404;">Посмотреть список</a>
     </div>
 
     <div class="dashboard-grid">
@@ -135,31 +152,32 @@
         <div class="card">
             <h2>Управление складами</h2>
             <p>Просмотр, добавление и редактирование складов, управление статусами и типами.</p>
-            <a href="/warehouse" class="btn btn-primary">Перейти к складам</a>
+            <a th:href="@{/warehouse}" class="btn btn-primary">Перейти к складам</a>
         </div>
 
         <div class="card">
             <h2>Номенклатура</h2>
             <p style="color: #95a5a6;">Список товаров и единиц измерения.</p>
-            <a href="/nomenclature" class="btn btn-primary">Перейти к номенклатуре</a>
+            <a th:href="@{/nomenclature}" class="btn btn-primary">Перейти к номенклатуре</a>
         </div>
 
         <div class="card">
-            <h2>Отчеты</h2>
+            <h2>Отчёты</h2>
             <p style="color: #95a5a6;">Аналитика по остаткам, срокам годности и движениям товаров.</p>
             <a th:href="@{/analytics}" class="btn btn-primary">Перейти к отчётам</a>
         </div>
 
         <div class="card">
             <h2>Контрагенты</h2>
-            <p style="color: #95a5a6;">Список поставщиков, клиентов и перевозчиков, управление реквизитами и договорами.</p>
-            <a href="/counterparty" class="btn btn-primary">Перейти к контрагентам</a>
+            <p style="color: #95a5a6;">Поставщики, клиенты и перевозчики, управление реквизитами и договорами.</p>
+            <a th:href="@{/counterparty}" class="btn btn-primary">Перейти к контрагентам</a>
         </div>
+
 
         <div class="card">
             <h2>Оформить движение</h2>
             <p style="color: #95a5a6;">Приход, расход, движение между складами, списание.</p>
-            <a href="/movements" class="btn btn-primary">Перейти к оформлению</a>
+            <a th:href="@{/movements}" class="btn btn-primary">Перейти к оформлению</a>
         </div>
 
         <div class="card">
@@ -168,9 +186,9 @@
             <a th:href="@{/inventory}" class="btn btn-primary">Перейти к оформлению</a>
         </div>
 
+
     </div>
 </div>
 
 </body>
 </html>
-

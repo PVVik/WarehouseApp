@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
+    <a th:href="@{/}" class="btn btn-primary">← Назад в главное меню</a>
+
     <title>Инвентаризации - WarehouseApp</title>
 
     <style>
@@ -40,11 +43,28 @@
         }
 
         .btn-add {
-            background-color: #3498db;
+            background-color: #27ae60;
             color: white;
         }
         .btn-add:hover {
-            background-color: #2980b9;
+            background-color: #219150;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .btn-info:hover {
+            background-color: #138496;
+        }
+
+        .btn-outline-secondary {
+            color: #333;
+            border: 1px solid #ccc;
+            background: white;
+        }
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
         }
 
         .flash-message {
@@ -59,7 +79,6 @@
             border: 1px solid #c3e6cb;
         }
 
-        /* Таблица */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -124,9 +143,10 @@
 
 <div class="container">
     <h1>Инвентаризации</h1>
-    <a href="/" class="btn btn-back">Назад</a>
 
-    <a th:href="@{/inventory/create}" class="btn btn-add">+ Новая инвентаризация</a>
+    <div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
+        <a th:href="@{/inventory/create}" class="btn btn-add" style="margin-left: 10px;">+ Новая инвентаризация</a>
+    </div>
 
     <div th:if="${successMessage}" class="flash-message flash-success">
         <b th:text="${successMessage}"></b>
@@ -157,34 +177,34 @@
             <td th:text="*{totalLines}"></td>
             <td>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <a th:if="${#strings.equals(check.status, 'IN_PROGRESS')}"
+                    <a sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')"
+                       th:if="${#strings.equals(check.status, 'IN_PROGRESS')}"
                        th:href="@{/inventory/{id}/review(id=${check.id})}"
-                       class="btn btn-sm btn-info"
-                       style="padding: 6px 12px; background-color: #17a2b8; color: white; text-decoration: none; border-radius: 4px; white-space: nowrap;">
+                       class="btn btn-sm btn-info">
                         Просмотр перед завершением
                     </a>
 
-                    <form th:if="${#strings.equals(check.status, 'IN_PROGRESS')}"
+                    <form sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')"
+                          th:if="${#strings.equals(check.status, 'IN_PROGRESS')}"
                           th:action="@{/inventory/{id}/complete(id=${check.id})}"
                           method="post"
                           onsubmit="return confirm('Вы уверены, что хотите завершить инвентаризацию?\nПосле этого нельзя будет менять фактические количества.');">
-                        <button type="submit" class="btn btn-sm btn-primary"
-                                style="padding: 6px 12px; background-color: #3498db; color: white; border: none; border-radius: 4px; white-space: nowrap;">
+                        <button type="submit" class="btn btn-sm btn-primary">
                             Завершить
                         </button>
                     </form>
 
-                    <a th:if="${#strings.equals(check.status, 'DRAFT')}"
+                    <a sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')"
+                       th:if="${#strings.equals(check.status, 'DRAFT')}"
                        th:href="@{/inventory/{id}/lines(id=${check.id})}"
-                       class="btn btn-sm btn-add"
-                       style="padding: 6px 12px; background-color: #27ae60; color: white; text-decoration: none; border-radius: 4px; white-space: nowrap;">
+                       class="btn btn-sm btn-add">
                         + Ввести остатки
                     </a>
 
-                    <a th:if="${#strings.equals(check.status, 'COMPLETED') and check.id != null}"
+                    <a sec:authorize="hasAnyRole('VIEWER','ADMIN','STOREKEEPER')"
+                       th:if="${#strings.equals(check.status, 'COMPLETED') and check.id != null}"
                        th:href="@{/inventory/acts/{actId}(actId=${check.id})}"
-                       class="btn btn-sm btn-outline-secondary"
-                       style="padding: 6px 12px; color: #333; border-color: #ccc; text-decoration: none; border-radius: 4px; white-space: nowrap;">
+                       class="btn btn-sm btn-outline-secondary">
                         📄 Акт расхождений
                     </a>
                 </div>
@@ -194,6 +214,13 @@
     </table>
 
     <p th:if="${checks.isEmpty()}" class="no-data-message">Пока нет инвентаризаций.</p>
+</div>
+
+<div sec:authorize="!hasAnyRole('VIEWER','ADMIN','STOREKEEPER')" style="text-align:center; padding:60px; background:#f8f9fa; border-radius:8px;">
+    <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для просмотра списка инвентаризаций.</p>
+    <a th:href="@{/}" class="btn" style="background-color:#95a5a6; color:white; margin-top:10px; padding:10px 20px; text-decoration:none;">Вернуться на главную</a>
 </div>
 
 </body>

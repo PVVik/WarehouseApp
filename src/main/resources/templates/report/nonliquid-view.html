@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Отчёт по неликвидам</title>
@@ -157,79 +158,101 @@
             color: #2e7d32;
             border: 1px solid #c8e6c9;
         }
+
+        .access-denied-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .access-denied-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <a th:href="@{/analytics}" class="btn btn-back" style="margin-bottom: 20px;">
-        ← Назад к аналитике
-    </a>
 
-    <form th:action="@{/report/nonliquid}" method="get" class="filter-panel">
-        <div class="form-group">
-            <label for="warehouseId">Склад:</label>
-            <select id="warehouseId" name="warehouseId" required>
-                <option value="" th:selected="${selectedWarehouseId == null}">-- Выберите склад --</option>
-                <option th:each="wh : ${warehouses}"
-                        th:value="${wh.id}"
-                        th:text="${wh.name}"
-                        th:selected="${selectedWarehouseId != null and selectedWarehouseId == wh.id}">
-                </option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Сформировать отчёт</button>
-
-        <a th:if="${selectedWarehouseId != null}"
-           th:href="@{/api/reports/nonliquid/csv(warehouseId=${selectedWarehouseId})}"
-           class="btn btn-success"
-           style="margin-left: auto;">
-            📥 Скачать отчёт (CSV)
+<div sec:authorize="hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')">
+    <div class="container">
+        <a th:href="@{/analytics}" class="btn btn-back" style="margin-bottom: 20px;">
+            ← Назад к аналитике
         </a>
-    </form>
 
-    <h2>Отчёт по неликвидам
-        <th:block th:if="${selectedWarehouseId != null}">
-            (склад №<span th:text="${selectedWarehouseId}"></span>)
-        </th:block>
-    </h2>
+        <form th:action="@{/report/nonliquid}" method="get" class="filter-panel">
+            <div class="form-group">
+                <label for="warehouseId">Склад:</label>
+                <select id="warehouseId" name="warehouseId" required>
+                    <option value="" th:selected="${selectedWarehouseId == null}">-- Выберите склад --</option>
+                    <option th:each="wh : ${warehouses}"
+                            th:value="${wh.id}"
+                            th:text="${wh.name}"
+                            th:selected="${selectedWarehouseId != null and selectedWarehouseId == wh.id}">
+                    </option>
+                </select>
+            </div>
 
-    <table>
-        <thead>
-        <tr>
-            <th style="width: 110px;">Статус</th>
-            <th>Номенклатура</th>
-            <th class="text-right">SKU</th>
-            <th class="text-right">Партия</th>
-            <th class="text-right">Остаток</th>
-            <th class="text-right">Мин. норма</th>
-            <th class="text-right">Дней без движения</th>
-            <th class="text-right">Критично?</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="row : ${nonliquidList}">
-            <td>
-                <span th:class="'status-badge ' + (row.status == 'КРИТИЧЕСКИЙ НЕЛИКВИД' ? 'badge-critical' : (row.status == 'НЕЛИКВИД (нет движения)' ? 'badge-warning' : 'badge-normal'))">
-                    <strong th:text="${row.status}"></strong>
-                </span>
-            </td>
-            <td th:text="${row.nomenclatureName}"></td>
-            <td class="text-right" th:text="${row.sku}"></td>
-            <td class="text-right" th:text="${row.batchNumber != null ? row.batchNumber : '-'}" style="font-family: monospace; color: #666;"></td>
-            <td class="text-right" th:text="${row.currentStock.stripTrailingZeros().toPlainString()}"></td>
-            <td class="text-right" th:text="${row.minThreshold != null ? row.minThreshold.stripTrailingZeros().toPlainString() : '-' }"></td>
-            <td class="text-right" th:text="${row.daysWithoutMovement}"></td>
-            <td class="text-right" th:text="${row.isCritical ? 'Да' : 'Нет'}"></td>
-        </tr>
+            <button type="submit" class="btn btn-primary">Сформировать отчёт</button>
 
-        <tr th:if="${#lists.isEmpty(nonliquidList)}">
-            <td colspan="8" style="text-align: center; padding: 40px; color: #7f8c8d; border: none; background-color: #fafafa;">
-                Нет позиций, попадающих под критерии неликвида на выбранном складе
-            </td>
-        </tr>
-        </tbody>
-    </table>
+            <a th:if="${selectedWarehouseId != null}"
+               th:href="@{/api/reports/nonliquid/csv(warehouseId=${selectedWarehouseId})}"
+               class="btn btn-success"
+               style="margin-left: auto;">
+                📥 Скачать отчёт (CSV)
+            </a>
+        </form>
+
+        <h2>Отчёт по неликвидам
+            <th:block th:if="${selectedWarehouseId != null}">
+                (склад №<span th:text="${selectedWarehouseId}"></span>)
+            </th:block>
+        </h2>
+
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 110px;">Статус</th>
+                <th>Номенклатура</th>
+                <th class="text-right">SKU</th>
+                <th class="text-right">Партия</th>
+                <th class="text-right">Остаток</th>
+                <th class="text-right">Мин. норма</th>
+                <th class="text-right">Дней без движения</th>
+                <th class="text-right">Критично?</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row : ${nonliquidList}">
+                <td>
+                    <span th:class="'status-badge ' + (row.status == 'КРИТИЧЕСКИЙ НЕЛИКВИД' ? 'badge-critical' : (row.status == 'НЕЛИКВИД (нет движения)' ? 'badge-warning' : 'badge-normal'))">
+                        <strong th:text="${row.status}"></strong>
+                    </span>
+                </td>
+                <td th:text="${row.nomenclatureName}"></td>
+                <td class="text-right" th:text="${row.sku}"></td>
+                <td class="text-right" th:text="${row.batchNumber != null ? row.batchNumber : '-'}" style="font-family: monospace; color: #666;"></td>
+                <td class="text-right" th:text="${row.currentStock.stripTrailingZeros().toPlainString()}"></td>
+                <td class="text-right" th:text="${row.minThreshold != null ? row.minThreshold.stripTrailingZeros().toPlainString() : '-' }"></td>
+                <td class="text-right" th:text="${row.daysWithoutMovement}"></td>
+                <td class="text-right" th:text="${row.isCritical ? 'Да' : 'Нет'}"></td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(nonliquidList)}">
+                <td colspan="8" style="text-align: center; padding: 40px; color: #7f8c8d; border: none; background-color: #fafafa;">
+                    Нет позиций, попадающих под критерии неликвида на выбранном складе
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<div sec:authorize="!hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')" class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для просмотра отчёта по неликвидам.</p>
+    <a th:href="@{/}" class="btn btn-back" style="margin-top:10px;">Вернуться на главную</a>
+</div>
+
 </body>
 </html>
