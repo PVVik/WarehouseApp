@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,27 +20,32 @@ public class SerialItemApiController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public SerialItemDto createSerialItem(@RequestBody @Valid SerialItemDto serialItemDto) {
         return serialItemService.create(serialItemDto);
     }
 
     @PatchMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public SerialItemDto updateSerialItem(@RequestBody SerialItemDto serialItemDto) {
         return serialItemService.update(serialItemDto);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public Page<SerialItemDto> getAll(@PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
                                       @RequestParam(value = "search", required = false) String search) {
         return serialItemService.getAll(pageable, search);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public SerialItemDto getSerialItemById(@PathVariable long id) {
         return serialItemService.getById(id);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSerialItemById(@PathVariable long id) {
         serialItemService.delete(id);

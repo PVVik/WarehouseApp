@@ -8,6 +8,7 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,6 +27,7 @@ public class ReportApiController {
     private final CsvGenerator csvGenerator;
 
     @GetMapping("/stock-balance")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public List<StockBalanceReportDto> getStockJson(@RequestParam Long warehouseId) {
         if (warehouseId != null && warehouseId <= 0) {
             throw new IllegalArgumentException("warehouseId должен быть положительным числом");
@@ -35,6 +37,7 @@ public class ReportApiController {
     }
 
     @GetMapping(value = "/stock-balance/csv", produces = "text/csv")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public ResponseEntity<byte[]> stockBalanceCsv(@RequestParam Long warehouseId) {
         if (warehouseId == null || warehouseId <= 0) {
             return ResponseEntity.badRequest().build();
@@ -57,6 +60,7 @@ public class ReportApiController {
     }
 
     @GetMapping("/movement")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public List<MovementReportProjection> getMovementJson(
             @RequestParam(required = false) Long warehouseId,
             @RequestParam LocalDate startDate,
@@ -69,6 +73,7 @@ public class ReportApiController {
     }
 
     @GetMapping(value = "/movement/csv", produces = "text/csv")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public ResponseEntity<byte[]> getMovementCsv(
             @RequestParam(required = false) Long warehouseId,
             @RequestParam LocalDate startDate,
@@ -102,6 +107,7 @@ public class ReportApiController {
     }
 
     @GetMapping("/turnover")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public List<TurnoverReportDto> getTurnoverJson(
             @RequestParam(required = false) Long warehouseId,
             @RequestParam LocalDate startDate,
@@ -122,6 +128,7 @@ public class ReportApiController {
     }
 
     @GetMapping(value = "/turnover/csv", produces = "text/csv")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public ResponseEntity<byte[]> getTurnoverCsv(
             @RequestParam(required = false) Long warehouseId,
             @RequestParam LocalDate startDate,
@@ -156,6 +163,7 @@ public class ReportApiController {
     }
 
     @GetMapping("/deficit")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public List<DeficitReportDto> getDeficitJson(@RequestParam Long warehouseId) {
         if (warehouseId == null || warehouseId <= 0) {
             throw new IllegalArgumentException("warehouseId должен быть положительным числом");
@@ -164,6 +172,7 @@ public class ReportApiController {
     }
 
     @GetMapping(value = "/deficit/csv", produces = "text/csv")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public ResponseEntity<byte[]> deficitCsv(@RequestParam Long warehouseId) {
         if (warehouseId == null || warehouseId <= 0) {
             return ResponseEntity.badRequest().build();
@@ -187,6 +196,7 @@ public class ReportApiController {
     }
 
     @GetMapping("/nonliquid")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public List<NonLiquidReportDto> getNonLiquidJson(@RequestParam Long warehouseId) {
         if (warehouseId == null || warehouseId <= 0) {
             throw new IllegalArgumentException("warehouseId должен быть положительным числом");
@@ -195,6 +205,7 @@ public class ReportApiController {
     }
 
     @GetMapping(value = "/nonliquid/csv", produces = "text/csv")
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public ResponseEntity<byte[]> nonLiquidCsv(@RequestParam Long warehouseId) {
         if (warehouseId == null || warehouseId <= 0) {
             return ResponseEntity.badRequest().build();

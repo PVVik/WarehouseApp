@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +20,7 @@ public class WarehouseApiController {
 
     @GetMapping
     @ResponseBody
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public Page<WarehouseDto> getWarehousesApi(@PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
                                                @RequestParam(value = "search", required = false) String search) {
         return warehouseService.getAll(pageable, search);
@@ -26,6 +28,7 @@ public class WarehouseApiController {
 
     @GetMapping("/{id}")
     @ResponseBody
+    @PreAuthorize("hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')")
     public WarehouseDto getWarehouseByIdApi(@PathVariable long id) {
         return warehouseService.getById(id);
     }
@@ -33,12 +36,14 @@ public class WarehouseApiController {
     @PostMapping
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public WarehouseDto addWarehouseApi(@Valid @RequestBody WarehouseDto warehouseDto) {
         return warehouseService.create(warehouseDto);
     }
 
     @PatchMapping
     @ResponseBody
+    @PreAuthorize("hasRole('ADMIN')")
     public WarehouseDto updateWarehouseApi(@RequestBody WarehouseDto warehouseDto) {
         return warehouseService.update(warehouseDto);
     }
@@ -46,6 +51,7 @@ public class WarehouseApiController {
     @DeleteMapping("/{id}")
     @ResponseBody
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteWarehouseApi(@PathVariable long id) {
         warehouseService.delete(id);
     }

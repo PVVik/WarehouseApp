@@ -5,6 +5,7 @@ import com.example.warehouseApp.service.movement.WriteOffService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,6 +17,7 @@ public class WriteOffApiController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public MovementDtoWriteOff createIssue(@RequestBody @Valid MovementDtoWriteOff movementDtoWriteOff) {
         return writeOffService.createWriteOff(movementDtoWriteOff);
     }
