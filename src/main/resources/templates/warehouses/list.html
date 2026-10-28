@@ -209,7 +209,7 @@
         <td class="actions-cell">
             <a th:href="@{/warehouse/{id}(id=${w.id})}" class="btn btn-view">Просмотр</a>
 
-            <div sec:authorize="hasAnyRole('ADMIN')">
+            <div sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')">
                 <a th:href="@{/warehouse/{id}/edit(id=${w.id})}" class="btn btn-edit">Редактировать</a>
 
                 <form th:action="@{/warehouse/{id}/delete(id=${w.id})}" method="post" style="display: inline;">

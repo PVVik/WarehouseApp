@@ -21,7 +21,7 @@
 </head>
 <body>
 
-<div sec:authorize="hasAnyRole('ADMIN')">
+<div sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')">
     <h1 th:text="${warehouseDto.id != null ? 'Редактировать склад' : 'Новый склад'}"></h1>
 
     <form th:action="@{/warehouse}" th:object="${warehouseDto}" method="post">
@@ -57,7 +57,7 @@
     </form>
 </div>
 
-<div sec:authorize="!hasAnyRole('ADMIN')" class="access-denied-container">
+<div sec:authorize="!hasAnyRole('ADMIN', 'STOREKEEPER')" class="access-denied-container">
     <div class="access-denied-icon">🚫</div>
     <h2>Доступ запрещён</h2>
     <p>У вас недостаточно прав для создания или редактирования склада.</p>

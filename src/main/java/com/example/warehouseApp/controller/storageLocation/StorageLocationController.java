@@ -53,7 +53,7 @@ public class StorageLocationController {
     }
 
     @PostMapping("/delete/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String delete(@PathVariable long id, @RequestParam Long warehouseId,
                          RedirectAttributes redirectAttributes) {
         storageLocationService.delete(id);

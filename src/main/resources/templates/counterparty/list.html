@@ -104,7 +104,7 @@
                 <span th:unless="${c.isActive}" class="inactive">Неактивен</span>
             </td>
 
-            <td sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
+            <td sec:authorize="hasAnyRole('ADMIN')">
                 <a th:href="@{/counterparty/edit/{id}(id=${c.id})}" class="btn btn-edit">Редактировать</a>
                 <form th:action="@{/counterparty/delete/{id}(id=${c.id})}" method="post" style="display: inline;">
                     <button type="submit" class="btn-delete"
