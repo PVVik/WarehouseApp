@@ -3,6 +3,7 @@ package com.example.warehouseApp.service.movement;
 import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.dto.movement.MovementDtoTransfer;
+import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.exception.ValidationException;
 import com.example.warehouseApp.mapper.*;
 import com.example.warehouseApp.model.ItemStatus;
@@ -68,6 +69,13 @@ public class TransferService {
         log.info("Оформили трансфер с id {}", newDto.getId());
 
         return newDto;
+    }
+
+    public MovementDtoTransfer getById(Long id) {
+        var mov = movementRepository.findById(id).orElseThrow(() ->
+                new NotFoundException(String.format("Не найдено трансфера с id %d", id)));
+
+        return TransferMapper.mapToDto(mov);
     }
 
     private SerialItemDto updateSerialItemStatus(SerialItemDto serialItem) {

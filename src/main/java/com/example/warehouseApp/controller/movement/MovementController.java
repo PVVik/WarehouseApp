@@ -5,8 +5,10 @@ import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.batch.BatchService;
 import com.example.warehouseApp.service.movement.IssueService;
 import com.example.warehouseApp.service.movement.ReceiptService;
+import com.example.warehouseApp.service.movement.TransferService;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.format.DateTimeFormatter;
 
+@Slf4j
 @Controller
 @RequestMapping("/movements")
 @RequiredArgsConstructor
@@ -31,11 +34,46 @@ public class MovementController {
     private final IssueService issueService;
     private final BatchService batchService;
     private final SerialItemService serialItemService;
+    private final TransferService transferService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String showActions() {
         return "movements/movements-actions";
+    }
+
+    @GetMapping("/{id}/print-transfer-m13")
+    @PreAuthorize("hasAnyRole('STOREKEEPER', 'ADMIN')")
+    public String printTransferM13(@PathVariable Long id, Model model) {
+        var dto = transferService.getById(id);
+        log.info("DEBUG: batchId = {}", dto.getBatchId());
+
+        var warehouseFromDto = warehouseService.getById(dto.getWarehouseFrom());
+        var warehouseToDto = warehouseService.getById(dto.getWarehouseTo());
+        var nomenclatureDto = nomenclatureService.getById(dto.getNomenclatureId());
+
+        BatchDto batchDto = null;
+        if (dto.getBatchId() != null) {
+            batchDto = batchService.getById(dto.getBatchId());
+            log.info(batchDto.toString());
+        }
+
+        SerialItemDto serialItemDto = null;
+        if (dto.getSerialItemId() != null) {
+            serialItemDto = serialItemService.getById(dto.getSerialItemId());
+            log.info(serialItemDto.toString());
+        }
+
+        model.addAttribute("document", dto);
+        model.addAttribute("warehouseFromName", warehouseFromDto.getName());
+        model.addAttribute("warehouseToName", warehouseToDto.getName());
+        model.addAttribute("nomenclatureName", nomenclatureDto.getName());
+        model.addAttribute("unitName", nomenclatureDto.getUnitOfMeasure().getLabel());
+        model.addAttribute("batchDto", batchDto);
+        model.addAttribute("serialItemDto", serialItemDto);
+        model.addAttribute("documentDateFormatted", DateTimeFormatter.ofPattern("dd.MM.yyyy").format(dto.getDate()));
+
+        return "movements/transfer-m13-print";
     }
 
     @GetMapping("/{id}/print-m4")

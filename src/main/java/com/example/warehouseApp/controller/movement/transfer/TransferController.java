@@ -11,6 +11,7 @@ import com.example.warehouseApp.service.movement.TransferService;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +25,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 
+@Slf4j
 @Controller
 @RequestMapping("/movements/transfer")
 @RequiredArgsConstructor
@@ -35,6 +37,18 @@ public class TransferController {
     private final BaseService<WarehouseDto> warehouseService;
     private final BatchService batchService;
     private final SerialItemService serialItemService;
+
+    @GetMapping("/success")
+    public String transferSuccess(@RequestParam(required = false) Long transferId, Model model) {
+        if (transferId == null) {
+            return "redirect:/movements";
+        }
+        var dto = transferService.getById(transferId);
+
+        model.addAttribute("transferId", transferId);
+        model.addAttribute("number", dto != null ? dto.getNumber() : null);
+        return "movements/transfer-success";
+    }
 
     @GetMapping("/form")
     public String transferForm(
@@ -93,7 +107,6 @@ public class TransferController {
             model.addAttribute("serialItemsWithStock", serialItems);
         }
 
-
         return "movements/transfer-form";
     }
 
@@ -129,9 +142,10 @@ public class TransferController {
             }
 
             var result = transferService.createTransfer(dto);
+            log.info(result.toString());
             redirectAttributes.addFlashAttribute("successMessage",
                     "Перемещение оформлено. Номер документа: " + result.getNumber());
-            return "redirect:/movements";
+            return "redirect:/movements/transfer/success?transferId=" + result.getId();
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",

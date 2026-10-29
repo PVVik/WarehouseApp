@@ -16,8 +16,16 @@ public class TransferMapper {
     }
 
     public static MovementDtoTransfer mapToDto(Movement movement) {
-        return new MovementDtoTransfer(movement.getId(), movement.getMovementType(), movement.getNomenclature().getId(),
+        var dto = new MovementDtoTransfer(movement.getId(), movement.getMovementType(), movement.getNomenclature().getId(),
                 movement.getWarehouseFrom().getId(), movement.getWarehouseTo().getId(), movement.getQuantity(),
                 movement.getNumber(), movement.getDate(), movement.getNotes());
+        if (movement.getBatch() != null) {
+            dto.setBatchId(movement.getBatch().getId());
+        }
+        if (movement.getSerialItem() != null) {
+            dto.setSerialItemId(movement.getSerialItem().getId());
+        }
+
+        return dto;
     }
 }

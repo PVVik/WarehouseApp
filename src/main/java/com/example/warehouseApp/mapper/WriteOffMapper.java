@@ -17,8 +17,16 @@ public class WriteOffMapper {
     }
 
     public static MovementDtoWriteOff mapToDto(Movement movement) {
-        return new MovementDtoWriteOff(movement.getId(), movement.getMovementType(), movement.getNomenclature().getId(),
+        var dto = new MovementDtoWriteOff(movement.getId(), movement.getMovementType(), movement.getNomenclature().getId(),
                 movement.getQuantity(), movement.getWarehouseFrom().getId(), movement.getStorageLocation().getId(),
                 movement.getNotes(), movement.getNumber(), movement.getDate());
+        if (movement.getBatch() != null) {
+            dto.setBatchId(movement.getBatch().getId());
+        }
+        if (movement.getSerialItem() != null) {
+            dto.setSerialItemId(movement.getSerialItem().getId());
+        }
+
+        return dto;
     }
 }
