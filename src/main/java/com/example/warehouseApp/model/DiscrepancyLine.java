@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(of = {"id"})
 @ToString
 @NoArgsConstructor
-public class DiscrepancyLine {
+public class DiscrepancyLine implements EntityWithId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

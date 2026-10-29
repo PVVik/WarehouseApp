@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.batch;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.BatchDto;
 import com.example.warehouseApp.dto.BatchWithStockDto;
 import com.example.warehouseApp.dto.CounterpartyDto;
@@ -37,6 +38,7 @@ public class BatchServiceImpl implements BatchService {
 
     @Override
     @Transactional
+    @LogAudit(action = "CREATE", entityType = Batch.class)
     public BatchDto create(BatchDto batchDto) {
         validDate(batchDto);
         var nomenclatureDto = nomenclatureService.getById(batchDto.getNomenclatureId());
@@ -58,6 +60,7 @@ public class BatchServiceImpl implements BatchService {
 
     @Override
     @Transactional
+    @LogAudit(action = "UPDATE", entityType = Batch.class)
     public BatchDto update(BatchDto batchDto) {
         var saved = getEntityById(batchDto.getId());
         var newBatch = batchRepository.save(BatchMapper.mapToUpdateEntity(saved, batchDto));
@@ -106,6 +109,7 @@ public class BatchServiceImpl implements BatchService {
     }
 
     @Override
+    @LogAudit(action = "DELETE", entityType = Batch.class)
     public void delete(long id) {
         var batch = getEntityById(id);
 

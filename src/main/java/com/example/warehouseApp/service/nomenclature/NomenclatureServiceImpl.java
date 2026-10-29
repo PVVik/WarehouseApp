@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.nomenclature;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.NomenclatureDto;
 import com.example.warehouseApp.exception.AlreadyExistsException;
 import com.example.warehouseApp.exception.NotFoundException;
@@ -26,6 +27,7 @@ public class NomenclatureServiceImpl implements NomenclatureService {
 
     @Override
     @Transactional
+    @LogAudit(action = "CREATE", entityType = Nomenclature.class)
     public NomenclatureDto create(NomenclatureDto nomenclatureDto) {
         checkUniqueSku(nomenclatureDto.getSku());
 
@@ -38,6 +40,7 @@ public class NomenclatureServiceImpl implements NomenclatureService {
 
     @Override
     @Transactional
+    @LogAudit(action = "UPDATE", entityType = Nomenclature.class)
     public NomenclatureDto update(NomenclatureDto nomenclatureDto) {
         var nomenclature = getEntityById(nomenclatureDto.getId());
         var updated = NomenclatureMapper.mapToUpdateEntity(nomenclature, nomenclatureDto);
@@ -77,6 +80,7 @@ public class NomenclatureServiceImpl implements NomenclatureService {
     }
 
     @Override
+    @LogAudit(action = "DELETE", entityType = Nomenclature.class)
     public void delete(long id) {
         var nomenclature = getEntityById(id);
 

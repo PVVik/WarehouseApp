@@ -10,7 +10,7 @@ import lombok.*;
 @EqualsAndHashCode(of = {"id", "serialNumber"})
 @ToString
 @NoArgsConstructor
-public class SerialItem {
+public class SerialItem implements EntityWithId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,5 +52,9 @@ public class SerialItem {
         this.status = status;
         this.passportNumber = passportNumber;
         this.notes = notes;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

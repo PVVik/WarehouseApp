@@ -1,8 +1,9 @@
 package com.example.warehouseApp.domain;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 
@@ -39,6 +40,7 @@ public class AuditLog {
     private LocalDateTime timestamp;
 
     @Column(name = "details", columnDefinition = "JSONB")
+    @Type(JsonType.class)
     private String details;
 }
 

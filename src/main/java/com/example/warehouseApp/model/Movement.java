@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of = {"id", "number"})
 @ToString
 @NoArgsConstructor
-public class Movement {
+public class Movement implements EntityWithId {
 
     @Id
     @Column(name = "id")
@@ -83,4 +83,7 @@ public class Movement {
         this.notes = notes;
     }
 
+    public Long getId() {
+        return id;
+    }
 }

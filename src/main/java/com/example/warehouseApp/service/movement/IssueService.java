@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.movement;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.dto.movement.MovementDtoIssue;
 import com.example.warehouseApp.exception.ValidationException;
@@ -38,6 +39,7 @@ public class IssueService {
     private final AuthContextService authContextService;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = Movement.class)
     public MovementDtoIssue createIssue(MovementDtoIssue movementDtoIssue) {
         var nomenclature = nomenclatureService.getById(movementDtoIssue.getNomenclatureId());
         var customer = counterpartyService.getById(movementDtoIssue.getCustomerId());

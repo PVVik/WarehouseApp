@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.movement;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.dto.movement.MovementDtoWriteOff;
 import com.example.warehouseApp.exception.ValidationException;
@@ -37,6 +38,7 @@ public class WriteOffService {
     private final AuthContextService authContextService;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = Movement.class)
     public MovementDtoWriteOff createWriteOff(MovementDtoWriteOff movementDtoWriteOff) {
         var nomenclature = nomenclatureService.getById(movementDtoWriteOff.getNomenclatureId());
         var warehouse = warehouseService.getById(movementDtoWriteOff.getWarehouseFrom());

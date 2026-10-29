@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.serialItem;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.NomenclatureDto;
 import com.example.warehouseApp.dto.SerialItemDto;
 import com.example.warehouseApp.exception.NotFoundException;
@@ -38,6 +39,7 @@ public class SerialItemServiceImpl implements SerialItemService {
 
     @Override
     @Transactional
+    @LogAudit(action = "CREATE", entityType = SerialItem.class)
     public SerialItemDto create(SerialItemDto serialItemDto) {
         var nomenclatureDto = nomenclatureService.getById(serialItemDto.getNomenclatureId());
         var batchDto = (serialItemDto.getBatchId() != null)
@@ -62,6 +64,7 @@ public class SerialItemServiceImpl implements SerialItemService {
 
     @Override
     @Transactional
+    @LogAudit(action = "UPDATE", entityType = SerialItem.class)
     public SerialItemDto update(SerialItemDto serialItemDto) {
         var saved = getEntityById(serialItemDto.getId());
         var newSerialItem = serialItemRepository.save(SerialItemMapper.mapToUpdateEntity(saved, serialItemDto));
@@ -114,6 +117,7 @@ public class SerialItemServiceImpl implements SerialItemService {
     }
 
     @Override
+    @LogAudit(action = "DELETE", entityType = SerialItem.class)
     public void delete(long id) {
         var serialItem = getEntityById(id);
 

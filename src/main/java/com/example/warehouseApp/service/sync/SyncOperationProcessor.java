@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.sync;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.BatchDto;
 import com.example.warehouseApp.dto.NomenclatureDto;
 import com.example.warehouseApp.dto.SerialItemDto;
@@ -38,6 +39,7 @@ public class SyncOperationProcessor {
     private final StockBalanceService stockBalanceService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @LogAudit(action = "CREATE", entityType = SyncResultItem.class)
     public SyncResultItem processOperation(int index, SyncOperationDto op) {
         try {
             NomenclatureDto nomenclature = nomenclatureService.getBySku(op.getNomenclatureSku());

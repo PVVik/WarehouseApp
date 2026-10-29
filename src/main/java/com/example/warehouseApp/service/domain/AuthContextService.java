@@ -25,4 +25,13 @@ public class AuthContextService {
 
         return user.getId();
     }
+
+    public String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("Пользователь не авторизован");
+        }
+
+        return authentication.getName();
+    }
 }

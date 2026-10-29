@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.stockBalance;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.exception.ValidationException;
@@ -25,6 +26,7 @@ public class StockBalanceService {
     private final BaseService<WarehouseDto> warehouseService;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = StockBalance.class)
     public StockBalance saveStockBalance(NomenclatureDto nomenclature, BatchDto batch, SerialItemDto serialItem,
                                          WarehouseDto warehouse, StorageLocationDto storageLocation, BigDecimal quantity,
                                          MovementType movementType) {

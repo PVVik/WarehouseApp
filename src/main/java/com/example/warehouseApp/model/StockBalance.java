@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Table(name = "stock_balance")
 @Data
 @NoArgsConstructor
-public class StockBalance {
+public class StockBalance implements EntityWithId {
 
     @Id
     @Column(name = "id")
@@ -40,4 +40,7 @@ public class StockBalance {
     @Column(name = "quantity", nullable = false)
     private BigDecimal quantity;
 
+    public Long getId() {
+        return id;
+    }
 }

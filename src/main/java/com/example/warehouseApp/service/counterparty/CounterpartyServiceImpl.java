@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.counterparty;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.CounterpartyDto;
 import com.example.warehouseApp.exception.AlreadyExistsException;
 import com.example.warehouseApp.exception.NotFoundException;
@@ -27,6 +28,7 @@ public class CounterpartyServiceImpl implements BaseService<CounterpartyDto> {
 
     @Override
     @Transactional
+    @LogAudit(action = "CREATE", entityType = Counterparty.class)
     public CounterpartyDto create(CounterpartyDto counterpartyDto) {
         checkUniqueInn(counterpartyDto.getInn());
 
@@ -48,6 +50,7 @@ public class CounterpartyServiceImpl implements BaseService<CounterpartyDto> {
 
     @Override
     @Transactional
+    @LogAudit(action = "UPDATE", entityType = Counterparty.class)
     public CounterpartyDto update(CounterpartyDto counterpartyDto) {
         var counterparty = getEntityById(counterpartyDto.getId());
         var updated = CounterpartyMapper.mapToUpdateEntity(counterparty, counterpartyDto);
@@ -87,6 +90,7 @@ public class CounterpartyServiceImpl implements BaseService<CounterpartyDto> {
     }
 
     @Override
+    @LogAudit(action = "DELETE", entityType = Counterparty.class)
     public void delete(long id) {
         var counterparty = getEntityById(id);
 

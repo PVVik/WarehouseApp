@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.movement;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.dto.movement.MovementDtoTransfer;
 import com.example.warehouseApp.exception.ValidationException;
@@ -36,6 +37,7 @@ public class TransferService {
     private final AuthContextService authContextService;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = Movement.class)
     public MovementDtoTransfer createTransfer(MovementDtoTransfer movementDtoTransfer) {
         var nomenclature = nomenclatureService.getById(movementDtoTransfer.getNomenclatureId());
         var warehouseFrom = warehouseService.getById(movementDtoTransfer.getWarehouseFrom());

@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.inventory;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.WarehouseDto;
 import com.example.warehouseApp.dto.inventory.InventoryCheckDtoResponse;
 import com.example.warehouseApp.dto.inventory.InventoryDiscrepancyActDto;
@@ -42,6 +43,7 @@ public class InventoryService {
     private final ReceiptDocumentRepository receiptDocumentRepository;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = InventoryCheck.class)
     public InventoryCheckDtoResponse createCheck(Long warehouseId) {
         WarehouseDto warehouse = warehouseService.getById(warehouseId);
 
@@ -68,6 +70,7 @@ public class InventoryService {
     }
 
     @Transactional
+    @LogAudit(action = "UPDATE", entityType = InventoryCheck.class)
     public void updateActualQty(Long lineId, BigDecimal actualQty) {
         if (actualQty == null || actualQty.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("actualQty не может быть null или отрицательным");
@@ -94,6 +97,7 @@ public class InventoryService {
     }
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = InventoryDiscrepancyAct.class)
     public InventoryDiscrepancyActDto completeCheck(Long checkId) {
         InventoryCheck check = getAndValidateCheck(checkId);
 
@@ -143,6 +147,7 @@ public class InventoryService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @LogAudit(action = "UPDATE", entityType = InventoryDiscrepancyAct.class)
     public void settleDiscrepancies(Long actId) {
         InventoryDiscrepancyAct act = inventoryDiscrepancyRepository.findById(actId)
                 .orElseThrow(() -> new NotFoundException("Акт не найден"));

@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of = {"id", "batchNumber"})
 @ToString
 @NoArgsConstructor
-public class Batch {
+public class Batch implements EntityWithId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,6 +54,10 @@ public class Batch {
         this.batchNumber = batchNumber;
         this.productionDate = productionDate;
         this.expiryDate = expiryDate;
+    }
+
+    public Long getId() {
+        return id;
     }
 }
 

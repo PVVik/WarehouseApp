@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.domain;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.domain.User;
 import com.example.warehouseApp.dto.domain.CreateUserRequest;
 import com.example.warehouseApp.exception.BusinessException;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +21,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
+    @Transactional
+    @LogAudit(action = "CREATE", entityType = User.class)
     public User createUserByAdmin(CreateUserRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new BusinessException("Пользователь с логином '" + request.getUsername() + "' уже существует");
