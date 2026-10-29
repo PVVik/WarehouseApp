@@ -105,7 +105,6 @@ public class WriteOffController {
             @RequestParam("warehouseFrom") Long warehouseFrom,
             @RequestParam("storageLocationId") Long storageLocationId,
             @RequestParam("quantity") BigDecimal quantity,
-            @RequestParam("userId") long userId,
             @RequestParam(required = false) Long batchId,
             @RequestParam(required = false) Long serialItemId,
             @RequestParam("notes") String notes,
@@ -118,7 +117,6 @@ public class WriteOffController {
             dto.setWarehouseFrom(warehouseFrom);
             dto.setStorageLocationId(storageLocationId);
             dto.setQuantity(quantity);
-            dto.setUserId(userId);
             dto.setNotes(notes);
 
             if (batchId != null) {

@@ -104,7 +104,6 @@ public class TransferController {
             @RequestParam("warehouseTo") Long warehouseTo,
             @RequestParam("storageLocationId") Long storageLocationId,
             @RequestParam("quantity") BigDecimal quantity,
-            @RequestParam("userId") long userId,
             @RequestParam(required = false) Long batchId,
             @RequestParam(required = false) Long serialItemId,
             @RequestParam(required = false) String notes,
@@ -118,7 +117,6 @@ public class TransferController {
             dto.setWarehouseTo(warehouseTo);
             dto.setStorageLocationId(storageLocationId);
             dto.setQuantity(quantity);
-            dto.setUserId(userId);
 
             if (batchId != null) {
                 dto.setBatchId(batchId);

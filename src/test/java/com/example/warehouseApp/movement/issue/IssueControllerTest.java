@@ -37,9 +37,9 @@ class IssueControllerTest {
     @Test
     void createIssueApi_shouldReturn201_andJsonBody() throws Exception {
         var request = buildDto(null, MovementType.ISSUE, 1L, 2L, 3L,
-                new BigDecimal("50"), new BigDecimal("120.50"), "ISS-2026-000001", LocalDate.of(2026, 10, 6), 10L);
+                new BigDecimal("50"), new BigDecimal("120.50"), "ISS-2026-000001", LocalDate.of(2026, 10, 6));
         var response = buildDto(100L, MovementType.ISSUE, 1L, 2L, 3L,
-                new BigDecimal("50"), new BigDecimal("120.50"), "ISS-2026-000001", LocalDate.of(2026, 10, 6), 10L);
+                new BigDecimal("50"), new BigDecimal("120.50"), "ISS-2026-000001", LocalDate.of(2026, 10, 6));
 
         when(issueService.createIssue(any(MovementDtoIssue.class))).thenReturn(response);
 
@@ -62,7 +62,7 @@ class IssueControllerTest {
     @Test
     void createIssueApi_shouldReturn400_whenQuantityIsNegative() throws Exception {
         var request = buildDto(null, MovementType.ISSUE, 1L, 2L, 3L,
-                new BigDecimal("-5"), new BigDecimal("120.50"), null, null, 10L);
+                new BigDecimal("-5"), new BigDecimal("120.50"), null, null);
 
         mockMvc.perform(post("/issue/api")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,7 +75,7 @@ class IssueControllerTest {
     @Test
     void createIssueApi_shouldReturn400_whenQuantityIsZero() throws Exception {
         var request = buildDto(null, MovementType.ISSUE, 1L, 2L, 3L,
-                BigDecimal.ZERO, new BigDecimal("120.50"), null, null, 10L);
+                BigDecimal.ZERO, new BigDecimal("120.50"), null, null);
 
         mockMvc.perform(post("/issue/api")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -88,7 +88,7 @@ class IssueControllerTest {
     @Test
     void createIssueApi_shouldReturn400_whenNomenclatureIdIsNull() throws Exception {
         var request = buildDto(null, MovementType.ISSUE, null, 2L, 3L,
-                new BigDecimal("50"), new BigDecimal("120.50"), null, null, 10L);
+                new BigDecimal("50"), new BigDecimal("120.50"), null, null);
 
         mockMvc.perform(post("/issue/api")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -101,7 +101,7 @@ class IssueControllerTest {
     @Test
     void createIssueApi_shouldReturn400_whenWarehouseFromIsNull() throws Exception {
         var request = buildDto(null, MovementType.ISSUE, 1L, null, 3L,
-                new BigDecimal("50"), new BigDecimal("120.50"), null, null, 10L);
+                new BigDecimal("50"), new BigDecimal("120.50"), null, null);
 
         mockMvc.perform(post("/issue/api")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -114,7 +114,7 @@ class IssueControllerTest {
     @Test
     void createIssueApi_shouldReturn400_whenCustomerIdIsNull() throws Exception {
         var request = buildDto(null, MovementType.ISSUE, 1L, 2L, null,
-                new BigDecimal("50"), new BigDecimal("120.50"), null, null, 10L);
+                new BigDecimal("50"), new BigDecimal("120.50"), null, null);
 
         mockMvc.perform(post("/issue/api")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -127,7 +127,7 @@ class IssueControllerTest {
     @Test
     void createIssueApi_shouldReturn400_whenUserIdIsNull() throws Exception {
         var request = buildDto(null, MovementType.ISSUE, 1L, 2L, 3L,
-                new BigDecimal("50"), new BigDecimal("120.50"), null, null, null);
+                new BigDecimal("50"), new BigDecimal("120.50"), null, null);
 
         mockMvc.perform(post("/issue/api")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -150,7 +150,7 @@ class IssueControllerTest {
     @Test
     void createIssueApi_shouldReturn404_whenNomenclatureNotFound() throws Exception {
         var request = buildDto(null, MovementType.ISSUE, 999L, 2L, 3L,
-                new BigDecimal("50"), new BigDecimal("120.50"), null, null, 10L);
+                new BigDecimal("50"), new BigDecimal("120.50"), null, null);
 
         when(issueService.createIssue(any(MovementDtoIssue.class)))
                 .thenThrow(new NotFoundException("Номенклатура с id 999 не найдена"));
@@ -166,7 +166,7 @@ class IssueControllerTest {
     @Test
     void createIssueApi_shouldReturn500_whenSerialItemNotInStock() throws Exception {
         var request = buildDto(null, MovementType.ISSUE, 1L, 2L, 3L,
-                BigDecimal.ONE, new BigDecimal("5000"), null, null, 10L);
+                BigDecimal.ONE, new BigDecimal("5000"), null, null);
         request.setSerialItemId(99L);
 
         when(issueService.createIssue(any(MovementDtoIssue.class)))
@@ -182,7 +182,7 @@ class IssueControllerTest {
 
     private MovementDtoIssue buildDto(Long id, MovementType movementType, Long nomenclatureId, Long warehouseFrom,
                                       Long customerId, BigDecimal quantity, BigDecimal price,
-                                      String number, LocalDate date, Long userId) {
+                                      String number, LocalDate date) {
         return new MovementDtoIssue(
                 id != null ? id : 0L,
                 movementType,
@@ -193,7 +193,6 @@ class IssueControllerTest {
                 price,
                 number,
                 date,
-                userId,
                 "Отгрузка по накладной №123"
         );
     }

@@ -9,6 +9,7 @@ import com.example.warehouseApp.model.Movement;
 import com.example.warehouseApp.repository.MovementRepository;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.batch.BatchService;
+import com.example.warehouseApp.service.domain.AuthContextService;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
@@ -32,6 +33,7 @@ public class TransferService {
     private final BatchService batchService;
     private final SerialItemService serialItemService;
     private final StockBalanceService stockBalanceService;
+    private final AuthContextService authContextService;
 
     @Transactional
     public MovementDtoTransfer createTransfer(MovementDtoTransfer movementDtoTransfer) {
@@ -51,6 +53,7 @@ public class TransferService {
         var movement = TransferMapper.mapToEntity(movementDtoTransfer);
         var updateSerialItem = updateSerialItemStatus(serialItem);
         setFieldsToEntity(movement, nomenclature, warehouseFrom, warehouseTo, storageLocation, batch, updateSerialItem);
+        movement.setUserId(authContextService.getCurrentUserId());
 
         var newMovement = movementRepository.save(movement);
 

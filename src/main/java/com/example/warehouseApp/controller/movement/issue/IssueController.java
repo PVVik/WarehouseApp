@@ -105,7 +105,6 @@ public class IssueController {
             @RequestParam("warehouseFrom") Long warehouseFrom,
             @RequestParam("quantity") BigDecimal quantity,
             @RequestParam("price") BigDecimal price,
-            @RequestParam("userId") Long userId,
             @RequestParam(required = false) Long batchId,
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) Long storageLocationId,
@@ -120,7 +119,6 @@ public class IssueController {
             dto.setCustomerId(customerId);
             dto.setQuantity(quantity);
             dto.setPrice(price);
-            dto.setUserId(userId);
 
             if (notes != null && !notes.isBlank()) {
                 dto.setNotes(notes);

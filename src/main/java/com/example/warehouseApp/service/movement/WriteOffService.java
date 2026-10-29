@@ -10,6 +10,7 @@ import com.example.warehouseApp.model.MovementType;
 import com.example.warehouseApp.repository.MovementRepository;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.batch.BatchService;
+import com.example.warehouseApp.service.domain.AuthContextService;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
@@ -33,6 +34,7 @@ public class WriteOffService {
     private final BatchService batchService;
     private final SerialItemService serialItemService;
     private final DocumentNumberService documentNumberService;
+    private final AuthContextService authContextService;
 
     @Transactional
     public MovementDtoWriteOff createWriteOff(MovementDtoWriteOff movementDtoWriteOff) {
@@ -53,6 +55,7 @@ public class WriteOffService {
 
         var movement = WriteOffMapper.mapToEntity(movementDtoWriteOff);
         setFieldsToEntity(movement, nomenclature, warehouse, storageLocation, batch, updatedSerialItem);
+        movement.setUserId(authContextService.getCurrentUserId());
 
         var newMovement = movementRepository.save(movement);
 

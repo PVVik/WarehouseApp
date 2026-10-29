@@ -10,6 +10,7 @@ import com.example.warehouseApp.model.Movement;
 import com.example.warehouseApp.repository.MovementRepository;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.batch.BatchService;
+import com.example.warehouseApp.service.domain.AuthContextService;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
@@ -34,6 +35,7 @@ public class ReceiptService {
     private final BaseService<WarehouseDto> warehouseService;
     private final StorageLocationService storageLocationService;
     private final StockBalanceService stockBalanceService;
+    private final AuthContextService authContextService;
 
     @Transactional
     public MovementDtoReceipt createReceipt(MovementDtoReceipt movementDtoReceipt) {
@@ -47,6 +49,7 @@ public class ReceiptService {
 
         var movement = ReceiptMapper.mapToEntity(movementDtoReceipt);
         setFieldsToEntity(movement, nomenclature, warehouse, supplier, batch, serialItem, storageLocation);
+        movement.setUserId(authContextService.getCurrentUserId());
 
         var newMovement = movementRepository.save(movement);
 

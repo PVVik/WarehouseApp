@@ -67,7 +67,6 @@ public class ReceiptController {
                                  @RequestParam(required = false) Long storageLocationId,
                                  @RequestParam(required = false) BigDecimal quantity,
                                  @RequestParam(required = false) BigDecimal price,
-                                 @RequestParam(required = false) Long userId,
                                  @RequestParam(required = false) String notes,
                                  @RequestParam(required = false) String batchNumber,
                                  @RequestParam(required = false) String batchManufactureDate,
@@ -89,7 +88,6 @@ public class ReceiptController {
             dto.setStorageLocationId(storageLocationId);
             dto.setQuantity(quantity);
             dto.setPrice(price);
-            dto.setUserId(userId);
             if (notes != null && !notes.isBlank()) {
                 dto.setNotes(notes);
             }

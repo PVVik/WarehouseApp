@@ -12,8 +12,8 @@ import com.example.warehouseApp.mapper.InventoryLineMapper;
 import com.example.warehouseApp.mapper.WarehouseMapper;
 import com.example.warehouseApp.model.*;
 import com.example.warehouseApp.repository.*;
-import com.example.warehouseApp.security.CurrentUserProvider;
 import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.service.domain.AuthContextService;
 import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ public class InventoryService {
     private final InventoryCheckRepository inventoryCheckRepository;
     private final InventoryLineRepository inventoryLineRepository;
     private final BaseService<WarehouseDto> warehouseService;
-    private final CurrentUserProvider currentUserProvider;
+    private final AuthContextService authContextService;
     private final StockBalanceService stockBalanceService;
     private final InventoryDiscrepancyRepository inventoryDiscrepancyRepository;
     private final DiscrepancyLineRepository discrepancyLineRepository;
@@ -197,7 +197,7 @@ public class InventoryService {
 
     private InventoryCheck createInventoryCheckEntity(WarehouseDto warehouse) {
         Warehouse checkWarehouse = WarehouseMapper.mapToEntityWithId(warehouse);
-        Long currentUserId = currentUserProvider.getCurrentUserId();
+        Long currentUserId = authContextService.getCurrentUserId();
 
         return new InventoryCheck(checkWarehouse, LocalDate.now(), DocumentStatus.DRAFT, currentUserId);
     }
@@ -263,7 +263,7 @@ public class InventoryService {
         InventoryDiscrepancyAct act = new InventoryDiscrepancyAct();
         act.setCreatedAt(LocalDate.now());
         act.setCheck(check);
-        act.setCreatedBy(currentUserProvider.getCurrentUserId());
+        act.setCreatedBy(authContextService.getCurrentUserId());
         act.setStatus(DocumentStatus.DRAFT);
         return act;
     }

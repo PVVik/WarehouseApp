@@ -40,7 +40,7 @@ public class StockBalanceService {
             if (movementType == MovementType.RECEIPT) {
                 stockBalance.setQuantity(oldQuantity.add(quantity));
             }
-            if (movementType == MovementType.ISSUE || movementType == MovementType.TRANSFER) {
+            if (movementType == MovementType.ISSUE || movementType == MovementType.TRANSFER || movementType == MovementType.WRITE_OFF) {
                 checkBalance(stockBalance, quantity);
                 stockBalance.setQuantity(oldQuantity.subtract(quantity));
             }
