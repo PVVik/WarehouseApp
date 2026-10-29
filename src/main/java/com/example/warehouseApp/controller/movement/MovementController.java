@@ -3,7 +3,9 @@ package com.example.warehouseApp.controller.movement;
 import com.example.warehouseApp.dto.CounterpartyDto;
 import com.example.warehouseApp.dto.NomenclatureDto;
 import com.example.warehouseApp.dto.WarehouseDto;
+import com.example.warehouseApp.dto.movement.MovementDtoReceipt;
 import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.service.movement.ReceiptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -11,8 +13,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.time.format.DateTimeFormatter;
 
 @Controller
 @RequestMapping("/movements")
@@ -22,11 +27,29 @@ public class MovementController {
     private final BaseService<NomenclatureDto> nomenclatureService;
     private final BaseService<CounterpartyDto> counterpartyService;
     private final BaseService<WarehouseDto> warehouseService;
+    private final ReceiptService receiptService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String showActions() {
         return "movements/movements-actions";
+    }
+
+    @GetMapping("/{id}/print-m4")
+    @PreAuthorize("hasAnyRole('STOREKEEPER', 'ADMIN')")
+    public String printM4(@PathVariable Long id, Model model) {
+        MovementDtoReceipt dto = receiptService.getById(id);
+        WarehouseDto warehouseDto = warehouseService.getById(dto.getWarehouseTo());
+        NomenclatureDto nomenclatureDto = nomenclatureService.getById(dto.getNomenclatureId());
+        CounterpartyDto counterpartyDto = counterpartyService.getById(dto.getCounterpartyId());
+
+        model.addAttribute("document", dto);
+        model.addAttribute("warehouseName", warehouseDto.getName());
+        model.addAttribute("nomenclatureName", nomenclatureDto.getName());
+        model.addAttribute("unitName", nomenclatureDto.getUnitOfMeasure().getLabel());
+        model.addAttribute("counterpartyName", counterpartyDto.getName());
+        model.addAttribute("documentDateFormatted", DateTimeFormatter.ofPattern("dd.MM.yyyy").format(dto.getDate()));
+        return "movements/receipt-m4-print";
     }
 
     @GetMapping("/nomenclature/list")

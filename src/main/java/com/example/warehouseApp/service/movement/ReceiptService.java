@@ -3,6 +3,7 @@ package com.example.warehouseApp.service.movement;
 import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.dto.movement.MovementDtoReceipt;
+import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.exception.ValidationException;
 import com.example.warehouseApp.mapper.*;
 import com.example.warehouseApp.model.InventoryType;
@@ -64,6 +65,13 @@ public class ReceiptService {
         log.info("Оформили приход с id и номером документа {} и {}", newMovementDto.getId(), newMovementDto.getNumber());
 
         return newMovementDto;
+    }
+
+    public MovementDtoReceipt getById(Long id) {
+        var mov = movementRepository.findById(id).orElseThrow(() ->
+                new NotFoundException(String.format("Не нашли приход с id %d", id)));
+
+        return ReceiptMapper.mapToDto(mov);
     }
 
     private BatchDto saveBatch(BatchDto batch, NomenclatureDto nomenclature, CounterpartyDto supplier) {

@@ -13,10 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
@@ -59,6 +56,19 @@ public class ReceiptController {
         return "movements/receipt-form";
     }
 
+    @GetMapping("/success")
+    public String receiptSuccess(@RequestParam(required = false) Long receiptId,
+                                 Model model) {
+        if (receiptId == null) {
+            return "redirect:/movements";
+        }
+        MovementDtoReceipt dto = receiptService.getById(receiptId);
+
+        model.addAttribute("receiptId", receiptId);
+        model.addAttribute("number", dto != null ? dto.getNumber() : null);
+        return "movements/receipt-success";
+    }
+
     @PostMapping
     public String processReceipt(@RequestParam(required = false) Long nomenclatureId,
                                  @RequestParam(required = false) String inventoryType,
@@ -74,7 +84,7 @@ public class ReceiptController {
                                  @RequestParam(required = false) String serialNumber,
                                  @RequestParam(required = false) String passportNumber,
                                  @RequestParam(required = false) String serialNotes,
-                                 RedirectAttributes redirectAttributes) {
+                                             RedirectAttributes redirectAttributes) {
 
         var contextQuery = buildContextQuery(nomenclatureId, null,
                 inventoryType, counterpartyId, warehouseTo);
@@ -118,7 +128,7 @@ public class ReceiptController {
             var result = receiptService.createReceipt(dto);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Приход оформлен. Номер документа: " + result.getNumber());
-            return "redirect:/movements";
+            return "redirect:/movements/receipt/success?receiptId=" + result.getId();
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Ошибка при оформлении прихода: " + e.getMessage());

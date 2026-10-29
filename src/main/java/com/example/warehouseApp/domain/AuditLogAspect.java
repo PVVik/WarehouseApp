@@ -77,7 +77,6 @@ public class AuditLogAspect {
         data.put("args", Arrays.stream(joinPoint.getArgs())
                 .filter(arg -> !(arg instanceof byte[] || arg instanceof InputStream))
                 .toList());
-        data.put("result", result);
 
         return JsonUtils.toJson(data);
     }
