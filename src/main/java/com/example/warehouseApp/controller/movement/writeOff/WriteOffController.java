@@ -37,6 +37,15 @@ public class WriteOffController {
     private final BatchService batchService;
     private final SerialItemService serialItemService;
 
+    @GetMapping("/success")
+    public String writeOffSuccess(@RequestParam Long id, Model model) {
+        var dto = writeOffService.getById(id);
+
+        model.addAttribute("id", id);
+        model.addAttribute("number", dto != null ? dto.getNumber() : null);
+        return "movements/write-off-success";
+    }
+
     @GetMapping("/form")
     public String writeOffForm(
             @RequestParam(required = false) Long nomenclatureId,
@@ -129,7 +138,7 @@ public class WriteOffController {
             var result = writeOffService.createWriteOff(dto);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Списание оформлено. Номер документа: " + result.getNumber());
-            return "redirect:/movements";
+            return "redirect:/movements/write-off/success?id=" + result.getId();
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",

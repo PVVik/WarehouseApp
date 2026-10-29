@@ -6,6 +6,7 @@ import com.example.warehouseApp.service.batch.BatchService;
 import com.example.warehouseApp.service.movement.IssueService;
 import com.example.warehouseApp.service.movement.ReceiptService;
 import com.example.warehouseApp.service.movement.TransferService;
+import com.example.warehouseApp.service.movement.WriteOffService;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,11 +36,41 @@ public class MovementController {
     private final BatchService batchService;
     private final SerialItemService serialItemService;
     private final TransferService transferService;
+    private final WriteOffService writeOffService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String showActions() {
         return "movements/movements-actions";
+    }
+
+    @GetMapping("/{id}/print-write-off-aktu")
+    @PreAuthorize("hasAnyRole('STOREKEEPER', 'ADMIN')")
+    public String printWriteOffAktu(@PathVariable Long id, Model model) {
+        var dto = writeOffService.getById(id);
+
+        var warehouseDto = warehouseService.getById(dto.getWarehouseFrom());
+        var nomenclatureDto = nomenclatureService.getById(dto.getNomenclatureId());
+
+        BatchDto batchDto = null;
+        if (dto.getBatchId() != null) {
+            batchDto = batchService.getById(dto.getBatchId());
+        }
+
+        SerialItemDto serialItemDto = null;
+        if (dto.getSerialItemId() != null) {
+            serialItemDto = serialItemService.getById(dto.getSerialItemId());
+        }
+
+        model.addAttribute("document", dto);
+        model.addAttribute("warehouseName", warehouseDto.getName());
+        model.addAttribute("nomenclatureName", nomenclatureDto.getName());
+        model.addAttribute("unitName", nomenclatureDto.getUnitOfMeasure().getLabel());
+        model.addAttribute("batchDto", batchDto);
+        model.addAttribute("serialItemDto", serialItemDto);
+        model.addAttribute("documentDateFormatted", DateTimeFormatter.ofPattern("dd.MM.yyyy").format(dto.getDate()));
+
+        return "movements/write-off-aktu-print";
     }
 
     @GetMapping("/{id}/print-transfer-m13")
