@@ -32,7 +32,8 @@ public class InventoryDiscrepancyActMapper {
 
     private static DiscrepancyLineDto toLineDto(DiscrepancyLine line) {
         DiscrepancyLineDto dto = new DiscrepancyLineDto(line.getNomenclature().getId(), line.getNomenclature().getName(),
-                line.getAccountedQty(), line.getActualQty(), line.getDifference(), line.getType());
+                line.getAccountedQty(), line.getActualQty(), line.getDifference(), line.getType(),
+                line.getNomenclature().getUnitOfMeasure().getLabel());
 
         dto.setBatchNumber(line.getBatch() != null ? line.getBatch().getBatchNumber() : null);
 

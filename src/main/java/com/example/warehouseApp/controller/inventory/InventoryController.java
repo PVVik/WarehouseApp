@@ -4,6 +4,7 @@ import com.example.warehouseApp.dto.WarehouseDto;
 import com.example.warehouseApp.dto.inventory.*;
 import com.example.warehouseApp.exception.BusinessException;
 import com.example.warehouseApp.exception.NotFoundException;
+import com.example.warehouseApp.model.DocumentStatus;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.inventory.InventoryService;
 import jakarta.validation.Valid;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Controller
@@ -26,6 +28,25 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
     private final BaseService<WarehouseDto> warehouseService;
+
+
+    @GetMapping("/acts/{id}/print-discrepancy-act")
+    @PreAuthorize("hasAnyRole('ADMIN','STOREKEEPER')")
+    public String printDiscrepancyAct(@PathVariable Long id, Model model) {
+        var actDto = inventoryService.getActById(id);
+
+        var inventoryDto = inventoryService.getById(actDto.getCheckId());
+        var warehouseDto = warehouseService.getById(inventoryDto.getWarehouseId());
+        var lines = actDto.getLines();
+
+        model.addAttribute("act", actDto);
+        model.addAttribute("inventory", inventoryDto);
+        model.addAttribute("warehouseName", warehouseDto.getName());
+        model.addAttribute("createdDateFormatted", DateTimeFormatter.ofPattern("dd.MM.yyyy").format(inventoryDto.getCheckDate()));
+        model.addAttribute("statusLabel", actDto.getStatus() == DocumentStatus.DRAFT ? "Черновик" : "Утверждён");
+
+        return "inventory/discrepancy-act-print";
+    }
 
     @GetMapping("/create")
     @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")

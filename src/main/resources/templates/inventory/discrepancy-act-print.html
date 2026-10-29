@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Акт расхождений № ' + ${act.id}">Акт расхождений</title>
+    <style>
+        @media print {
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .page-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+            .info-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+            .info-label { font-weight: bold; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #000; padding: 8px; vertical-align: top; }
+            th { background: #f0f0f0; }
+            .negative { color: #d9534f; font-weight: bold; }
+            .signature-area { margin-top: 50px; }
+            button, .no-print { display: none; }
+        }
+        @media screen {
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            button { padding: 10px 20px; background: #3498db; color: white; border: none; cursor: pointer; border-radius: 4px; }
+            button:hover { background: #2980b9; }
+        }
+    </style>
+</head>
+<body>
+<div class="page-header">
+    <h1>Акт расхождений № <span th:text="${act.id}"></span></h1>
+    <div class="info-row">
+        <span class="info-label">Склад:</span>
+        <span th:text="${warehouseName}">Склад №1</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Дата создания:</span>
+        <span th:text="${createdDateFormatted}">29.10.2026</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Статус акта:</span>
+        <span th:text="${statusLabel}">Черновик</span>
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th style="width:5%;">№</th>
+        <th style="width:40%;">Товар / Партия</th>
+        <th style="width:15%;">Учётное кол-во</th>
+        <th style="width:15%;">Фактическое кол-во</th>
+        <th style="width:15%;">Разница</th>
+        <th style="width:10%;">Ед. изм.</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="line, iter : ${act.lines}" th:class="${line.difference < 0} ? 'negative' : ''">
+        <td th:text="${iter.index + 1}">1</td>
+        <td>
+            <div th:text="${line.nomenclatureName}">Топливо</div>
+            <small th:if="${line.batchNumber != null}" style="color:#666;">
+                Партия: <b th:text="${line.batchNumber}">Партия-123</b>
+            </small>
+        </td>
+        <td style="text-align:right;"
+            th:text="${line.accountedQty != null ? #numbers.formatDecimal(line.accountedQty, 3, 2, 'COMMA') : ''}">224,05</td>
+
+        <td style="text-align:right;"
+            th:text="${line.actualQty != null ? #numbers.formatDecimal(line.actualQty, 3, 2, 'COMMA') : ''}">200,00</td>
+
+        <td style="text-align:right;"
+            th:class="${line.difference < 0} ? 'negative' : ''"
+            th:text="${line.difference != null ? #numbers.formatDecimal(line.difference, 3, 2, 'COMMA') : ''}">-24,05</td>
+
+        <td th:text="${line.unitOfMeasure}">л</td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="signature-area">
+    <p>Расхождения выявлены комиссией:</p>
+    <div style="display:flex; gap:30px; margin-top:10px;">
+        <div style="flex:1">
+            <p>Председатель комиссии: _________________________ /ФИО/</p>
+            <p>Члены комиссии: _________________________ /ФИО/</p>
+        </div>
+        <div style="flex:1">
+            <p>Материально ответственное лицо: _________________________ /ФИО/</p>
+            <p>Бухгалтер: _________________________ /ФИО/</p>
+        </div>
+    </div>
+</div>
+
+<button type="button" onclick="window.print()" class="no-print"
+        style="margin-top:30px; padding:10px 20px; background:#3498db; color:white; border:none; cursor:pointer; border-radius: 4px;">
+    🖨️ Распечатать акт
+</button>
+</body>
+</html>

@@ -16,14 +16,16 @@ public class DiscrepancyLineDto {
     private BigDecimal actualQty;
     private BigDecimal difference;
     private DiscrepancyType type;
+    private String unitOfMeasure;
 
     public DiscrepancyLineDto(Long nomenclatureId, String nomenclatureName, BigDecimal accountedQty,
-                              BigDecimal actualQty, BigDecimal difference, DiscrepancyType type) {
+                              BigDecimal actualQty, BigDecimal difference, DiscrepancyType type, String unitOfMeasure) {
         this.nomenclatureId = nomenclatureId;
         this.nomenclatureName = nomenclatureName;
         this.accountedQty = accountedQty;
         this.actualQty = actualQty;
         this.difference = difference;
         this.type = type;
+        this.unitOfMeasure = unitOfMeasure;
     }
 }
