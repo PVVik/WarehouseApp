@@ -34,6 +34,18 @@ public class IssueController {
     private final BatchService batchService;
     private final SerialItemService serialItemService;
 
+    @GetMapping("/success")
+    public String issueSuccess(@RequestParam(required = false) Long issueId, Model model) {
+        if (issueId == null) {
+            return "redirect:/movements";
+        }
+        MovementDtoIssue dto = issueService.getById(issueId);
+
+        model.addAttribute("issueId", issueId);
+        model.addAttribute("number", dto != null ? dto.getNumber() : null);
+        return "movements/issue-success";
+    }
+
     @GetMapping("/form")
     public String issueForm(
             @RequestParam(required = false) Long nomenclatureId,
@@ -139,7 +151,7 @@ public class IssueController {
             var result = issueService.createIssue(dto);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Отгрузка оформлена. Номер документа: " + result.getNumber());
-            return "redirect:/movements";
+            return "redirect:/movements/issue/success?issueId=" + result.getId();
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",

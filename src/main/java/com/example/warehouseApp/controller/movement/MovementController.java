@@ -1,11 +1,11 @@
 package com.example.warehouseApp.controller.movement;
 
-import com.example.warehouseApp.dto.CounterpartyDto;
-import com.example.warehouseApp.dto.NomenclatureDto;
-import com.example.warehouseApp.dto.WarehouseDto;
-import com.example.warehouseApp.dto.movement.MovementDtoReceipt;
+import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.service.batch.BatchService;
+import com.example.warehouseApp.service.movement.IssueService;
 import com.example.warehouseApp.service.movement.ReceiptService;
+import com.example.warehouseApp.service.serialItem.SerialItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -28,6 +28,9 @@ public class MovementController {
     private final BaseService<CounterpartyDto> counterpartyService;
     private final BaseService<WarehouseDto> warehouseService;
     private final ReceiptService receiptService;
+    private final IssueService issueService;
+    private final BatchService batchService;
+    private final SerialItemService serialItemService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
@@ -38,10 +41,10 @@ public class MovementController {
     @GetMapping("/{id}/print-m4")
     @PreAuthorize("hasAnyRole('STOREKEEPER', 'ADMIN')")
     public String printM4(@PathVariable Long id, Model model) {
-        MovementDtoReceipt dto = receiptService.getById(id);
-        WarehouseDto warehouseDto = warehouseService.getById(dto.getWarehouseTo());
-        NomenclatureDto nomenclatureDto = nomenclatureService.getById(dto.getNomenclatureId());
-        CounterpartyDto counterpartyDto = counterpartyService.getById(dto.getCounterpartyId());
+        var dto = receiptService.getById(id);
+        var warehouseDto = warehouseService.getById(dto.getWarehouseTo());
+        var nomenclatureDto = nomenclatureService.getById(dto.getNomenclatureId());
+        var counterpartyDto = counterpartyService.getById(dto.getCounterpartyId());
 
         model.addAttribute("document", dto);
         model.addAttribute("warehouseName", warehouseDto.getName());
@@ -50,6 +53,37 @@ public class MovementController {
         model.addAttribute("counterpartyName", counterpartyDto.getName());
         model.addAttribute("documentDateFormatted", DateTimeFormatter.ofPattern("dd.MM.yyyy").format(dto.getDate()));
         return "movements/receipt-m4-print";
+    }
+
+    @GetMapping("/{id}/print-issue-m11")
+    @PreAuthorize("hasAnyRole('STOREKEEPER', 'ADMIN')")
+    public String printIssueM11(@PathVariable Long id, Model model) {
+        var dto = issueService.getById(id);
+
+        var warehouseDto = warehouseService.getById(dto.getWarehouseFrom());
+        var nomenclatureDto = nomenclatureService.getById(dto.getNomenclatureId());
+        var customerDto = counterpartyService.getById(dto.getCustomerId());
+
+        BatchDto batchDto = null;
+        if (dto.getBatchId() != null) {
+            batchDto = batchService.getById(dto.getBatchId());
+        }
+
+        SerialItemDto serialItemDto = null;
+        if (dto.getSerialItemId() != null) {
+            serialItemDto = serialItemService.getById(dto.getSerialItemId());
+        }
+
+        model.addAttribute("document", dto);
+        model.addAttribute("warehouseName", warehouseDto.getName());
+        model.addAttribute("nomenclatureName", nomenclatureDto.getName());
+        model.addAttribute("unitName", nomenclatureDto.getUnitOfMeasure().getLabel());
+        model.addAttribute("customerName", customerDto.getName());
+        model.addAttribute("batchDto", batchDto);
+        model.addAttribute("serialItemDto", serialItemDto);
+        model.addAttribute("documentDateFormatted", DateTimeFormatter.ofPattern("dd.MM.yyyy").format(dto.getDate()));
+
+        return "movements/issue-m11-print";
     }
 
     @GetMapping("/nomenclature/list")
