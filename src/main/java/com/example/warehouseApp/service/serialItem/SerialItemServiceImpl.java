@@ -130,24 +130,14 @@ public class SerialItemServiceImpl implements SerialItemService {
     public List<SerialItemDto> findByNomenclatureAndWarehouseWithStock(
             Long nomenclatureId, Long warehouseId, ItemStatus status) {
 
-        if (nomenclatureId == null || warehouseId == null) {
+        if (nomenclatureId == null) {
             return List.of();
         }
 
         var candidates = serialItemRepository.findAllByNomenclatureIdAndStatus(nomenclatureId, status);
-        if (candidates.isEmpty()) {
-            return List.of();
-        }
 
-        var balances = stockBalanceService.findPositiveBalancesByWarehouse(warehouseId);
-
-        var inStockIds = balances.stream()
-                .filter(sb -> sb.getSerialItem() != null)
-                .map(sb -> sb.getSerialItem().getId())
-                .collect(Collectors.toSet());
-
+        log.info("DEBUG: найдено серийников по номенклатуре/статусу = {}", candidates.size());
         return candidates.stream()
-                .filter(si -> inStockIds.contains(si.getId()))
                 .map(SerialItemMapper::mapToDto)
                 .toList();
     }

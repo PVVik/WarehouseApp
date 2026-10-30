@@ -13,9 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Aspect
 @Component
@@ -37,9 +35,10 @@ public class AuditLogAspect {
             throw e;
         }
 
-        Long entityId = extractEntityId(result, joinPoint);
+        Long entityId = extractEntityId(result);
         if (entityId == null) {
-            log.warn("Не удалось извлечь entityId для логирования: {}", joinPoint.getSignature().toShortString());
+            // Не прерываем, просто не пишем аудит по ID
+            log.debug("Не удалось извлечь entityId для логирования: {}", joinPoint.getSignature().toShortString());
             return result;
         }
 
@@ -51,32 +50,65 @@ public class AuditLogAspect {
         log.setEntityId(entityId);
         log.setTimestamp(LocalDateTime.now());
 
-        String details = extractDetails(joinPoint, result);
+        String details = extractDetailsSafe(joinPoint, result);
         log.setDetails(details);
 
         auditLogRepository.save(log);
         return result;
     }
 
-    private Long extractEntityId(Object result, ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
-        if (result instanceof EntityWithId) {
-            return ((EntityWithId) result).getId();
-        }
-        if (result != null && result.getClass().getDeclaredMethod("getId") != null) {
-            try {
-                return (Long) result.getClass().getMethod("getId").invoke(result);
-            } catch (ReflectiveOperationException ignored) {
-            }
+    // Безопасно: берём ID только у тех, кто точно его имеет (EntityWithId)
+    private Long extractEntityId(Object result) {
+        if (result instanceof EntityWithId entity) {
+            return entity.getId();
         }
         return null;
     }
 
-    private String extractDetails(ProceedingJoinPoint joinPoint, Object result) {
+    // Самое важное: никакой рефлексии getId() на случайных объектах
+    private String extractDetailsSafe(ProceedingJoinPoint joinPoint, Object result) {
         Map<String, Object> data = new HashMap<>();
         data.put("method", joinPoint.getSignature().toShortString());
-        data.put("args", Arrays.stream(joinPoint.getArgs())
-                .filter(arg -> !(arg instanceof byte[] || arg instanceof InputStream))
-                .toList());
+
+        List<Object> argsSummary = new ArrayList<>();
+        for (Object arg : joinPoint.getArgs()) {
+            if (arg == null) {
+                argsSummary.add(null);
+            } else if (arg instanceof byte[] || arg instanceof InputStream) {
+                // Бинарные данные не трогаем
+                argsSummary.add("byte[]/InputStream (skipped)");
+            } else if (arg instanceof EntityWithId entity) {
+                // Только для сущностей с гарантированным getId()
+                argsSummary.add(Map.of(
+                        "type", entity.getClass().getSimpleName(),
+                        "id", entity.getId()
+                ));
+            } else {
+                // Для всех остальных (включая BigDecimal, String, DTO и т.п.) — только тип и toString
+                argsSummary.add(Map.of(
+                        "type", arg.getClass().getSimpleName(),
+                        "value", arg.toString()
+                ));
+            }
+        }
+        data.put("args", argsSummary);
+
+        // Результат тоже безопасно
+        if (result != null) {
+            if (result instanceof EntityWithId entity) {
+                data.put("result", Map.of(
+                        "type", entity.getClass().getSimpleName(),
+                        "id", entity.getId()
+                ));
+            } else {
+                data.put("result", Map.of(
+                        "type", result.getClass().getSimpleName(),
+                        "value", result.toString()
+                ));
+            }
+        } else {
+            data.put("result", null);
+        }
 
         return JsonUtils.toJson(data);
     }

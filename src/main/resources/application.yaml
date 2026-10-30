@@ -30,3 +30,4 @@ logging:
   level:
     org.springframework.jdbc.core: DEBUG
     com.oilgas.warehouse: DEBUG
+    org.springframework.security: DEBUG

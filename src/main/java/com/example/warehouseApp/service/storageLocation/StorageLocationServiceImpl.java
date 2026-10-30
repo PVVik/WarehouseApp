@@ -110,7 +110,6 @@ public class StorageLocationServiceImpl implements StorageLocationService {
 
     @Override
     @Transactional
-    @LogAudit(action = "CREATE", entityType = BulkCreateResult.class)
     public BulkCreateResult createBulk(Long warehouseId, String zone, String rack, int count) {
         var normalizedZone = (zone == null) ? "" : zone.trim().toUpperCase();
         if (normalizedZone.isBlank() || !normalizedZone.matches("[A-ZА-Я0-9]{1,2}")) {

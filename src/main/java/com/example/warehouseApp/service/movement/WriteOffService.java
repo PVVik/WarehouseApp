@@ -41,6 +41,7 @@ public class WriteOffService {
     @Transactional
     @LogAudit(action = "CREATE", entityType = Movement.class)
     public MovementDtoWriteOff createWriteOff(MovementDtoWriteOff movementDtoWriteOff) {
+        log.info(movementDtoWriteOff.toString());
         var nomenclature = nomenclatureService.getById(movementDtoWriteOff.getNomenclatureId());
         var warehouse = warehouseService.getById(movementDtoWriteOff.getWarehouseFrom());
         var storageLocation = storageLocationService.getById(movementDtoWriteOff.getStorageLocationId());
@@ -51,7 +52,12 @@ public class WriteOffService {
                 ? serialItemService.getById(movementDtoWriteOff.getSerialItemId())
                 : null;
 
-        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
+        if (movementDtoWriteOff.getBatchId() != null) {
+            stockBalanceService.checkBatchExistsAndPositiveQuantity(movementDtoWriteOff.getBatchId(),
+                    movementDtoWriteOff.getQuantity());
+        } else {
+            stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
+        }
         checkQuantitySerialItem(serialItem, movementDtoWriteOff.getQuantity());
 
         var updatedSerialItem = updateSerialItemStatus(serialItem);

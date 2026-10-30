@@ -17,9 +17,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+        http.csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/**")
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/end-act/write-off/**").hasAnyRole("ADMIN", "STOREKEEPER")
 
                         .requestMatchers(HttpMethod.GET, "/api/reports/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/analytics/expiry-control").authenticated()
@@ -33,28 +37,28 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/movements/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/inventory/checks/**").authenticated()
 
-                        .requestMatchers(HttpMethod.POST, "/api/nomenclature").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/nomenclature/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/nomenclature").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/nomenclature/**").hasAnyRole("ADMIN", "STOREKEEPER")
                         .requestMatchers(HttpMethod.DELETE, "/api/nomenclature/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/counterparty").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/counterparty/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/counterparty").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/counterparty/**").hasAnyRole("ADMIN", "STOREKEEPER")
                         .requestMatchers(HttpMethod.DELETE, "/api/counterparty/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/warehouse").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/warehouse/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/warehouse").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/warehouse/**").hasAnyRole("ADMIN", "STOREKEEPER")
                         .requestMatchers(HttpMethod.DELETE, "/api/warehouse/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/storageLocation").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/storageLocation/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/storageLocation").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/storageLocation/**").hasAnyRole("ADMIN", "STOREKEEPER")
                         .requestMatchers(HttpMethod.DELETE, "/api/storageLocation/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/serial-item").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/serial-item/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/serial-item").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/serial-item/**").hasAnyRole("ADMIN", "STOREKEEPER")
                         .requestMatchers(HttpMethod.DELETE, "/api/serial-item/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/batch").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/batch/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/batch").hasAnyRole("ADMIN", "STOREKEEPER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/batch/**").hasAnyRole("ADMIN", "STOREKEEPER")
                         .requestMatchers(HttpMethod.DELETE, "/api/batch/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.POST, "/api/inventory/checks").hasAnyRole("ADMIN", "STOREKEEPER")

@@ -55,7 +55,12 @@ public class IssueService {
                 ? serialItemService.getById(movementDtoIssue.getSerialItemId())
                 : null;
 
-        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
+        if (movementDtoIssue.getBatchId() != null) {
+            stockBalanceService.checkBatchExistsAndPositiveQuantity(movementDtoIssue.getBatchId(),
+                    movementDtoIssue.getQuantity());
+        } else {
+            stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
+        }
         checkQuantitySerialItem(serialItem, movementDtoIssue.getQuantity());
 
         var updatedSerialItem = updateSerialItemStatus(serialItem);

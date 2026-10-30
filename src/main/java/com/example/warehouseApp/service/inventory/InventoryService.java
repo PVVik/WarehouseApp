@@ -155,31 +155,31 @@ public class InventoryService {
         if (act.getStatus() == DocumentStatus.COMPLETED) {
             return;
         }
+
         LocalDate now = LocalDate.now();
 
-        for (DiscrepancyLine line : act.getLines()) {
-            switch (line.getType()) {
-                case WRITE_OFF:
-                    WriteOffDocument wf = new WriteOffDocument();
-                    wf.setAct(act);
-                    wf.setQuantity(line.getDifference());
-                    wf.setStatus(DocumentStatus.DRAFT);
-                    wf.setCreatedAt(now);
-                    wf.setUpdatedAt(now);
-                    writeOffDocumentRepository.save(wf);
-                    break;
-                case RECEIPT:
-                    ReceiptDocument rf = new ReceiptDocument();
-                    rf.setAct(act);
-                    rf.setQuantity(line.getDifference());
-                    rf.setStatus(DocumentStatus.DRAFT);
-                    rf.setCreatedAt(now);
-                    rf.setUpdatedAt(now);
-                    receiptDocumentRepository.save(rf);
-                    break;
-                default:
-                    break;
-            }
+        boolean hasWriteOff = act.getLines().stream()
+                .anyMatch(l -> l.getType() == DiscrepancyType.WRITE_OFF);
+
+        boolean hasReceipt = act.getLines().stream()
+                .anyMatch(l -> l.getType() == DiscrepancyType.RECEIPT);
+
+        if (hasWriteOff) {
+            WriteOffDocument wf = new WriteOffDocument();
+            wf.setAct(act);
+            wf.setStatus(DocumentStatus.DRAFT);
+            wf.setCreatedAt(now);
+            wf.setUpdatedAt(now);
+            writeOffDocumentRepository.save(wf);
+        }
+
+        if (hasReceipt) {
+            ReceiptDocument rf = new ReceiptDocument();
+            rf.setAct(act);
+            rf.setStatus(DocumentStatus.DRAFT);
+            rf.setCreatedAt(now);
+            rf.setUpdatedAt(now);
+            receiptDocumentRepository.save(rf);
         }
 
         act.setStatus(DocumentStatus.COMPLETED);

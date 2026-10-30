@@ -26,9 +26,15 @@ public class BatchMapper {
     }
 
     public static BatchDto mapToDto(Batch batch) {
-        var batchDto = new BatchDto(batch.getId(), batch.getNomenclature().getId(), batch.getBatchNumber(),
-                batch.getProductionDate(), batch.getExpiryDate(), batch.getReceiptDate(), batch.getStatus().toString());
-        if(batch.getSupplier() != null) {
+        var batchDto = new BatchDto(batch.getId(), batch.getBatchNumber(),
+                batch.getProductionDate(), batch.getExpiryDate(), batch.getReceiptDate());
+        if (batch.getStatus() != null) {
+            batchDto.setStatus(batch.getStatus().toString());
+        }
+        if (batch.getNomenclature() != null) {
+            batchDto.setNomenclatureId(batch.getNomenclature().getId());
+        }
+        if (batch.getSupplier() != null) {
             batchDto.setSupplierId(batch.getSupplier().getId());
         }
 

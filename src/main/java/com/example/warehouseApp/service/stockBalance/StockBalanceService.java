@@ -68,8 +68,17 @@ public class StockBalanceService {
         return stockBalanceRepository.findPositiveBalancesByWarehouse(warehouseId);
     }
 
+    public void checkBatchExistsAndPositiveQuantity(Long batchId, BigDecimal requiredQty) {
+        var balance = stockBalanceRepository.findByBatchId(batchId).orElseThrow(() ->
+                new NotFoundException(String.format("Нет остатков для партии %d", batchId)));
+
+        if (balance.getQuantity() == null || balance.getQuantity().compareTo(requiredQty) < 0) {
+            throw new ValidationException("Недостаточно остатка по выбранной партии");
+        }
+    }
+
     public void checkNomenclatureExistsOnWarehouseAndPositiveQuantity(NomenclatureDto nomenclature, WarehouseDto warehouse) {
-        StockBalance stockBalance = stockBalanceRepository.findByNomenclatureIdAndWarehouseId(
+        var stockBalance = stockBalanceRepository.findByNomenclatureIdAndWarehouseId(
                 nomenclature.getId(), warehouse.getId()).orElseGet(() -> {
             log.warn("На складе с id {} не найдена позиция с id {}", warehouse.getId(), nomenclature.getId());
             throw new NotFoundException(String.format("На выбранном складе нет номенклатуры %s", nomenclature.getName()));

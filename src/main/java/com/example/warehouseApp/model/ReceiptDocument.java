@@ -27,9 +27,6 @@ public class ReceiptDocument implements EntityWithId {
     @Column(name = "source", nullable = false)
     private String source;
 
-    @Column(name = "quantity")
-    private BigDecimal quantity;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private DocumentStatus status;
@@ -39,4 +36,7 @@ public class ReceiptDocument implements EntityWithId {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDate updatedAt;
+
+    @Column(name = "completed_by", nullable = false)
+    private Long completedBy;
 }

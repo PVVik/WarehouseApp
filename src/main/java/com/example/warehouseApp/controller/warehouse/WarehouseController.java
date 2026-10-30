@@ -5,6 +5,7 @@ import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/warehouse")
 @RequiredArgsConstructor
+@Slf4j
 public class WarehouseController {
 
     private final BaseService<WarehouseDto> warehouseService;
@@ -151,7 +153,7 @@ public class WarehouseController {
 
         if (!result.success()) {
             redirectAttributes.addFlashAttribute("error", result.message());
-            return "redirect:/warehouse/" + id + "/locations/bulk";
+            return "redirect:/warehouse/" + id;
         }
 
         redirectAttributes.addFlashAttribute("message", result.message());

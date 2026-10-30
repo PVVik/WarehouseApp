@@ -48,11 +48,13 @@ public class BatchServiceImpl implements BatchService {
 
         var newBatch = BatchMapper.mapToEntity(batchDto);
         newBatch.setNomenclature(NomenclatureMapper.mapToEntityWithId(nomenclatureDto));
+        log.info(newBatch.toString());
         if (supplierDto != null) {
             newBatch.setSupplier(CounterpartyMapper.mapToEntityWithId(supplierDto));
         }
         var saved = batchRepository.save(newBatch);
 
+        log.info(saved.toString());
         log.info("Создали партию с id {}", newBatch.getId());
 
         return BatchMapper.mapToDto(saved);
