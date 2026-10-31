@@ -8,6 +8,7 @@ import com.example.warehouseApp.service.movement.IssueService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -23,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = IssueApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class IssueControllerTest {
 
     @Autowired
@@ -43,7 +45,7 @@ class IssueControllerTest {
 
         when(issueService.createIssue(any(MovementDtoIssue.class))).thenReturn(response);
 
-        mockMvc.perform(post("/issue/api")
+        mockMvc.perform(post("/api/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -64,7 +66,7 @@ class IssueControllerTest {
         var request = buildDto(null, MovementType.ISSUE, 1L, 2L, 3L,
                 new BigDecimal("-5"), new BigDecimal("120.50"), null, null);
 
-        mockMvc.perform(post("/issue/api")
+        mockMvc.perform(post("/api/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -77,7 +79,7 @@ class IssueControllerTest {
         var request = buildDto(null, MovementType.ISSUE, 1L, 2L, 3L,
                 BigDecimal.ZERO, new BigDecimal("120.50"), null, null);
 
-        mockMvc.perform(post("/issue/api")
+        mockMvc.perform(post("/api/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -90,7 +92,7 @@ class IssueControllerTest {
         var request = buildDto(null, MovementType.ISSUE, null, 2L, 3L,
                 new BigDecimal("50"), new BigDecimal("120.50"), null, null);
 
-        mockMvc.perform(post("/issue/api")
+        mockMvc.perform(post("/api/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -103,7 +105,7 @@ class IssueControllerTest {
         var request = buildDto(null, MovementType.ISSUE, 1L, null, 3L,
                 new BigDecimal("50"), new BigDecimal("120.50"), null, null);
 
-        mockMvc.perform(post("/issue/api")
+        mockMvc.perform(post("/api/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -116,20 +118,7 @@ class IssueControllerTest {
         var request = buildDto(null, MovementType.ISSUE, 1L, 2L, null,
                 new BigDecimal("50"), new BigDecimal("120.50"), null, null);
 
-        mockMvc.perform(post("/issue/api")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-
-        verify(issueService, never()).createIssue(any());
-    }
-
-    @Test
-    void createIssueApi_shouldReturn400_whenUserIdIsNull() throws Exception {
-        var request = buildDto(null, MovementType.ISSUE, 1L, 2L, 3L,
-                new BigDecimal("50"), new BigDecimal("120.50"), null, null);
-
-        mockMvc.perform(post("/issue/api")
+        mockMvc.perform(post("/api/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -139,7 +128,7 @@ class IssueControllerTest {
 
     @Test
     void createIssueApi_shouldReturn400_whenBodyIsEmpty() throws Exception {
-        mockMvc.perform(post("/issue/api")
+        mockMvc.perform(post("/api/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(""))
                 .andExpect(status().isBadRequest());
@@ -155,7 +144,7 @@ class IssueControllerTest {
         when(issueService.createIssue(any(MovementDtoIssue.class)))
                 .thenThrow(new NotFoundException("Номенклатура с id 999 не найдена"));
 
-        mockMvc.perform(post("/issue/api")
+        mockMvc.perform(post("/api/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -172,7 +161,7 @@ class IssueControllerTest {
         when(issueService.createIssue(any(MovementDtoIssue.class)))
                 .thenThrow(new IllegalStateException("Серийная единица не может быть списана, статус — IN_USE"));
 
-        mockMvc.perform(post("/issue/api")
+        mockMvc.perform(post("/api/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isInternalServerError());

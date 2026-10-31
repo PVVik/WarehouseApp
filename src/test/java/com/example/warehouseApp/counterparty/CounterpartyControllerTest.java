@@ -1,6 +1,6 @@
 package com.example.warehouseApp.counterparty;
 
-import com.example.warehouseApp.controller.counterparty.CounterpartyController;
+import com.example.warehouseApp.controller.counterparty.CounterpartyApiController;
 import com.example.warehouseApp.dto.CounterpartyDto;
 import com.example.warehouseApp.exception.AlreadyExistsException;
 import com.example.warehouseApp.exception.NotFoundException;
@@ -9,6 +9,7 @@ import com.example.warehouseApp.service.BaseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,7 +27,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(CounterpartyController.class)
+@WebMvcTest(CounterpartyApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class CounterpartyControllerTest {
 
     @Autowired
@@ -61,7 +63,7 @@ class CounterpartyControllerTest {
 
         when(counterpartyService.create(any(CounterpartyDto.class))).thenReturn(response);
 
-        mockMvc.perform(post("/counterparty/api")
+        mockMvc.perform(post("/api/counterparty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -80,7 +82,7 @@ class CounterpartyControllerTest {
         CounterpartyDto request = buildDto(null, "", "7701234567", "770101001",
                 CounterpartyType.SUPPLIER, "+79991234567", "Иванов И.И.", true);
 
-        mockMvc.perform(post("/counterparty/api")
+        mockMvc.perform(post("/api/counterparty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -93,7 +95,7 @@ class CounterpartyControllerTest {
         CounterpartyDto request = buildDto(null, "ООО «Ромашка»", "", "770101001",
                 CounterpartyType.SUPPLIER, "+79991234567", "Иванов И.И.", true);
 
-        mockMvc.perform(post("/counterparty/api")
+        mockMvc.perform(post("/api/counterparty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -106,7 +108,7 @@ class CounterpartyControllerTest {
         CounterpartyDto request = buildDto(null, "ООО «Ромашка»", "7701234567", "",
                 CounterpartyType.SUPPLIER, "+79991234567", "Иванов И.И.", true);
 
-        mockMvc.perform(post("/counterparty/api")
+        mockMvc.perform(post("/api/counterparty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -119,7 +121,7 @@ class CounterpartyControllerTest {
         CounterpartyDto request = buildDto(null, "ООО «Ромашка»", "7701234567", "770101001",
                 CounterpartyType.SUPPLIER, "123", "Иванов И.И.", true);
 
-        mockMvc.perform(post("/counterparty/api")
+        mockMvc.perform(post("/api/counterparty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -132,7 +134,7 @@ class CounterpartyControllerTest {
         CounterpartyDto request = buildDto(null, "ООО «Ромашка»", "7701234567", "770101001",
                 CounterpartyType.SUPPLIER, "+79991234567", "", true);
 
-        mockMvc.perform(post("/counterparty/api")
+        mockMvc.perform(post("/api/counterparty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -145,7 +147,7 @@ class CounterpartyControllerTest {
         CounterpartyDto request = buildDto(null, "ООО «Ромашка»", "7701234567", "770101001",
                 null, "+79991234567", "Иванов И.И.", true);
 
-        mockMvc.perform(post("/counterparty/api")
+        mockMvc.perform(post("/api/counterparty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -161,7 +163,7 @@ class CounterpartyControllerTest {
         when(counterpartyService.create(any(CounterpartyDto.class)))
                 .thenThrow(new AlreadyExistsException("Контрагент с ИНН 7701234567 уже существует"));
 
-        mockMvc.perform(post("/counterparty/api")
+        mockMvc.perform(post("/api/counterparty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
@@ -176,7 +178,7 @@ class CounterpartyControllerTest {
 
         when(counterpartyService.getById(1L)).thenReturn(dto);
 
-        mockMvc.perform(get("/counterparty/api/1"))
+        mockMvc.perform(get("/api/counterparty/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("ООО «Ромашка»"))
@@ -192,7 +194,7 @@ class CounterpartyControllerTest {
         when(counterpartyService.getById(id))
                 .thenThrow(new NotFoundException(String.format("Контрагента с id %d не существует", id)));
 
-        mockMvc.perform(get("/counterparty/api/" + id))
+        mockMvc.perform(get("/api/counterparty/" + id))
                 .andExpect(status().isNotFound());
 
         verify(counterpartyService).getById(eq(id));
@@ -207,7 +209,7 @@ class CounterpartyControllerTest {
 
         when(counterpartyService.update(any(CounterpartyDto.class))).thenReturn(response);
 
-        mockMvc.perform(patch("/counterparty/api")
+        mockMvc.perform(patch("/api/counterparty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -226,7 +228,7 @@ class CounterpartyControllerTest {
         when(counterpartyService.update(any(CounterpartyDto.class)))
                 .thenThrow(new NotFoundException("Контрагента с id 999 не существует"));
 
-        mockMvc.perform(patch("/counterparty/api")
+        mockMvc.perform(patch("/api/counterparty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -245,7 +247,7 @@ class CounterpartyControllerTest {
 
         when(counterpartyService.getAll(any(Pageable.class), eq(null))).thenReturn(page);
 
-        mockMvc.perform(get("/counterparty/api"))
+        mockMvc.perform(get("/api/counterparty"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()").value(2))
                 .andExpect(jsonPath("$.content[0].name").value("ООО «Поставщик»"))
@@ -263,7 +265,7 @@ class CounterpartyControllerTest {
 
         when(counterpartyService.getAll(any(Pageable.class), eq("name:Поставщик,"))).thenReturn(page);
 
-        mockMvc.perform(get("/counterparty/api").param("search", "name:Поставщик,"))
+        mockMvc.perform(get("/api/counterparty").param("search", "name:Поставщик,"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()").value(1))
                 .andExpect(jsonPath("$.content[0].name").value("ООО «Поставщик»"));
@@ -275,7 +277,7 @@ class CounterpartyControllerTest {
 
         doNothing().when(counterpartyService).delete(id);
 
-        mockMvc.perform(delete("/counterparty/api/" + id))
+        mockMvc.perform(delete("/api/counterparty/" + id))
                 .andExpect(status().isNoContent());
 
         verify(counterpartyService).delete(eq(id));
@@ -288,7 +290,7 @@ class CounterpartyControllerTest {
         doThrow(new NotFoundException("Контрагента с id 999 не существует"))
                 .when(counterpartyService).delete(id);
 
-        mockMvc.perform(delete("/counterparty/api/" + id))
+        mockMvc.perform(delete("/api/counterparty/" + id))
                 .andExpect(status().isNotFound());
 
         verify(counterpartyService).delete(eq(id));

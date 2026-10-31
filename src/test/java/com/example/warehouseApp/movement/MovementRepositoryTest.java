@@ -86,7 +86,6 @@ class MovementRepositoryTest {
         assertThat(saved.getPrice()).isEqualTo(new BigDecimal("500.00"));
         assertThat(saved.getNumber()).isEqualTo("MOV-2026-000001");
         assertThat(saved.getDate()).isEqualTo(LocalDate.of(2026, 10, 6));
-        assertThat(saved.getUserId()).isEqualTo(10L);
     }
 
     @Test
@@ -205,8 +204,6 @@ class MovementRepositoryTest {
         assertThat(movementRepository.findById(id)).isEmpty();
     }
 
-    // Хелперы
-
     private Nomenclature createNomenclature(String name, String sku) {
         return new Nomenclature(
                 name,
@@ -239,7 +236,6 @@ class MovementRepositoryTest {
         c.setPhone("89123456789");
         c.setContact("Иванов Иван");
         c.setActive(true);
-        // Если у Counterparty тоже есть createdAt/updatedAt — добавь их аналогично
         return c;
     }
 
@@ -257,7 +253,7 @@ class MovementRepositoryTest {
             long userId,
             String notes
     ) {
-        var m = new Movement(movementType, quantity, price, userId, notes);
+        var m = new Movement(movementType, quantity, price, notes);
         m.setNomenclature(nomenclature);
         m.setBatch(batch);
         m.setSerialItem(serialItem);

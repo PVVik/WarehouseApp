@@ -1,12 +1,13 @@
 package com.example.warehouseApp.storageLocation;
 
-import com.example.warehouseApp.controller.storageLocation.StorageLocationController;
+import com.example.warehouseApp.controller.storageLocation.StorageLocationApiController;
 import com.example.warehouseApp.dto.StorageLocationDto;
 import com.example.warehouseApp.exception.NotFoundException;
-import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.service.storageLocation.StorageLocationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,7 +25,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(StorageLocationController.class)
+@WebMvcTest(StorageLocationApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class StorageLocationControllerTest {
 
     @Autowired
@@ -34,7 +36,7 @@ class StorageLocationControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private BaseService<StorageLocationDto> storageLocationService;
+    private StorageLocationService storageLocationService;
 
     private StorageLocationDto buildDto(Long id, long warehouseId, String zone, String rack, String shelf, boolean used) {
         StorageLocationDto dto = new StorageLocationDto();
@@ -56,7 +58,7 @@ class StorageLocationControllerTest {
 
         when(storageLocationService.create(any(StorageLocationDto.class))).thenReturn(response);
 
-        mockMvc.perform(post("/storageLocation/api")
+        mockMvc.perform(post("/api/storageLocation")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -73,7 +75,7 @@ class StorageLocationControllerTest {
     void addStorageLocationApi_shouldReturn400_whenZoneIsBlank() throws Exception {
         StorageLocationDto request = buildDto(null, 1L, "", "01", "02", false);
 
-        mockMvc.perform(post("/storageLocation/api")
+        mockMvc.perform(post("/api/storageLocation")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -87,7 +89,7 @@ class StorageLocationControllerTest {
 
         when(storageLocationService.getById(1L)).thenReturn(dto);
 
-        mockMvc.perform(get("/storageLocation/api/1"))
+        mockMvc.perform(get("/api/storageLocation/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.zone").value("A"))
@@ -102,7 +104,7 @@ class StorageLocationControllerTest {
         when(storageLocationService.getById(id))
                 .thenThrow(new NotFoundException(String.format("Ячейка с id %d не найдена", id)));
 
-        mockMvc.perform(get("/storageLocation/api/" + id))
+        mockMvc.perform(get("/api/storageLocation/" + id))
                 .andExpect(status().isNotFound());
 
         verify(storageLocationService).getById(eq(id));
@@ -115,7 +117,7 @@ class StorageLocationControllerTest {
 
         when(storageLocationService.update(any(StorageLocationDto.class))).thenReturn(response);
 
-        mockMvc.perform(patch("/storageLocation/api")
+        mockMvc.perform(patch("/api/storageLocation")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -132,7 +134,7 @@ class StorageLocationControllerTest {
         when(storageLocationService.update(any(StorageLocationDto.class)))
                 .thenThrow(new NotFoundException("Ячейка с id 999 не найдена"));
 
-        mockMvc.perform(patch("/storageLocation/api")
+        mockMvc.perform(patch("/api/storageLocation")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -147,7 +149,7 @@ class StorageLocationControllerTest {
 
         when(storageLocationService.getAll(any(Pageable.class), eq(null))).thenReturn(page);
 
-        mockMvc.perform(get("/storageLocation/api"))
+        mockMvc.perform(get("/api/storageLocation"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()").value(2))
                 .andExpect(jsonPath("$.content[0].zone").value("A"))
@@ -164,7 +166,7 @@ class StorageLocationControllerTest {
 
         when(storageLocationService.getAll(any(Pageable.class), eq("zone:A,"))).thenReturn(page);
 
-        mockMvc.perform(get("/storageLocation/api").param("search", "zone:A,"))
+        mockMvc.perform(get("/api/storageLocation").param("search", "zone:A,"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()").value(1))
                 .andExpect(jsonPath("$.content[0].zone").value("A"));
@@ -176,7 +178,7 @@ class StorageLocationControllerTest {
 
         doNothing().when(storageLocationService).delete(id);
 
-        mockMvc.perform(delete("/storageLocation/api/" + id))
+        mockMvc.perform(delete("/api/storageLocation/" + id))
                 .andExpect(status().isNoContent());
 
         verify(storageLocationService).delete(eq(id));
@@ -189,7 +191,7 @@ class StorageLocationControllerTest {
         doThrow(new NotFoundException("Ячейка с id 999 не найдена"))
                 .when(storageLocationService).delete(id);
 
-        mockMvc.perform(delete("/storageLocation/api/" + id))
+        mockMvc.perform(delete("/api/storageLocation/" + id))
                 .andExpect(status().isNotFound());
 
         verify(storageLocationService).delete(eq(id));

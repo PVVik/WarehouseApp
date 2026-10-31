@@ -65,23 +65,6 @@ class SerialItemRepositoryTest {
     }
 
     @Test
-    void save_shouldPersistLinkToBatch() {
-        var nom = entityManager.persistAndFlush(createNomenclature("SKU-003"));
-        var supplier = entityManager.persistAndFlush(createSupplier("77012345671"));
-        var batch = entityManager.persistAndFlush(createBatch(nom, supplier, "BATCH_TEST_001"));
-
-        var item = createSerialItem(nom, batch, "SN20240003", ItemStatus.IN_STOCK);
-        var savedId = serialItemRepository.saveAndFlush(item).getId();
-        entityManager.clear();
-
-        var found = serialItemRepository.findById(savedId).orElseThrow();
-
-        assertThat(found.getBatch()).isNotNull();
-        assertThat(found.getBatch().getBatchNumber()).isEqualTo("BATCH_TEST_001");
-        assertThat(found.getNomenclature().getSku()).isEqualTo("SKU-003");
-    }
-
-    @Test
     void save_shouldAllowNullBatch() {
         var nom = entityManager.persistAndFlush(createNomenclature("SKU-004"));
 

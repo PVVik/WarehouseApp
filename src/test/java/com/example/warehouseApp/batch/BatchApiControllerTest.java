@@ -4,9 +4,11 @@ import com.example.warehouseApp.controller.batch.BatchApiController;
 import com.example.warehouseApp.dto.BatchDto;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.service.batch.BatchService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
+@AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(BatchApiController.class)
 class BatchApiControllerTest {
 
@@ -35,7 +37,7 @@ class BatchApiControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private BaseService<BatchDto> batchService;
+    private BatchService batchService;
 
     @Test
     void addBatchApi_shouldReturn201_andJsonBody() throws Exception {
@@ -44,7 +46,7 @@ class BatchApiControllerTest {
 
         when(batchService.create(any(BatchDto.class))).thenReturn(response);
 
-        mockMvc.perform(post("/batch/api")
+        mockMvc.perform(post("/api/batch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -52,7 +54,6 @@ class BatchApiControllerTest {
                 .andExpect(jsonPath("$.nomenclatureId").value(1))
                 .andExpect(jsonPath("$.batchNumber").value("BATCH-2024-001"))
                 .andExpect(jsonPath("$.supplierId").value(5))
-                .andExpect(jsonPath("$.certificateNumber").value("CERT-12345"))
                 .andExpect(jsonPath("$.productionDate").value("2024-06-01"))
                 .andExpect(jsonPath("$.expiryDate").value("2025-06-01"));
 
@@ -63,7 +64,7 @@ class BatchApiControllerTest {
     void addBatchApi_shouldReturn400_whenNomenclatureIdIsNull() throws Exception {
         var json = "{\"nomenclatureId\": null, \"batchNumber\": \"BATCH-BAD-001\"}";
 
-        mockMvc.perform(post("/batch/api")
+        mockMvc.perform(post("/api/batch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest());
@@ -75,7 +76,7 @@ class BatchApiControllerTest {
     void addBatchApi_shouldReturn400_whenBatchNumberIsNull() throws Exception {
         var json = "{\"nomenclatureId\": 1, \"batchNumber\": null}";
 
-        mockMvc.perform(post("/batch/api")
+        mockMvc.perform(post("/api/batch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest());
@@ -85,7 +86,7 @@ class BatchApiControllerTest {
 
     @Test
     void addBatchApi_shouldReturn400_whenBodyIsEmpty() throws Exception {
-        mockMvc.perform(post("/batch/api")
+        mockMvc.perform(post("/api/batch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(""))
                 .andExpect(status().isBadRequest());
@@ -99,7 +100,7 @@ class BatchApiControllerTest {
 
         when(batchService.getById(1L)).thenReturn(dto);
 
-        mockMvc.perform(get("/batch/api/1"))
+        mockMvc.perform(get("/api/batch/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.batchNumber").value("BATCH-2024-001"))
@@ -116,7 +117,7 @@ class BatchApiControllerTest {
         when(batchService.getById(id))
                 .thenThrow(new NotFoundException(String.format("Партия с id %d не найдена", id)));
 
-        mockMvc.perform(get("/batch/api/" + id))
+        mockMvc.perform(get("/api/batch/" + id))
                 .andExpect(status().isNotFound());
 
         verify(batchService).getById(eq(id));
@@ -129,12 +130,11 @@ class BatchApiControllerTest {
 
         when(batchService.update(any(BatchDto.class))).thenReturn(response);
 
-        mockMvc.perform(patch("/batch/api")
+        mockMvc.perform(patch("/api/batch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.certificateNumber").value("CERT-UPDATED-999"));
+                .andExpect(jsonPath("$.id").value(1));
 
         verify(batchService).update(any(BatchDto.class));
     }
@@ -146,7 +146,7 @@ class BatchApiControllerTest {
         when(batchService.update(any(BatchDto.class)))
                 .thenThrow(new NotFoundException("Партия с id 999 не найдена"));
 
-        mockMvc.perform(patch("/batch/api")
+        mockMvc.perform(patch("/api/batch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -161,7 +161,7 @@ class BatchApiControllerTest {
 
         when(batchService.getAll(any(Pageable.class), eq(null))).thenReturn(page);
 
-        mockMvc.perform(get("/batch/api"))
+        mockMvc.perform(get("/api/batch"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()").value(2))
                 .andExpect(jsonPath("$.content[0].batchNumber").value("BATCH-001"))
@@ -178,7 +178,7 @@ class BatchApiControllerTest {
 
         when(batchService.getAll(any(Pageable.class), eq("batchNumber:BATCH,"))).thenReturn(page);
 
-        mockMvc.perform(get("/batch/api").param("search", "batchNumber:BATCH,"))
+        mockMvc.perform(get("/api/batch").param("search", "batchNumber:BATCH,"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()").value(1))
                 .andExpect(jsonPath("$.content[0].batchNumber").value("BATCH-001"));
@@ -190,7 +190,7 @@ class BatchApiControllerTest {
 
         doNothing().when(batchService).delete(id);
 
-        mockMvc.perform(delete("/batch/api/" + id))
+        mockMvc.perform(delete("/api/batch/" + id))
                 .andExpect(status().isNoContent());
 
         verify(batchService).delete(eq(id));
@@ -203,7 +203,7 @@ class BatchApiControllerTest {
         doThrow(new NotFoundException("Партия с id 999 не найдена"))
                 .when(batchService).delete(id);
 
-        mockMvc.perform(delete("/batch/api/" + id))
+        mockMvc.perform(delete("/api/batch/" + id))
                 .andExpect(status().isNotFound());
 
         verify(batchService).delete(eq(id));

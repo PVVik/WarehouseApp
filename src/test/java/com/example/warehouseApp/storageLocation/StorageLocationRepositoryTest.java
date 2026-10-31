@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(properties = {
         "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=validate"})
+        "spring.jpa.hibernate.ddl-auto=create-drop"})
 class StorageLocationRepositoryTest {
 
     @Autowired

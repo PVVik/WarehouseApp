@@ -56,6 +56,14 @@ public class Batch implements EntityWithId {
         this.expiryDate = expiryDate;
     }
 
+    public Batch(Nomenclature nomenclature, String batchNumber, Counterparty supplier, LocalDate productionDate, LocalDate expiryDate) {
+        this.nomenclature = nomenclature;
+        this.batchNumber = batchNumber;
+        this.supplier = supplier;
+        this.productionDate = productionDate;
+        this.expiryDate = expiryDate;
+    }
+
     public Long getId() {
         return id;
     }
