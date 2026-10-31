@@ -200,6 +200,18 @@ public class InventoryService {
         return InventoryDiscrepancyActMapper.toDto(act);
     }
 
+    public WriteOffDocument findWriteOffDocumentByActId(Long actId) {
+        var act = inventoryDiscrepancyRepository.findById(actId)
+                .orElseThrow(() -> new NotFoundException("Акт не найден"));
+        return writeOffDocumentRepository.findByAct(act).orElse(null);
+    }
+
+    public ReceiptDocument findReceiptDocumentByActId(Long actId) {
+        var act = inventoryDiscrepancyRepository.findById(actId)
+                .orElseThrow(() -> new NotFoundException("Акт не найден"));
+        return receiptDocumentRepository.findByAct(act).orElse(null);
+    }
+
     private InventoryCheck createInventoryCheckEntity(WarehouseDto warehouse) {
         Warehouse checkWarehouse = WarehouseMapper.mapToEntityWithId(warehouse);
         Long currentUserId = authContextService.getCurrentUserId();

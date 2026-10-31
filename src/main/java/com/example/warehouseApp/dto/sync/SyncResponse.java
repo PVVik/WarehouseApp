@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SyncResponse {
+
     private String siteCode;
     private int totalCount;
     private int successCount;

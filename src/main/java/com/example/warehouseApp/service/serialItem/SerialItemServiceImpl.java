@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +34,6 @@ public class SerialItemServiceImpl implements SerialItemService {
     private final SerialItemRepository serialItemRepository;
     private final BaseService<NomenclatureDto> nomenclatureService;
     private final BatchService batchService;
-    private final StockBalanceService stockBalanceService;
 
     @Override
     @Transactional

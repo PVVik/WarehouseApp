@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReceiptLineBreakdownDto {
+
     private Long nomenclatureId;
     private String nomenclatureName;
     private Long batchId;

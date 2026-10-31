@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequiredArgsConstructor
 @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
-public class WriteOffForActController {
+public class EndActApiController {
 
     private final DocumentService documentService;
 

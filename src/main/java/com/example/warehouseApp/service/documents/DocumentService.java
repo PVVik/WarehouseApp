@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.documents;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.BatchDto;
 import com.example.warehouseApp.dto.NomenclatureDto;
 import com.example.warehouseApp.dto.WarehouseDto;
@@ -43,6 +44,7 @@ public class DocumentService {
     private final ReceiptDocumentRepository receiptDocumentRepository;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = WriteOffDocument.class)
     public WriteOffDocumentResultDto completeWriteOffByActId(Long actId, String reason) {
         log.info("Начало проведения списаний по акту: actId={}", actId);
 
@@ -57,6 +59,7 @@ public class DocumentService {
     }
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = ReceiptDocument.class)
     public ReceiptDocumentResultDto completeReceiptByActId(Long actId, String source) {
         log.info("Начало проведения оприходования по акту: actId={}", actId);
 

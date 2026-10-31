@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Акт списания № ' + ${doc.id}">Акт списания</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1, h4 { color: #2c3e50; margin-bottom: 16px; }
+        .meta-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+        .meta-item { font-size: 0.9rem; color: #555; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; color: #2c3e50; }
+        tr:hover { background-color: #f1f1f1; }
+        .text-end { text-align: right; }
+        .difference-negative { color: #e74c3c; font-weight: 700; }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; }
+        .bg-warning { background-color: #fff3cd; color: #856404; }
+        .bg-success { background-color: #d4edda; color: #155724; }
+
+        .btn {
+            padding: 10px 18px;
+            width: 240px;
+            box-sizing: border-box;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: white;
+            background-color: #3498db;
+            white-space: nowrap;
+            font-size: 14px;
+            line-height: 1.2;
+            flex-shrink: 0;
+        }
+
+        button.btn {
+            width: 240px !important;
+            box-sizing: border-box !important;
+            padding: 10px 18px !important;
+            margin: 0 !important;
+        }
+
+        .btn:hover {
+            background-color: #3498db;
+        }
+        .btn-back { background-color: #95a5a6; color: white; }
+        .btn-back:hover { background-color: #7f8c8d; }
+
+        .flash-message { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .flash-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .sig-line { border-bottom: 1px solid #000; width: 100%; display: inline-block; }
+        .signature-block { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px; page-break-after: always; }
+        .sig-col { break-inside: avoid; }
+        .sig-col p { margin: 0; font-weight: bold; }
+
+        @media print {
+            body { background: none; padding: 0; }
+            .container { max-width: 100%; }
+            .btn, .flash-message, form, .card { display: none; }
+            .signature-block { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button type="button" class="btn" onclick="window.print()">
+        Распечатать
+    </button>
+
+    <h1>АКТ СПИСАНИЯ</h1>
+
+    <div class="header-row">
+        <div>
+            <b>Документ №</b>: <span th:text="${doc.id}"></span><br>
+            <b>Дата проведения</b>: <span th:text="${#temporals.format(doc.updatedAt, 'dd.MM.yyyy')}"></span>
+        </div>
+        <div style="text-align:right;">
+            <b>Организация</b>: ООО «СкладСервис»<br>
+            <b>Склад</b>: <span th:text="${warehouseName}"></span>
+        </div>
+    </div>
+
+    <div class="meta-row">
+        <span class="meta-item"><b>Основание</b>: Акт расхождений №<span th:text="${act.id}"></span></span>
+        <span class="meta-item"><b>Инвентаризация №</b>: <span th:text="${act.check.id}"></span></span>
+        <span class="meta-item"><b>Причина списания</b>: <span th:text="${doc.reason}"></span></span>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>№</th>
+            <th>Номенклатура</th>
+            <th>Партия</th>
+            <th class="text-end">Ед. изм.</th>
+            <th class="text-end">К списанию</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="line, rowStat : ${lines}" th:if="${line.type.name() == 'WRITE_OFF'}">
+            <td class="text-end" th:text="${rowStat.count}"></td>
+            <td>
+                <strong th:text="${line.nomenclature.name}"></strong>
+            </td>
+            <td th:if="${line.batch != null}" th:text="${line.batch.batchNumber}"></td>
+            <td th:if="${line.batch == null}">—</td>
+            <td class="text-end"><span th:text="${line.nomenclature.unitOfMeasure}"></span></td>
+            <td class="text-end difference-negative">
+                −<span th:text="${#strings.replace(line.difference.toPlainString(), '.', ',')}"></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="signature-block">
+        <div class="sig-col">
+            <p><b>Ответственный за списание</b></p>
+            <div style="margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>ФИО:</span>
+                    <span class="sig-line" style="flex-grow: 1; margin-left: 8px;"></span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Дата:</span>
+                    <span class="sig-line" style="flex-grow: 1; margin-left: 8px;"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sig-col">
+            <p><b>Кладовщик</b></p>
+            <div style="margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>ФИО:</span>
+                    <span class="sig-line" style="flex-grow: 1; margin-left: 8px;"></span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Дата:</span>
+                    <span class="sig-line" style="flex-grow: 1; margin-left: 8px;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

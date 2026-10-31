@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WriteOffCompleteRequestDto {
+public class WriteOffFormDto {
 
     private String reason;
 }

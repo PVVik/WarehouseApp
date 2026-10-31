@@ -1,10 +1,7 @@
 package com.example.warehouseApp.service.domain;
 
 import com.example.warehouseApp.domain.User;
-import com.example.warehouseApp.domain.User.Role;
 import com.example.warehouseApp.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;

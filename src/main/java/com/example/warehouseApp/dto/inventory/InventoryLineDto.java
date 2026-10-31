@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InventoryLineDto {
+
     private Long id;
     private String nomenclatureName;
     private String batchNumber;

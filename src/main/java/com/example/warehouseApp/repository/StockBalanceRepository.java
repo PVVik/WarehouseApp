@@ -18,7 +18,8 @@ public interface StockBalanceRepository extends JpaRepository<StockBalance, Long
     Optional<StockBalance> findByNomenclatureIdAndBatchIdAndWarehouseId(Long nomenclatureId,
                                                                         Long batchId,
                                                                         Long warehouseId);
-    Optional<StockBalance>findByBatchId(Long batchId);
+
+    Optional<StockBalance> findByBatchId(Long batchId);
 
     @Query("SELECT sb FROM StockBalance sb " +
             "WHERE sb.warehouse.id = :warehouseId AND sb.quantity > 0")

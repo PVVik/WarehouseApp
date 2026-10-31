@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReceiptDocumentResultDto {
+
     private Long id;
     private DocumentStatus status;
     private String source;

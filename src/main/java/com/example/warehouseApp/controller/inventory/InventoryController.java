@@ -4,6 +4,7 @@ import com.example.warehouseApp.dto.WarehouseDto;
 import com.example.warehouseApp.dto.inventory.*;
 import com.example.warehouseApp.exception.BusinessException;
 import com.example.warehouseApp.exception.NotFoundException;
+import com.example.warehouseApp.model.DiscrepancyType;
 import com.example.warehouseApp.model.DocumentStatus;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.inventory.InventoryService;
@@ -28,7 +29,6 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
     private final BaseService<WarehouseDto> warehouseService;
-
 
     @GetMapping("/acts/{id}/print-discrepancy-act")
     @PreAuthorize("hasAnyRole('ADMIN','STOREKEEPER')")
@@ -203,7 +203,39 @@ public class InventoryController {
     public String showAct(@PathVariable Long actId, Model model) {
         InventoryDiscrepancyActDto actDto = inventoryService.getActById(actId);
 
+        boolean isWriteOffRequired = false;
+        boolean isWriteOffCompleted = false;
+
+        boolean isReceiptRequired = false;
+        boolean isReceiptCompleted = false;
+
+        var lines = actDto.getLines();
+        if (lines != null) {
+            boolean hasWriteOffLines = lines.stream()
+                    .anyMatch(l -> DiscrepancyType.WRITE_OFF.equals(l.getType()));
+            boolean hasReceiptLines = lines.stream()
+                    .anyMatch(l -> DiscrepancyType.RECEIPT.equals(l.getType()));
+
+            isWriteOffRequired = hasWriteOffLines;
+            isReceiptRequired = hasReceiptLines;
+        }
+
+        var writeOffDoc = inventoryService.findWriteOffDocumentByActId(actId);
+        if (writeOffDoc != null) {
+            isWriteOffCompleted = DocumentStatus.COMPLETED.equals(writeOffDoc.getStatus());
+        }
+
+        var receiptDoc = inventoryService.findReceiptDocumentByActId(actId);
+        if (receiptDoc != null) {
+            isReceiptCompleted = DocumentStatus.COMPLETED.equals(receiptDoc.getStatus());
+        }
+
         model.addAttribute("act", actDto);
+        model.addAttribute("isWriteOffRequired", isWriteOffRequired);
+        model.addAttribute("isWriteOffCompleted", isWriteOffCompleted);
+        model.addAttribute("isReceiptRequired", isReceiptRequired);
+        model.addAttribute("isReceiptCompleted", isReceiptCompleted);
+
         return "inventory/act-details";
     }
 
