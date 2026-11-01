@@ -1,7 +1,9 @@
 package com.example.warehouseApp.service.movement;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.dto.movement.MovementDtoTransfer;
+import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.exception.ValidationException;
 import com.example.warehouseApp.mapper.*;
 import com.example.warehouseApp.model.ItemStatus;
@@ -9,6 +11,7 @@ import com.example.warehouseApp.model.Movement;
 import com.example.warehouseApp.repository.MovementRepository;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.batch.BatchService;
+import com.example.warehouseApp.service.domain.AuthContextService;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
@@ -32,8 +35,10 @@ public class TransferService {
     private final BatchService batchService;
     private final SerialItemService serialItemService;
     private final StockBalanceService stockBalanceService;
+    private final AuthContextService authContextService;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = Movement.class)
     public MovementDtoTransfer createTransfer(MovementDtoTransfer movementDtoTransfer) {
         var nomenclature = nomenclatureService.getById(movementDtoTransfer.getNomenclatureId());
         var warehouseFrom = warehouseService.getById(movementDtoTransfer.getWarehouseFrom());
@@ -51,6 +56,7 @@ public class TransferService {
         var movement = TransferMapper.mapToEntity(movementDtoTransfer);
         var updateSerialItem = updateSerialItemStatus(serialItem);
         setFieldsToEntity(movement, nomenclature, warehouseFrom, warehouseTo, storageLocation, batch, updateSerialItem);
+        movement.setUserId(authContextService.getCurrentUserId());
 
         var newMovement = movementRepository.save(movement);
 
@@ -63,6 +69,13 @@ public class TransferService {
         log.info("Оформили трансфер с id {}", newDto.getId());
 
         return newDto;
+    }
+
+    public MovementDtoTransfer getById(Long id) {
+        var mov = movementRepository.findById(id).orElseThrow(() ->
+                new NotFoundException(String.format("Не найдено трансфера с id %d", id)));
+
+        return TransferMapper.mapToDto(mov);
     }
 
     private SerialItemDto updateSerialItemStatus(SerialItemDto serialItem) {

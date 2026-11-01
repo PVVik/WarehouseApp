@@ -1,7 +1,9 @@
 package com.example.warehouseApp.service.movement;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.dto.movement.MovementDtoIssue;
+import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.exception.ValidationException;
 import com.example.warehouseApp.mapper.*;
 import com.example.warehouseApp.model.ItemStatus;
@@ -10,6 +12,7 @@ import com.example.warehouseApp.model.MovementType;
 import com.example.warehouseApp.repository.MovementRepository;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.batch.BatchService;
+import com.example.warehouseApp.service.domain.AuthContextService;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
@@ -34,8 +37,10 @@ public class IssueService {
     private final BatchService batchService;
     private final SerialItemService serialItemService;
     private final DocumentNumberService documentNumberService;
+    private final AuthContextService authContextService;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = Movement.class)
     public MovementDtoIssue createIssue(MovementDtoIssue movementDtoIssue) {
         var nomenclature = nomenclatureService.getById(movementDtoIssue.getNomenclatureId());
         var customer = counterpartyService.getById(movementDtoIssue.getCustomerId());
@@ -50,13 +55,19 @@ public class IssueService {
                 ? serialItemService.getById(movementDtoIssue.getSerialItemId())
                 : null;
 
-        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
+        if (movementDtoIssue.getBatchId() != null) {
+            stockBalanceService.checkBatchExistsAndPositiveQuantity(movementDtoIssue.getBatchId(),
+                    movementDtoIssue.getQuantity());
+        } else {
+            stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
+        }
         checkQuantitySerialItem(serialItem, movementDtoIssue.getQuantity());
 
         var updatedSerialItem = updateSerialItemStatus(serialItem);
 
         var movement = IssueMapper.mapToEntity(movementDtoIssue);
         setFieldsToEntity(movement, nomenclature, customer, warehouse, storageLocation, batch, updatedSerialItem);
+        movement.setUserId(authContextService.getCurrentUserId());
 
         var newMovement = movementRepository.save(movement);
 
@@ -69,6 +80,13 @@ public class IssueService {
         log.info("Оформили расход с id и номером документа {} и {}", newMovementDto.getId(), newMovementDto.getNumber());
 
         return newMovementDto;
+    }
+
+    public MovementDtoIssue getById(Long id) {
+        var mov = movementRepository.findById(id).orElseThrow(() ->
+                new NotFoundException(String.format("Не найден расход по id %d", id)));
+
+        return IssueMapper.mapToDto(mov);
     }
 
     private SerialItemDto updateSerialItemStatus(SerialItemDto serialItem) {

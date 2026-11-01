@@ -10,15 +10,23 @@ public class IssueMapper {
 
     public static Movement mapToEntity(MovementDtoIssue movementDtoIssue) {
         Movement movement = new Movement(MovementType.ISSUE, movementDtoIssue.getQuantity(), movementDtoIssue.getPrice(),
-                movementDtoIssue.getUserId(), movementDtoIssue.getNotes());
+                movementDtoIssue.getNotes());
         movement.setDate(LocalDate.now());
 
         return movement;
     }
 
     public static MovementDtoIssue mapToDto(Movement movement) {
-        return new MovementDtoIssue(movement.getId(), movement.getMovementType(), movement.getNomenclature().getId(),
+        var dto = new MovementDtoIssue(movement.getId(), movement.getMovementType(), movement.getNomenclature().getId(),
                 movement.getWarehouseFrom().getId(), movement.getCounterparty().getId(), movement.getQuantity(),
-                movement.getPrice(), movement.getNumber(), movement.getDate(), movement.getUserId(), movement.getNotes());
+                movement.getPrice(), movement.getNumber(), movement.getDate(), movement.getNotes());
+        if (movement.getBatch() != null) {
+            dto.setBatchId(movement.getBatch().getId());
+        }
+        if (movement.getSerialItem() != null) {
+            dto.setSerialItemId(movement.getSerialItem().getId());
+        }
+
+        return dto;
     }
 }

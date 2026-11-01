@@ -11,6 +11,7 @@ import com.example.warehouseApp.service.storageLocation.StorageLocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,12 +26,25 @@ import java.util.Collections;
 @Controller
 @RequestMapping("/movements/issue")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
 public class IssueController {
 
     private final IssueService issueService;
     private final StorageLocationService storageLocationService;
     private final BatchService batchService;
     private final SerialItemService serialItemService;
+
+    @GetMapping("/success")
+    public String issueSuccess(@RequestParam(required = false) Long issueId, Model model) {
+        if (issueId == null) {
+            return "redirect:/movements";
+        }
+        MovementDtoIssue dto = issueService.getById(issueId);
+
+        model.addAttribute("issueId", issueId);
+        model.addAttribute("number", dto != null ? dto.getNumber() : null);
+        return "movements/issue-success";
+    }
 
     @GetMapping("/form")
     public String issueForm(
@@ -103,7 +117,6 @@ public class IssueController {
             @RequestParam("warehouseFrom") Long warehouseFrom,
             @RequestParam("quantity") BigDecimal quantity,
             @RequestParam("price") BigDecimal price,
-            @RequestParam("userId") Long userId,
             @RequestParam(required = false) Long batchId,
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) Long storageLocationId,
@@ -118,7 +131,6 @@ public class IssueController {
             dto.setCustomerId(customerId);
             dto.setQuantity(quantity);
             dto.setPrice(price);
-            dto.setUserId(userId);
 
             if (notes != null && !notes.isBlank()) {
                 dto.setNotes(notes);
@@ -139,7 +151,7 @@ public class IssueController {
             var result = issueService.createIssue(dto);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Отгрузка оформлена. Номер документа: " + result.getNumber());
-            return "redirect:/movements";
+            return "redirect:/movements/issue/success?issueId=" + result.getId();
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",

@@ -13,7 +13,7 @@ import java.util.List;
 @EqualsAndHashCode(of = {"id"})
 @ToString
 @NoArgsConstructor
-public class InventoryDiscrepancyAct {
+public class InventoryDiscrepancyAct implements EntityWithId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

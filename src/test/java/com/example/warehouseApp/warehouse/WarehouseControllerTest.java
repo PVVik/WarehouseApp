@@ -1,13 +1,15 @@
 package com.example.warehouseApp.warehouse;
 
-import com.example.warehouseApp.controller.warehouse.WarehouseController;
+import com.example.warehouseApp.controller.warehouse.WarehouseApiController;
 import com.example.warehouseApp.dto.WarehouseDto;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.model.WarehouseType;
 import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.service.storageLocation.StorageLocationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -18,15 +20,14 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(WarehouseController.class)
+@WebMvcTest(WarehouseApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class WarehouseControllerTest {
 
     @Autowired
@@ -37,6 +38,9 @@ class WarehouseControllerTest {
 
     @MockitoBean
     private BaseService<WarehouseDto> warehouseService;
+
+    @MockitoBean
+    private StorageLocationService storageLocationService;
 
     @Test
     void addWarehouseApi_shouldReturn201_andJsonBody() throws Exception {
@@ -55,7 +59,7 @@ class WarehouseControllerTest {
 
         when(warehouseService.create(any(WarehouseDto.class))).thenReturn(response);
 
-        mockMvc.perform(post("/warehouse/api")
+        mockMvc.perform(post("/api/warehouse")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -73,7 +77,7 @@ class WarehouseControllerTest {
         request.setType(WarehouseType.REMOTE);
         request.setActive(true);
 
-        mockMvc.perform(post("/warehouse/api")
+        mockMvc.perform(post("/api/warehouse")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -89,7 +93,7 @@ class WarehouseControllerTest {
         request.setType(WarehouseType.REMOTE);
         request.setActive(true);
 
-        mockMvc.perform(post("/warehouse/api")
+        mockMvc.perform(post("/api/warehouse")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -116,7 +120,7 @@ class WarehouseControllerTest {
 
         when(warehouseService.getAll(any(Pageable.class), eq(null))).thenReturn(page);
 
-        mockMvc.perform(get("/warehouse/api"))
+        mockMvc.perform(get("/api/warehouse"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()").value(2))
                 .andExpect(jsonPath("$.content[0].name").value("Склад A"))
@@ -136,7 +140,7 @@ class WarehouseControllerTest {
 
         when(warehouseService.getById(1L)).thenReturn(dto);
 
-        mockMvc.perform(get("/warehouse/api/1"))
+        mockMvc.perform(get("/api/warehouse/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Склад 1"))
@@ -150,7 +154,7 @@ class WarehouseControllerTest {
         when(warehouseService.getById(anyLong()))
                 .thenThrow(new NotFoundException(String.format("Склад с id %d не найден", id)));
 
-        mockMvc.perform(get("/warehouse/api/" + id))
+        mockMvc.perform(get("/api/warehouse/" + id))
                 .andExpect(status().isNotFound());
 
         verify(warehouseService).getById(eq(id));
@@ -174,7 +178,7 @@ class WarehouseControllerTest {
 
         when(warehouseService.update(any(WarehouseDto.class))).thenReturn(response);
 
-        mockMvc.perform(patch("/warehouse/api")
+        mockMvc.perform(patch("/api/warehouse")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -195,7 +199,7 @@ class WarehouseControllerTest {
         when(warehouseService.update(any(WarehouseDto.class)))
                 .thenThrow(new NotFoundException("Склад с id 999 не найден"));
 
-        mockMvc.perform(patch("/warehouse/api")
+        mockMvc.perform(patch("/api/warehouse")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -207,7 +211,7 @@ class WarehouseControllerTest {
 
         doNothing().when(warehouseService).delete(id);
 
-        mockMvc.perform(delete("/warehouse/api/" + id))
+        mockMvc.perform(delete("/api/warehouse/" + id))
                 .andExpect(status().isNoContent());
 
         verify(warehouseService).delete(eq(id));
@@ -220,7 +224,7 @@ class WarehouseControllerTest {
         doThrow(new NotFoundException("Склад с id 999 не найден"))
                 .when(warehouseService).delete(id);
 
-        mockMvc.perform(delete("/warehouse/api/" + id))
+        mockMvc.perform(delete("/api/warehouse/" + id))
                 .andExpect(status().isNotFound());
 
         verify(warehouseService).delete(eq(id));

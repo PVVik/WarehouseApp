@@ -1,7 +1,9 @@
 package com.example.warehouseApp.service.movement;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.dto.movement.MovementDtoReceipt;
+import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.exception.ValidationException;
 import com.example.warehouseApp.mapper.*;
 import com.example.warehouseApp.model.InventoryType;
@@ -10,6 +12,7 @@ import com.example.warehouseApp.model.Movement;
 import com.example.warehouseApp.repository.MovementRepository;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.batch.BatchService;
+import com.example.warehouseApp.service.domain.AuthContextService;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
@@ -34,8 +37,10 @@ public class ReceiptService {
     private final BaseService<WarehouseDto> warehouseService;
     private final StorageLocationService storageLocationService;
     private final StockBalanceService stockBalanceService;
+    private final AuthContextService authContextService;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = Movement.class)
     public MovementDtoReceipt createReceipt(MovementDtoReceipt movementDtoReceipt) {
         var nomenclature = nomenclatureService.getById(movementDtoReceipt.getNomenclatureId());
         var supplier = counterpartyService.getById(movementDtoReceipt.getCounterpartyId());
@@ -47,6 +52,7 @@ public class ReceiptService {
 
         var movement = ReceiptMapper.mapToEntity(movementDtoReceipt);
         setFieldsToEntity(movement, nomenclature, warehouse, supplier, batch, serialItem, storageLocation);
+        movement.setUserId(authContextService.getCurrentUserId());
 
         var newMovement = movementRepository.save(movement);
 
@@ -59,6 +65,13 @@ public class ReceiptService {
         log.info("Оформили приход с id и номером документа {} и {}", newMovementDto.getId(), newMovementDto.getNumber());
 
         return newMovementDto;
+    }
+
+    public MovementDtoReceipt getById(Long id) {
+        var mov = movementRepository.findById(id).orElseThrow(() ->
+                new NotFoundException(String.format("Не нашли приход с id %d", id)));
+
+        return ReceiptMapper.mapToDto(mov);
     }
 
     private BatchDto saveBatch(BatchDto batch, NomenclatureDto nomenclature, CounterpartyDto supplier) {

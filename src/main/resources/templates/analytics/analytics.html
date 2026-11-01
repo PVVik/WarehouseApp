@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Отчёты — Складская система</title>
@@ -79,50 +80,57 @@
 </head>
 <body>
 
-<div class="container">
-    <h1>Отчёты и аналитика</h1>
+<div sec:authorize="hasAnyRole('VIEWER','ADMIN','STOREKEEPER')">
+    <div class="container">
+        <h1>Отчёты и аналитика</h1>
 
-    <a th:href="@{/}" class="btn btn-primary">← Назад к операциям</a>
+        <a th:href="@{/}" class="btn btn-primary">← Назад к операциям</a>
 
-    <div class="dashboard-grid">
-        <div class="card">
-            <h2>Контроль сроков годности партий</h2>
-            <p>Мониторинг партий, у которых скоро истекает срок годности или он уже истёк.</p>
-            <a th:href="@{/analytics/expiry-control}" class="btn btn-primary">Перейти к списку партий</a>
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>Контроль сроков годности партий</h2>
+                <p>Мониторинг партий, у которых скоро истекает срок годности или он уже истёк.</p>
+                <a th:href="@{/analytics/expiry-control}" class="btn btn-primary">Перейти к списку партий</a>
+            </div>
+
+            <div class="card">
+                <h2>Отчёт по остаткам</h2>
+                <p>Сводный отчёт по текущим остаткам номенклатуры на складах.</p>
+                <a th:href="@{/report/stock-form}" class="btn btn-primary">Сформировать отчёт</a>
+            </div>
+
+            <div class="card">
+                <h2>Отчёт по движениям товаров</h2>
+                <p>Анализ всех операций: приходы, расходы, перемещения и списания. Фильтрация по складу и периоду.</p>
+                <a th:href="@{/report/movement-form}" class="btn btn-primary">Сформировать отчёт</a>
+            </div>
+
+            <div class="card">
+                <h2>Оборачиваемость и ABC‑анализ</h2>
+                <p>Расчёт оборачиваемости товаров и динамическая ABC‑классификация по объёму расхода за период.</p>
+                <a th:href="@{/report/turnover}" class="btn btn-primary">Перейти к отчёту</a>
+            </div>
+
+            <div class="card">
+                <h2>Отчёт по дефицитам</h2>
+                <p>Выявление позиций с недостатком запаса: критические и предупредительные уровни относительно минимального порога.</p>
+                <a th:href="@{/report/deficit}" class="btn btn-primary">Перейти к отчёту</a>
+            </div>
+
+            <div class="card">
+                <h2>Отчёт по неликвидам</h2>
+                <p>Выявление позиций с длительным отсутствием движения (более 90 дней) и оценка их критичности.</p>
+                <a th:href="@{/report/nonliquid}" class="btn btn-primary">Перейти к отчёту</a>
+            </div>
         </div>
-
-        <div class="card">
-            <h2>Отчёт по остаткам</h2>
-            <p>Сводный отчёт по текущим остаткам номенклатуры на складах.</p>
-            <a th:href="@{/report/stock-form}" class="btn btn-primary">Сформировать отчёт</a>
-        </div>
-
-        <div class="card">
-            <h2>Отчёт по движениям товаров</h2>
-            <p>Анализ всех операций: приходы, расходы, перемещения и списания. Фильтрация по складу и периоду.</p>
-            <a th:href="@{/report/movement-form}" class="btn btn-primary">Сформировать отчёт</a>
-        </div>
-
-
-        <div class="card">
-            <h2>Оборачиваемость и ABC‑анализ</h2>
-            <p>Расчёт оборачиваемости товаров и динамическая ABC‑классификация по объёму расхода за период.</p>
-            <a th:href="@{/report/turnover}" class="btn btn-primary">Перейти к отчёту</a>
-        </div>
-
-        <div class="card">
-            <h2>Отчёт по дефицитам</h2>
-            <p>Выявление позиций с недостатком запаса: критические и предупредительные уровни относительно минимального порога.</p>
-            <a th:href="@{/report/deficit}" class="btn btn-primary">Перейти к отчёту</a>
-        </div>
-
-        <div class="card">
-            <h2>Отчёт по неликвидам</h2>
-            <p>Выявление позиций с длительным отсутствием движения (более 90 дней) и оценка их критичности относительно минимального порога.</p>
-            <a th:href="@{/report/nonliquid}" class="btn btn-primary">Перейти к отчёту</a>
-        </div>
-
     </div>
+</div>
+
+<div sec:authorize="!hasAnyRole('VIEWER','ADMIN','STOREKEEPER')" style="text-align:center; padding:60px; background:#f8f9fa; border-radius:8px;">
+    <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для просмотра отчётов.</p>
+    <a th:href="@{/}" class="btn" style="background-color:#6c757d; color:white; margin-top:10px; padding:10px 20px; text-decoration:none;">Вернуться на главную</a>
 </div>
 
 </body>

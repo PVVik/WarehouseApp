@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Новая инвентаризация - WarehouseApp</title>
@@ -123,46 +124,54 @@
 </head>
 <body>
 
-<div class="container">
-    <h1>Новая инвентаризация</h1>
+<div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
+    <div class="container">
+        <h1>Новая инвентаризация</h1>
 
-    <div th:if="${successMessage}" class="flash-message flash-success">
-        <b th:text="${successMessage}"></b>
-    </div>
+        <div th:if="${successMessage}" class="flash-message flash-success">
+            <b th:text="${successMessage}"></b>
+        </div>
 
-    <div th:if="${error}" class="flash-message flash-error">
-        <b>Ошибка:</b> <span th:text="${error}"></span>
-    </div>
+        <div th:if="${error}" class="flash-message flash-error">
+            <b>Ошибка:</b> <span th:text="${error}"></span>
+        </div>
 
-    <form th:action="@{/inventory}" th:object="${inventoryForm}" method="post" class="form-card">
+        <form th:action="@{/inventory}" th:object="${inventoryForm}" method="post" class="form-card">
 
-        <div class="form-group">
-            <label for="warehouseId" class="form-label">Склад для инвентаризации</label>
-            <select id="warehouseId" name="warehouseId" required>
-                <option value="" disabled selected>Выберите склад</option>
-                <option th:each="w : ${warehouses}"
-                        th:value="${w.id}"
-                        th:text="${w.name + ' (' + w.type + ')'}"></option>
-            </select>
+            <div class="form-group">
+                <label for="warehouseId" class="form-label">Склад для инвентаризации</label>
+                <select id="warehouseId" name="warehouseId" required>
+                    <option value="" disabled selected>Выберите склад</option>
+                    <option th:each="w : ${warehouses}"
+                            th:value="${w.id}"
+                            th:text="${w.name + ' (' + w.type + ')'}"></option>
+                </select>
 
-            <div th:if="${#fields.hasErrors('warehouseId')}" class="text-danger">
-                <span th:errors="*{warehouseId}"></span>
+                <div th:if="${#fields.hasErrors('warehouseId')}" class="text-danger">
+                    <span th:errors="*{warehouseId}"></span>
+                </div>
             </div>
-        </div>
 
-        <div style="display: flex; gap: 15px;">
-            <button type="submit" class="btn btn-primary">Создать инвентаризацию</button>
-            <a href="/" class="btn btn-secondary">Отмена</a>
-        </div>
-    </form>
+            <div style="display: flex; gap: 15px;">
+                <button type="submit" class="btn btn-primary">Создать инвентаризацию</button>
+                <a th:href="@{/inventory}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
 
-    <hr>
-    <p class="help-text">
-        При создании система автоматически сформирует строки инвентаризации на основе текущих остатков на выбранном складе.
-        Если остатков нет, будет создан пустой черновик.
-    </p>
+        <hr>
+        <p class="help-text">
+            При создании система автоматически сформирует строки инвентаризации на основе текущих остатков на выбранном складе.
+            Если остатков нет, будет создан пустой черновик.
+        </p>
+    </div>
+</div>
+
+<div sec:authorize="!hasAnyRole('ADMIN','STOREKEEPER')" style="text-align:center; padding:60px; background:#f8f9fa; border-radius:8px;">
+    <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для создания инвентаризации. Эта операция доступна только администраторам и кладовщикам.</p>
+    <a th:href="@{/}" class="btn" style="background-color:#95a5a6; color:white; margin-top:10px; padding:10px 20px; text-decoration:none;">Вернуться на главную</a>
 </div>
 
 </body>
 </html>
-

@@ -1,8 +1,7 @@
 package com.example.warehouseApp.nomenclature;
 
-import com.example.warehouseApp.controller.nomenclature.NomenclatureController;
+import com.example.warehouseApp.controller.nomenclature.NomenclatureApiController;
 import com.example.warehouseApp.dto.NomenclatureDto;
-import com.example.warehouseApp.exception.ErrorHandler;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.model.InventoryType;
 import com.example.warehouseApp.model.StuffCategory;
@@ -12,8 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -29,8 +28,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(NomenclatureController.class)
-@Import(ErrorHandler.class)
+@WebMvcTest(NomenclatureApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class NomenclatureControllerTest {
 
     @Autowired
@@ -61,7 +60,7 @@ class NomenclatureControllerTest {
         when(nomenclatureService.create(any(NomenclatureDto.class)))
                 .thenReturn(sampleDto);
 
-        mockMvc.perform(post("/nomenclature/api")
+        mockMvc.perform(post("/api/nomenclature")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(sampleDto)))
                 .andExpect(status().isCreated())
@@ -84,7 +83,7 @@ class NomenclatureControllerTest {
         invalid.setInventoryType(InventoryType.QUANTITY);
         invalid.setActive(true);
 
-        mockMvc.perform(post("/nomenclature/api")
+        mockMvc.perform(post("/api/nomenclature")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
                 .andExpect(status().isBadRequest());
@@ -100,7 +99,7 @@ class NomenclatureControllerTest {
         invalid.setInventoryType(InventoryType.QUANTITY);
         invalid.setActive(true);
 
-        mockMvc.perform(post("/nomenclature/api")
+        mockMvc.perform(post("/api/nomenclature")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
                 .andExpect(status().isBadRequest());
@@ -116,7 +115,7 @@ class NomenclatureControllerTest {
         invalid.setInventoryType(InventoryType.QUANTITY);
         invalid.setActive(true);
 
-        mockMvc.perform(post("/nomenclature/api")
+        mockMvc.perform(post("/api/nomenclature")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
                 .andExpect(status().isBadRequest());
@@ -124,7 +123,7 @@ class NomenclatureControllerTest {
 
     @Test
     void addNomenclature_shouldReturn400_whenBodyEmpty() throws Exception {
-        mockMvc.perform(post("/nomenclature/api")
+        mockMvc.perform(post("/api/nomenclature")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(""))
                 .andExpect(status().isBadRequest());
@@ -137,7 +136,7 @@ class NomenclatureControllerTest {
         when(nomenclatureService.update(any(NomenclatureDto.class)))
                 .thenReturn(sampleDto);
 
-        mockMvc.perform(patch("/nomenclature/api")
+        mockMvc.perform(patch("/api/nomenclature")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(sampleDto)))
                 .andExpect(status().isOk())
@@ -150,7 +149,7 @@ class NomenclatureControllerTest {
         when(nomenclatureService.update(any(NomenclatureDto.class)))
                 .thenThrow(new NotFoundException("Позиция с id 99999 не найдена"));
 
-        mockMvc.perform(patch("/nomenclature/api")
+        mockMvc.perform(patch("/api/nomenclature")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(sampleDto)))
                 .andExpect(status().isNotFound());
@@ -162,7 +161,7 @@ class NomenclatureControllerTest {
         when(nomenclatureService.getAll(any(Pageable.class), any()))
                 .thenReturn(page);
 
-        mockMvc.perform(get("/nomenclature/api"))
+        mockMvc.perform(get("/api/nomenclature"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].name").value("Болт М8 оцинкованный"))
@@ -180,7 +179,7 @@ class NomenclatureControllerTest {
         when(nomenclatureService.getAll(any(Pageable.class), any()))
                 .thenReturn(page);
 
-        mockMvc.perform(get("/nomenclature/api")
+        mockMvc.perform(get("/api/nomenclature")
                         .param("page", "1")
                         .param("size", "5")
                         .param("sort", "name,asc"))
@@ -196,7 +195,7 @@ class NomenclatureControllerTest {
         when(nomenclatureService.getAll(any(Pageable.class), eq("name:Болт")))
                 .thenReturn(page);
 
-        mockMvc.perform(get("/nomenclature/api")
+        mockMvc.perform(get("/api/nomenclature")
                         .param("search", "name:Болт"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].name").value("Болт М8 оцинкованный"));
@@ -210,7 +209,7 @@ class NomenclatureControllerTest {
         when(nomenclatureService.getAll(any(Pageable.class), any()))
                 .thenReturn(emptyPage);
 
-        mockMvc.perform(get("/nomenclature/api"))
+        mockMvc.perform(get("/api/nomenclature"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content").isEmpty())
@@ -222,7 +221,7 @@ class NomenclatureControllerTest {
     void getNomenclatureById_shouldReturn200AndDto() throws Exception {
         when(nomenclatureService.getById(1L)).thenReturn(sampleDto);
 
-        mockMvc.perform(get("/nomenclature/api/1"))
+        mockMvc.perform(get("/api/nomenclature/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Болт М8 оцинкованный"))
@@ -234,7 +233,7 @@ class NomenclatureControllerTest {
         when(nomenclatureService.getById(99999L))
                 .thenThrow(new NotFoundException("Позиция с id 99999 не найдена"));
 
-        mockMvc.perform(get("/nomenclature/api/by-id/99999"))
+        mockMvc.perform(get("/api/nomenclature/99999"))
                 .andExpect(status().isNotFound());
     }
 }

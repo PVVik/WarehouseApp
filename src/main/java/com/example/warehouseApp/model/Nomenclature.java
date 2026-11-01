@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class Nomenclature {
+public class Nomenclature implements EntityWithId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,5 +62,9 @@ public class Nomenclature {
         this.unitOfMeasure = unitOfMeasure;
         this.inventoryType = inventoryType;
         this.isActive = isActive;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

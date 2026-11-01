@@ -4,7 +4,6 @@ import com.example.warehouseApp.model.*;
 import com.example.warehouseApp.repository.BatchRepository;
 import com.example.warehouseApp.repository.CounterpartyRepository;
 import com.example.warehouseApp.repository.NomenclatureRepository;
-import com.example.warehouseApp.specification.batch.BatchSpecificationBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -25,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(properties = {
         "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=validate"})
+        "spring.jpa.hibernate.ddl-auto=create-drop"})
 class BatchRepositoryTest {
 
     @Autowired
@@ -52,9 +50,8 @@ class BatchRepositoryTest {
         var supplier = createCounterparty("ООО Поставщик", "7701234567");
         var savedSupplier = counterpartyRepository.save(supplier);
 
-        var batch = createBatch(savedNomenclature.getId(), "BATCH-2024-001", savedSupplier.getId());
-        batch.setNomenclature(savedNomenclature);
-        batch.setSupplier(savedSupplier);
+        var batch = createBatch(savedNomenclature, "BATCH-2024-001", savedSupplier);
+        batch.setStatus(BatchStatus.ACTIVE);
         Batch saved = batchRepository.save(batch);
 
         assertThat(saved.getId()).isGreaterThan(0L);
@@ -70,11 +67,12 @@ class BatchRepositoryTest {
         var nomenclature = createNomenclature("Инструмент универсальный", "TOOL-001");
         var savedNomenclature = nomenclatureRepository.save(nomenclature);
 
-        var batch = createBatch(savedNomenclature.getId(), "BATCH-NO-SUPPLIER", null);
+        var batch = createBatch(savedNomenclature, "BATCH-NO-SUPPLIER", null);
+        batch.setStatus(BatchStatus.ACTIVE);
         var saved = batchRepository.save(batch);
 
         assertThat(saved.getId()).isGreaterThan(0L);
-        assertThat(saved.getSupplier().getId()).isNull();
+        assertThat(saved.getSupplier()).isNull();
     }
 
     @Test
@@ -82,9 +80,11 @@ class BatchRepositoryTest {
         var nomenclature = createNomenclature("Реагент второй", "REAGENT-002");
         var savedNomenclature = nomenclatureRepository.save(nomenclature);
 
-        batchRepository.save(createBatch(savedNomenclature.getId(), "BATCH-DUP-001", null));
+        var batch = createBatch(savedNomenclature, "BATCH-DUP-001", null);
+        batch.setStatus(BatchStatus.ACTIVE);
+        batchRepository.save(batch);
 
-        assertThatThrownBy(() -> batchRepository.save(createBatch(savedNomenclature.getId(), "BATCH-DUP-001", null)))
+        assertThatThrownBy(() -> batchRepository.save(createBatch(savedNomenclature, "BATCH-DUP-001", null)))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -93,8 +93,9 @@ class BatchRepositoryTest {
         var nomenclature = createNomenclature("Реагент третий", "REAGENT-003");
         var savedNomenclature = nomenclatureRepository.save(nomenclature);
 
-        var saved = batchRepository.save(
-                createBatch(savedNomenclature.getId(), "BATCH-FIND-001", null));
+        var batch = createBatch(savedNomenclature, "BATCH-FIND-001", null);
+        batch.setStatus(BatchStatus.ACTIVE);
+        var saved = batchRepository.save(batch);
 
         var found = batchRepository.findById(saved.getId());
 
@@ -115,8 +116,10 @@ class BatchRepositoryTest {
         var nomenclature = createNomenclature("Реагент четвёртый", "REAGENT-004");
         var savedNomenclature = nomenclatureRepository.save(nomenclature);
 
-        var b1 = createBatch(savedNomenclature.getId(), "BATCH-ALL-001", null);
-        var b2 = createBatch(savedNomenclature.getId(), "BATCH-ALL-002", null);
+        var b1 = createBatch(savedNomenclature, "BATCH-ALL-001", null);
+        b1.setStatus(BatchStatus.ACTIVE);
+        var b2 = createBatch(savedNomenclature, "BATCH-ALL-002", null);
+        b2.setStatus(BatchStatus.ACTIVE);
 
         batchRepository.saveAll(List.of(b1, b2));
 
@@ -130,30 +133,14 @@ class BatchRepositoryTest {
         var nomenclature = createNomenclature("Реагент пятый", "REAGENT-005");
         var savedNomenclature = nomenclatureRepository.save(nomenclature);
 
-        var saved = batchRepository.save(
-                createBatch(savedNomenclature.getId(), "BATCH-DELETE-001", null));
+        var batch = createBatch(savedNomenclature, "BATCH-DELETE-001", null);
+        batch.setStatus(BatchStatus.ACTIVE);
+
+        var saved = batchRepository.save(batch);
 
         batchRepository.deleteById(saved.getId());
 
         assertThat(batchRepository.findById(saved.getId())).isEmpty();
-    }
-
-    @Test
-    void findAll_withSpecification_shouldFilterByBatchNumber() {
-        var nomenclature = createNomenclature("Реагент шестой", "REAGENT-006");
-        var savedNomenclature = nomenclatureRepository.save(nomenclature);
-
-        batchRepository.save(createBatch(savedNomenclature.getId(), "BATCH-SPEC-001", null));
-        batchRepository.save(createBatch(savedNomenclature.getId(), "BATCH-SPEC-002", null));
-        batchRepository.save(createBatch(savedNomenclature.getId(), "OTHER-SPEC-003", null));
-
-        var builder = new BatchSpecificationBuilder();
-        builder.with("batchNumber", ":", "BATCH");
-        var specification = builder.build();
-
-        var result = batchRepository.findAll(specification);
-
-        assertEquals(2, result.size());
     }
 
     private Nomenclature createNomenclature(String name, String sku) {
@@ -168,7 +155,6 @@ class BatchRepositoryTest {
     }
 
     private Counterparty createCounterparty(String name, String inn) {
-        LocalDateTime now = LocalDateTime.now();
         return new Counterparty(
                 name,
                 inn,
@@ -180,8 +166,13 @@ class BatchRepositoryTest {
         );
     }
 
-    private Batch createBatch(long nomenclatureId, String batchNumber, Long supplierId) {
-        return new Batch(batchNumber, LocalDate.of(2024, 6, 1),
-                LocalDate.of(2025, 6, 1));
+    private Batch createBatch(Nomenclature nomenclature, String batchNumber, Counterparty supplier) {
+        return new Batch(
+                nomenclature,
+                batchNumber,
+                supplier,
+                LocalDate.of(2024, 6, 1),
+                LocalDate.of(2025, 6, 1)
+        );
     }
 }

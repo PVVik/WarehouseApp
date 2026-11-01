@@ -11,7 +11,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class Counterparty {
+public class Counterparty implements EntityWithId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,5 +48,9 @@ public class Counterparty {
         this.phone = phone;
         this.contact = contact;
         this.isActive = isActive;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

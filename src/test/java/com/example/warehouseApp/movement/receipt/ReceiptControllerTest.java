@@ -10,6 +10,7 @@ import com.example.warehouseApp.service.movement.ReceiptService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
@@ -24,6 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ReceiptApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class ReceiptControllerTest {
 
     @Autowired
@@ -39,6 +41,7 @@ class ReceiptControllerTest {
     void createReceiptApi_shouldReturn201_andJsonBody() throws Exception {
         var request = buildDto(null, 1L, MovementType.RECEIPT, 2L, 3L,
                 new BigDecimal("50"), new BigDecimal("120.50"), 10L);
+        request.setStorageLocationId(1L);
         var response = buildDto(100L, 1L, MovementType.RECEIPT, 2L, 3L,
                 new BigDecimal("50"), new BigDecimal("120.50"), 10L);
         response.setNumber("PRI-2026-000001");
@@ -46,7 +49,7 @@ class ReceiptControllerTest {
 
         when(receiptService.createReceipt(any(MovementDtoReceipt.class))).thenReturn(response);
 
-        mockMvc.perform(post("/receipt")
+        mockMvc.perform(post("/api/receipt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -67,6 +70,7 @@ class ReceiptControllerTest {
         var request = buildDto(null, 5L, MovementType.RECEIPT, 2L, 3L,
                 new BigDecimal("120"), new BigDecimal("9.90"), 10L);
         request.setBatchDto(buildBatchDto(null));
+        request.setStorageLocationId(1L);
 
         var response = buildDto(101L, 5L, MovementType.RECEIPT, 2L, 3L,
                 new BigDecimal("120"), new BigDecimal("9.90"), 10L);
@@ -75,7 +79,7 @@ class ReceiptControllerTest {
 
         when(receiptService.createReceipt(any(MovementDtoReceipt.class))).thenReturn(response);
 
-        mockMvc.perform(post("/receipt")
+        mockMvc.perform(post("/api/receipt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -89,6 +93,7 @@ class ReceiptControllerTest {
     void createReceiptApi_shouldReturn201_withSerialItem() throws Exception {
         var request = buildDto(null, 7L, MovementType.RECEIPT, 2L, 3L,
                 BigDecimal.ONE, new BigDecimal("500000"), 10L);
+        request.setStorageLocationId(1L);
         request.setSerialItemDto(buildSerialItemDto(null));
 
         var response = buildDto(102L, 7L, MovementType.RECEIPT, 2L, 3L,
@@ -98,7 +103,7 @@ class ReceiptControllerTest {
 
         when(receiptService.createReceipt(any(MovementDtoReceipt.class))).thenReturn(response);
 
-        mockMvc.perform(post("/receipt")
+        mockMvc.perform(post("/api/receipt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -113,7 +118,7 @@ class ReceiptControllerTest {
         var request = buildDto(null, 1L, null, 2L, 3L,
                 new BigDecimal("50"), new BigDecimal("120.50"), 10L);
 
-        mockMvc.perform(post("/receipt")
+        mockMvc.perform(post("/api/receipt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -126,7 +131,7 @@ class ReceiptControllerTest {
         var request = buildDto(null, null, MovementType.RECEIPT, 2L, 3L,
                 new BigDecimal("50"), new BigDecimal("120.50"), 10L);
 
-        mockMvc.perform(post("/receipt")
+        mockMvc.perform(post("/api/receipt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -139,7 +144,7 @@ class ReceiptControllerTest {
         var request = buildDto(null, 1L, MovementType.RECEIPT, 2L, 3L,
                 new BigDecimal("-5"), new BigDecimal("120.50"), 10L);
 
-        mockMvc.perform(post("/receipt")
+        mockMvc.perform(post("/api/receipt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -152,7 +157,7 @@ class ReceiptControllerTest {
         var request = buildDto(null, 1L, MovementType.RECEIPT, 2L, 3L,
                 BigDecimal.ZERO, new BigDecimal("120.50"), 10L);
 
-        mockMvc.perform(post("/receipt")
+        mockMvc.perform(post("/api/receipt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -165,7 +170,7 @@ class ReceiptControllerTest {
         var request = buildDto(null, 1L, MovementType.RECEIPT, null, 3L,
                 new BigDecimal("50"), new BigDecimal("120.50"), 10L);
 
-        mockMvc.perform(post("/receipt")
+        mockMvc.perform(post("/api/receipt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -178,7 +183,7 @@ class ReceiptControllerTest {
         var request = buildDto(null, 1L, MovementType.RECEIPT, 2L, 3L,
                 new BigDecimal("50"), new BigDecimal("120.50"), null);
 
-        mockMvc.perform(post("/receipt")
+        mockMvc.perform(post("/api/receipt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -188,7 +193,7 @@ class ReceiptControllerTest {
 
     @Test
     void createReceiptApi_shouldReturn400_whenBodyIsEmpty() throws Exception {
-        mockMvc.perform(post("/receipt")
+        mockMvc.perform(post("/api/receipt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(""))
                 .andExpect(status().isBadRequest());
@@ -200,11 +205,12 @@ class ReceiptControllerTest {
     void createReceiptApi_shouldReturn404_whenNomenclatureNotFound() throws Exception {
         var request = buildDto(null, 999L, MovementType.RECEIPT, 2L, 3L,
                 new BigDecimal("50"), new BigDecimal("120.50"), 10L);
+        request.setStorageLocationId(1L);
 
         when(receiptService.createReceipt(any(MovementDtoReceipt.class)))
                 .thenThrow(new NotFoundException("Номенклатура с id 999 не найдена"));
 
-        mockMvc.perform(post("/receipt")
+        mockMvc.perform(post("/api/receipt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -225,7 +231,6 @@ class ReceiptControllerTest {
                 price,
                 null,
                 LocalDate.of(2026, 10, 6),
-                userId,
                 "Приход по накладной №123");
         return dto;
     }

@@ -5,8 +5,10 @@ import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,12 +18,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/warehouse")
 @RequiredArgsConstructor
+@Slf4j
 public class WarehouseController {
 
     private final BaseService<WarehouseDto> warehouseService;
     private final StorageLocationService storageLocationService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
                        @RequestParam(required = false) String name, Model model) {
 
@@ -45,6 +49,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/new")
+    @PreAuthorize("hasRole('ADMIN')")
     public String createForm(@RequestParam(required = false) String from,
                              @RequestParam(required = false) String name,
                              Model model) {
@@ -58,12 +63,14 @@ public class WarehouseController {
     }
 
     @GetMapping("/{id}/edit")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String editForm(@PathVariable Long id, Model model) {
         model.addAttribute("warehouseDto", warehouseService.getById(id));
         return "warehouses/form";
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String save(@ModelAttribute @Valid WarehouseDto warehouseDto,
                        BindingResult bindingResult,
                        @RequestParam(required = false) String from) {
@@ -83,12 +90,14 @@ public class WarehouseController {
     }
 
     @PostMapping("/{id}/delete")
+    @PreAuthorize("hasRole('ADMIN')")
     public String delete(@PathVariable Long id) {
         warehouseService.delete(id);
         return "redirect:/warehouse";
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public String viewWarehouse(@PathVariable long id,
                                 @RequestParam(defaultValue = "0") int page,
                                 @RequestParam(defaultValue = "10") int size,
@@ -133,6 +142,7 @@ public class WarehouseController {
     }
 
     @PostMapping("/{id}/locations/bulk")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String bulkLocationsCreate(@PathVariable Long id,
                                       @RequestParam String zone,
                                       @RequestParam String rack,
@@ -143,7 +153,7 @@ public class WarehouseController {
 
         if (!result.success()) {
             redirectAttributes.addFlashAttribute("error", result.message());
-            return "redirect:/warehouse/" + id + "/locations/bulk";
+            return "redirect:/warehouse/" + id;
         }
 
         redirectAttributes.addFlashAttribute("message", result.message());
@@ -151,6 +161,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/{id}/locations/bulk")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String bulkLocationsForm(@PathVariable Long id, Model model) {
         model.addAttribute("warehouse", warehouseService.getById(id));
         return "warehouses/bulk-locations";

@@ -28,15 +28,13 @@ public class BatchDto implements Comparable<BatchDto> {
 
     private String status;
 
-    public BatchDto(long id, Long nomenclatureId, String batchNumber, LocalDate productionDate, LocalDate expiryDate,
-                    LocalDate receiptDate, String status) {
+    public BatchDto(long id, String batchNumber, LocalDate productionDate, LocalDate expiryDate,
+                    LocalDate receiptDate) {
         this.id = id;
-        this.nomenclatureId = nomenclatureId;
         this.batchNumber = batchNumber;
         this.productionDate = productionDate;
         this.expiryDate = expiryDate;
         this.receiptDate = receiptDate;
-        this.status = status;
     }
 
     @Override

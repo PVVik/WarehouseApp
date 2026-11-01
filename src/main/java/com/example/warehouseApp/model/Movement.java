@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of = {"id", "number"})
 @ToString
 @NoArgsConstructor
-public class Movement {
+public class Movement implements EntityWithId {
 
     @Id
     @Column(name = "id")
@@ -70,19 +70,20 @@ public class Movement {
     @Column(name = "notes")
     private String notes;
 
-    public Movement(MovementType movementType, BigDecimal quantity, BigDecimal price, long userId, String notes) {
+    public Movement(MovementType movementType, BigDecimal quantity, BigDecimal price, String notes) {
         this.movementType = movementType;
         this.quantity = quantity;
         this.price = price;
-        this.userId = userId;
         this.notes = notes;
     }
 
-    public Movement(MovementType movementType, BigDecimal quantity, long userId, String notes) {
+    public Movement(MovementType movementType, BigDecimal quantity, String notes) {
         this.movementType = movementType;
         this.quantity = quantity;
-        this.userId = userId;
         this.notes = notes;
     }
 
+    public Long getId() {
+        return id;
+    }
 }

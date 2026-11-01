@@ -11,8 +11,10 @@ import com.example.warehouseApp.service.movement.TransferService;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,9 +25,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 
+@Slf4j
 @Controller
 @RequestMapping("/movements/transfer")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
 public class TransferController {
 
     private final TransferService transferService;
@@ -33,6 +37,18 @@ public class TransferController {
     private final BaseService<WarehouseDto> warehouseService;
     private final BatchService batchService;
     private final SerialItemService serialItemService;
+
+    @GetMapping("/success")
+    public String transferSuccess(@RequestParam(required = false) Long transferId, Model model) {
+        if (transferId == null) {
+            return "redirect:/movements";
+        }
+        var dto = transferService.getById(transferId);
+
+        model.addAttribute("transferId", transferId);
+        model.addAttribute("number", dto != null ? dto.getNumber() : null);
+        return "movements/transfer-success";
+    }
 
     @GetMapping("/form")
     public String transferForm(
@@ -91,7 +107,6 @@ public class TransferController {
             model.addAttribute("serialItemsWithStock", serialItems);
         }
 
-
         return "movements/transfer-form";
     }
 
@@ -102,7 +117,6 @@ public class TransferController {
             @RequestParam("warehouseTo") Long warehouseTo,
             @RequestParam("storageLocationId") Long storageLocationId,
             @RequestParam("quantity") BigDecimal quantity,
-            @RequestParam("userId") long userId,
             @RequestParam(required = false) Long batchId,
             @RequestParam(required = false) Long serialItemId,
             @RequestParam(required = false) String notes,
@@ -116,7 +130,6 @@ public class TransferController {
             dto.setWarehouseTo(warehouseTo);
             dto.setStorageLocationId(storageLocationId);
             dto.setQuantity(quantity);
-            dto.setUserId(userId);
 
             if (batchId != null) {
                 dto.setBatchId(batchId);
@@ -129,9 +142,10 @@ public class TransferController {
             }
 
             var result = transferService.createTransfer(dto);
+            log.info(result.toString());
             redirectAttributes.addFlashAttribute("successMessage",
                     "Перемещение оформлено. Номер документа: " + result.getNumber());
-            return "redirect:/movements";
+            return "redirect:/movements/transfer/success?transferId=" + result.getId();
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",

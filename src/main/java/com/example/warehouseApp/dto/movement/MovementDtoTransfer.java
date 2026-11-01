@@ -44,14 +44,10 @@ public class MovementDtoTransfer {
 
     private LocalDate date;
 
-    @NotNull(message = "Указать сотрудника, инициировавшего операцию, нужно обязательно")
-    private long userId;
-
     private String notes;
 
     public MovementDtoTransfer(long id, MovementType movementType, Long nomenclatureId, Long warehouseFrom,
-                               Long warehouseTo, BigDecimal quantity, String number, LocalDate date, long userId,
-                               String notes) {
+                               Long warehouseTo, BigDecimal quantity, String number, LocalDate date, String notes) {
         this.id = id;
         this.movementType = movementType;
         this.nomenclatureId = nomenclatureId;
@@ -60,7 +56,6 @@ public class MovementDtoTransfer {
         this.quantity = quantity;
         this.number = number;
         this.date = date;
-        this.userId = userId;
         this.notes = notes;
     }
 }

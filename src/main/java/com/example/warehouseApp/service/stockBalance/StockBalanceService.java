@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.stockBalance;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.exception.ValidationException;
@@ -25,6 +26,7 @@ public class StockBalanceService {
     private final BaseService<WarehouseDto> warehouseService;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = StockBalance.class)
     public StockBalance saveStockBalance(NomenclatureDto nomenclature, BatchDto batch, SerialItemDto serialItem,
                                          WarehouseDto warehouse, StorageLocationDto storageLocation, BigDecimal quantity,
                                          MovementType movementType) {
@@ -40,7 +42,7 @@ public class StockBalanceService {
             if (movementType == MovementType.RECEIPT) {
                 stockBalance.setQuantity(oldQuantity.add(quantity));
             }
-            if (movementType == MovementType.ISSUE || movementType == MovementType.TRANSFER) {
+            if (movementType == MovementType.ISSUE || movementType == MovementType.TRANSFER || movementType == MovementType.WRITE_OFF) {
                 checkBalance(stockBalance, quantity);
                 stockBalance.setQuantity(oldQuantity.subtract(quantity));
             }
@@ -66,8 +68,17 @@ public class StockBalanceService {
         return stockBalanceRepository.findPositiveBalancesByWarehouse(warehouseId);
     }
 
+    public void checkBatchExistsAndPositiveQuantity(Long batchId, BigDecimal requiredQty) {
+        var balance = stockBalanceRepository.findByBatchId(batchId).orElseThrow(() ->
+                new NotFoundException(String.format("Нет остатков для партии %d", batchId)));
+
+        if (balance.getQuantity() == null || balance.getQuantity().compareTo(requiredQty) < 0) {
+            throw new ValidationException("Недостаточно остатка по выбранной партии");
+        }
+    }
+
     public void checkNomenclatureExistsOnWarehouseAndPositiveQuantity(NomenclatureDto nomenclature, WarehouseDto warehouse) {
-        StockBalance stockBalance = stockBalanceRepository.findByNomenclatureIdAndWarehouseId(
+        var stockBalance = stockBalanceRepository.findByNomenclatureIdAndWarehouseId(
                 nomenclature.getId(), warehouse.getId()).orElseGet(() -> {
             log.warn("На складе с id {} не найдена позиция с id {}", warehouse.getId(), nomenclature.getId());
             throw new NotFoundException(String.format("На выбранном складе нет номенклатуры %s", nomenclature.getName()));

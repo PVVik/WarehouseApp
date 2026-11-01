@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.storageLocation;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.LocationWithQuantity;
 import com.example.warehouseApp.dto.StorageLocationDto;
 import com.example.warehouseApp.dto.WarehouseDto;
@@ -32,6 +33,7 @@ public class StorageLocationServiceImpl implements StorageLocationService {
 
     @Override
     @Transactional
+    @LogAudit(action = "CREATE", entityType = StorageLocationService.class)
     public StorageLocationDto create(StorageLocationDto storageLocationDto) {
         var storageLocation = storageLocationRepository.save(StorageLocationMapper.mapToEntity(storageLocationDto));
         var newLocation = StorageLocationMapper.mapToDto(storageLocation);
@@ -44,6 +46,7 @@ public class StorageLocationServiceImpl implements StorageLocationService {
 
     @Override
     @Transactional
+    @LogAudit(action = "UPDATE", entityType = StorageLocation.class)
     public StorageLocationDto update(StorageLocationDto storageLocationDto) {
         var savedLocation = getEntityById(storageLocationDto.getId());
         var updatedLocation = StorageLocationMapper.mapToUpdateEntity(savedLocation, storageLocationDto);
@@ -67,6 +70,7 @@ public class StorageLocationServiceImpl implements StorageLocationService {
     }
 
     @Override
+    @LogAudit(action = "DELETE", entityType = StorageLocation.class)
     public void delete(long id) {
         getEntityById(id);
 

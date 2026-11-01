@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(of = {"id"})
 @ToString
 @NoArgsConstructor
-public class InventoryLine {
+public class InventoryLine implements EntityWithId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

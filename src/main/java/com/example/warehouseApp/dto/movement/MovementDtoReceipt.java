@@ -50,14 +50,11 @@ public class MovementDtoReceipt {
 
     private LocalDate date;
 
-    @NotNull(message = "id сотрудника обязателен к заполнению")
-    private Long userId;
-
     private String notes;
 
     public MovementDtoReceipt(long id, MovementType movementType, Long nomenclatureId, Long warehouseTo,
                               Long counterpartyId, BigDecimal quantity, BigDecimal price,
-                              String number, LocalDate date, Long userId, String notes) {
+                              String number, LocalDate date, String notes) {
         this.id = id;
         this.movementType = movementType;
         this.nomenclatureId = nomenclatureId;
@@ -67,7 +64,6 @@ public class MovementDtoReceipt {
         this.price = price;
         this.number = number;
         this.date = date;
-        this.userId = userId;
         this.notes = notes;
     }
 

@@ -9,6 +9,7 @@ import com.example.warehouseApp.service.movement.TransferService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -24,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = TransferApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class TransferControllerTest {
 
     @Autowired
@@ -66,7 +68,7 @@ class TransferControllerTest {
 
         when(transferService.createTransfer(any(MovementDtoTransfer.class))).thenReturn(response);
 
-        mockMvc.perform(post("/transfer/api")
+        mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -90,7 +92,7 @@ class TransferControllerTest {
                 new BigDecimal("-5"), null, null, 10L, null
         );
 
-        mockMvc.perform(post("/transfer/api")
+        mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -106,7 +108,7 @@ class TransferControllerTest {
                 BigDecimal.ZERO, null, null, 10L, null
         );
 
-        mockMvc.perform(post("/transfer/api")
+        mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -122,7 +124,7 @@ class TransferControllerTest {
                 BigDecimal.TEN, null, null, 10L, null
         );
 
-        mockMvc.perform(post("/transfer/api")
+        mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -138,7 +140,7 @@ class TransferControllerTest {
                 BigDecimal.TEN, null, null, 10L, null
         );
 
-        mockMvc.perform(post("/transfer/api")
+        mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -154,7 +156,7 @@ class TransferControllerTest {
                 BigDecimal.TEN, null, null, 10L, null
         );
 
-        mockMvc.perform(post("/transfer/api")
+        mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -170,9 +172,8 @@ class TransferControllerTest {
         request.setWarehouseFrom(2L);
         request.setWarehouseTo(3L);
         request.setQuantity(BigDecimal.TEN);
-        request.setUserId(10L);
 
-        mockMvc.perform(post("/transfer/api")
+        mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -182,7 +183,7 @@ class TransferControllerTest {
 
     @Test
     void createTransferApi_shouldReturn400_whenBodyIsEmpty() throws Exception {
-        mockMvc.perform(post("/transfer/api")
+        mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(""))
                 .andExpect(status().isBadRequest());
@@ -201,7 +202,7 @@ class TransferControllerTest {
         when(transferService.createTransfer(any(MovementDtoTransfer.class)))
                 .thenThrow(new NotFoundException("Номенклатура с id 999 не найдена"));
 
-        mockMvc.perform(post("/transfer/api")
+        mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -221,7 +222,7 @@ class TransferControllerTest {
         when(transferService.createTransfer(any(MovementDtoTransfer.class)))
                 .thenThrow(new IllegalStateException("Серийная единица не может быть списана, статус — IN_USE"));
 
-        mockMvc.perform(post("/transfer/api")
+        mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isInternalServerError());
@@ -241,7 +242,7 @@ class TransferControllerTest {
         when(transferService.createTransfer(any(MovementDtoTransfer.class)))
                 .thenThrow(new ValidationException("Проверьте введенное количество, для серийных единиц оно может быть только 1"));
 
-        mockMvc.perform(post("/transfer/api")
+        mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -265,7 +266,6 @@ class TransferControllerTest {
                 quantity,
                 number,
                 date,
-                userId,
                 notes
         );
     }

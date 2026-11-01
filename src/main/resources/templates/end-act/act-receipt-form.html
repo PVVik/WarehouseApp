@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Оприходование по акту № ' + ${act.id}">Оприходование</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1, h4 { color: #2c3e50; margin-bottom: 16px; }
+        .card { background: white; padding: 24px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .meta-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+        .meta-item { font-size: 0.9rem; color: #555; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; color: #2c3e50; }
+        tr:hover { background-color: #f1f1f1; }
+        .text-end { text-align: right; }
+        .difference-positive { color: #27ae60; font-weight: 700; }
+
+        .form-group { margin-top: 20px; }
+        label { font-weight: 600; display: block; margin-bottom: 6px; color: #333; }
+        textarea { width: 100%; padding: 12px 14px; border: 1px solid #ccc; border-radius: 4px; min-height: 140px; resize: vertical; box-sizing: border-box; }
+
+        .btn {
+            padding: 10px 18px;
+            width: 240px;
+            box-sizing: border-box;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: white;
+            background-color: #3498db;
+            white-space: nowrap;
+            font-size: 14px;
+            line-height: 1.2;
+            flex-shrink: 0;
+        }
+
+        button.btn {
+            width: 240px !important;
+            box-sizing: border-box !important;
+            padding: 10px 18px !important;
+            margin: 0 !important;
+        }
+
+        .btn:hover {
+            background-color: #3498db;
+        }
+        .btn-back { background-color: #95a5a6; color: white; }
+        .btn-back:hover { background-color: #7f8c8d; }
+
+        .flash-message { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .flash-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a th:href="@{/inventory/acts/{id}(id=${act.id})}" class="btn btn-back">
+        ← Назад к акту
+    </a>
+    <div th:if="${successMessage}" class="flash-message" style="background:#d4edda;color:#155724;">
+        <b th:text="${successMessage}"></b>
+    </div>
+    <div th:if="${error}" class="flash-message flash-error">
+        <b th:text="${error}"></b>
+    </div>
+
+    <div class="card">
+        <h4>Акт расхождений №<span th:text="${act.id}"></span></h4>
+        <div class="meta-row">
+            <span class="meta-item">Статус акта: <span th:text="${act.status.name()}" class="status-badge bg-warning"></span></span>
+            <span class="meta-item">Дата создания: <span th:text="${#temporals.format(act.approvedAt, 'dd.MM.yyyy HH:mm')}"></span></span>
+            <span class="meta-item">Инвентаризация №<span th:text="${act.check.id}"></span></span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Документ на оприходование №<span th:text="${doc.id}"></span></h4>
+        <div class="meta-row">
+            <span class="meta-item">Статус документа: <span th:text="${doc.status.name()}"
+                                                            th:classappend="${doc.status.name() == 'COMPLETED'} ? 'status-badge bg-success' : 'status-badge bg-warning'"></span></span>
+            <span class="meta-item" th:if="${doc.updatedAt != null}">Дата проведения: <span th:text="${#temporals.format(doc.updatedAt, 'dd.MM.yyyy HH:mm')}"></span></span>
+            <span class="meta-item" th:if="${doc.source != null}">Источник: <span th:text="${doc.source}"></span></span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Строки расхождений (оприходование)</h4>
+        <table>
+            <thead>
+            <tr>
+                <th>Номенклатура</th>
+                <th>Партия</th>
+                <th class="text-end">Учётное кол-во</th>
+                <th class="text-end">Фактическое кол-во</th>
+                <th class="text-end">К оприходованию</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="line : ${act.lines}"
+                th:if="${line.type.name() == 'RECEIPT'}">
+                <td>
+                    <strong th:text="${line.nomenclature.name}"></strong><br>
+                    <small th:if="${line != null and line.batch != null}" style="color:#666;">
+                        Партия: <span th:text="${line.batch.batchNumber}"></span>
+                    </small>
+                </td>
+                <td th:if="${line.batch == null}">—</td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(line.accountedQty, 0, 2)}"></td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(line.actualQty, 0, 2)}"></td>
+                <td class="text-end difference-positive">
+                    +<span th:text="${#strings.replace(line.difference.toPlainString(), '.', ',')}"></span>
+                </td>
+            </tr>
+            <tr th:if="${!hasReceiptLines}">
+                <td colspan="5" class="text-center">Нет расхождений под оприходование</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <form th:action="@{/end-act/receipt/{actId}/complete(actId=${act.id})}"
+          th:object="${form}"
+          method="POST">
+
+        <div class="form-group">
+            <label for="source">Обоснование / источник поступления (обязательно)</label>
+            <textarea id="source" name="source" required
+                      placeholder="Укажите источник поступления и обоснование: например, «Поставщик ООО Ромашка, накладная №123», «Перемещение со склада Б», «Производство (заказ №456)»"
+                      th:field="*{source}"></textarea>
+        </div>
+
+        <button type="submit" class="btn" th:if="${doc.status.name() != 'COMPLETED'}">
+            ➕ Провести оприходование
+        </button>
+
+        <div th:if="${doc.status.name() == 'COMPLETED'}" style="margin-top: 24px;">
+            <a th:href="@{/end-act/receipt/{actId}/print(actId=${act.id})}"
+               class="btn"
+               target="_blank">
+                🖨️ Распечатать акт оприходования
+            </a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

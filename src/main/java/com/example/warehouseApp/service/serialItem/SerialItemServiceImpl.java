@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.serialItem;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.NomenclatureDto;
 import com.example.warehouseApp.dto.SerialItemDto;
 import com.example.warehouseApp.exception.NotFoundException;
@@ -24,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,10 +34,10 @@ public class SerialItemServiceImpl implements SerialItemService {
     private final SerialItemRepository serialItemRepository;
     private final BaseService<NomenclatureDto> nomenclatureService;
     private final BatchService batchService;
-    private final StockBalanceService stockBalanceService;
 
     @Override
     @Transactional
+    @LogAudit(action = "CREATE", entityType = SerialItem.class)
     public SerialItemDto create(SerialItemDto serialItemDto) {
         var nomenclatureDto = nomenclatureService.getById(serialItemDto.getNomenclatureId());
         var batchDto = (serialItemDto.getBatchId() != null)
@@ -62,6 +62,7 @@ public class SerialItemServiceImpl implements SerialItemService {
 
     @Override
     @Transactional
+    @LogAudit(action = "UPDATE", entityType = SerialItem.class)
     public SerialItemDto update(SerialItemDto serialItemDto) {
         var saved = getEntityById(serialItemDto.getId());
         var newSerialItem = serialItemRepository.save(SerialItemMapper.mapToUpdateEntity(saved, serialItemDto));
@@ -114,6 +115,7 @@ public class SerialItemServiceImpl implements SerialItemService {
     }
 
     @Override
+    @LogAudit(action = "DELETE", entityType = SerialItem.class)
     public void delete(long id) {
         var serialItem = getEntityById(id);
 
@@ -126,24 +128,14 @@ public class SerialItemServiceImpl implements SerialItemService {
     public List<SerialItemDto> findByNomenclatureAndWarehouseWithStock(
             Long nomenclatureId, Long warehouseId, ItemStatus status) {
 
-        if (nomenclatureId == null || warehouseId == null) {
+        if (nomenclatureId == null) {
             return List.of();
         }
 
         var candidates = serialItemRepository.findAllByNomenclatureIdAndStatus(nomenclatureId, status);
-        if (candidates.isEmpty()) {
-            return List.of();
-        }
 
-        var balances = stockBalanceService.findPositiveBalancesByWarehouse(warehouseId);
-
-        var inStockIds = balances.stream()
-                .filter(sb -> sb.getSerialItem() != null)
-                .map(sb -> sb.getSerialItem().getId())
-                .collect(Collectors.toSet());
-
+        log.info("DEBUG: найдено серийников по номенклатуре/статусу = {}", candidates.size());
         return candidates.stream()
-                .filter(si -> inStockIds.contains(si.getId()))
                 .map(SerialItemMapper::mapToDto)
                 .toList();
     }

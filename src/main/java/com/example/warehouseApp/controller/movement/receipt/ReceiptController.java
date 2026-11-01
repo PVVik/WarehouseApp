@@ -10,6 +10,7 @@ import com.example.warehouseApp.service.storageLocation.StorageLocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,7 @@ import java.time.LocalDate;
 @Controller
 @RequestMapping("/movements/receipt")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
 public class ReceiptController {
 
     private final ReceiptService receiptService;
@@ -57,6 +59,19 @@ public class ReceiptController {
         return "movements/receipt-form";
     }
 
+    @GetMapping("/success")
+    public String receiptSuccess(@RequestParam(required = false) Long receiptId,
+                                 Model model) {
+        if (receiptId == null) {
+            return "redirect:/movements";
+        }
+        MovementDtoReceipt dto = receiptService.getById(receiptId);
+
+        model.addAttribute("receiptId", receiptId);
+        model.addAttribute("number", dto != null ? dto.getNumber() : null);
+        return "movements/receipt-success";
+    }
+
     @PostMapping
     public String processReceipt(@RequestParam(required = false) Long nomenclatureId,
                                  @RequestParam(required = false) String inventoryType,
@@ -65,7 +80,6 @@ public class ReceiptController {
                                  @RequestParam(required = false) Long storageLocationId,
                                  @RequestParam(required = false) BigDecimal quantity,
                                  @RequestParam(required = false) BigDecimal price,
-                                 @RequestParam(required = false) Long userId,
                                  @RequestParam(required = false) String notes,
                                  @RequestParam(required = false) String batchNumber,
                                  @RequestParam(required = false) String batchManufactureDate,
@@ -87,7 +101,6 @@ public class ReceiptController {
             dto.setStorageLocationId(storageLocationId);
             dto.setQuantity(quantity);
             dto.setPrice(price);
-            dto.setUserId(userId);
             if (notes != null && !notes.isBlank()) {
                 dto.setNotes(notes);
             }
@@ -118,7 +131,7 @@ public class ReceiptController {
             var result = receiptService.createReceipt(dto);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Приход оформлен. Номер документа: " + result.getNumber());
-            return "redirect:/movements";
+            return "redirect:/movements/receipt/success?receiptId=" + result.getId();
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Ошибка при оформлении прихода: " + e.getMessage());

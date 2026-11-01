@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Номенклатура - WarehouseApp</title>
@@ -141,133 +142,158 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        .access-denied-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .access-denied-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Номенклатура</h1>
+<div sec:authorize="hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')">
+    <div class="container">
+        <h1>Номенклатура</h1>
 
-    <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
+        <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
 
-    <div class="toolbar">
-        <div class="toolbar-left">
-            <a th:href="@{/}" class="btn btn-primary">← Назад к операциям</a>
-            <div>
-                <h2>Список позиций</h2>
-            </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
-            <form th:action="@{/nomenclature}" method="get" class="filter-form">
-                <input type="text" name="name" th:value="${filterName}" placeholder="Название (например, Болт)" />
-                <input type="text" name="sku" th:value="${filterSku}" placeholder="Артикул" />
-                <select name="stuffCategory">
-                    <option value="">Все категории</option>
-                    <option th:each="cat : ${T(com.example.warehouseApp.model.StuffCategory).values()}"
-                            th:value="${cat.name()}"
-                            th:text="${cat.label}"
-                            th:selected="${cat.name() == filterStuffCategory}">
-                    </option>
-                </select>
-                <select name="inventoryType">
-                    <option value="">Любой тип учёта</option>
-                    <option th:each="type : ${T(com.example.warehouseApp.model.InventoryType).values()}"
-                            th:value="${type.name()}"
-                            th:text="${type.label}"
-                            th:selected="${type.name() == filterInventoryType}">
-                    </option>
-                </select>
-                <select name="active">
-                    <option value="">Любой статус</option>
-                    <option value="true" th:selected="${filterActive == true}">Активен</option>
-                    <option value="false" th:selected="${filterActive == false}">Неактивен</option>
-                </select>
-                <div style="display: flex; gap: 8px;">
-                    <button type="submit" class="btn btn-primary">Найти</button>
-                    <a th:href="@{/nomenclature}" class="btn" style="background:none; color:#6c757d; text-decoration:none; padding: 8px 16px;">Сброс</a>
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <a th:href="@{/}" class="btn btn-primary">← Назад к операциям</a>
+                <div>
+                    <h2>Список позиций</h2>
                 </div>
-            </form>
+            </div>
 
-            <div style="display: flex; justify-content: flex-end;">
-                <a href="/nomenclature/form" class="btn btn-primary">+ Добавить позицию</a>
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                <form th:action="@{/nomenclature}" method="get" class="filter-form">
+                    <input type="text" name="name" th:value="${filterName}" placeholder="Название (например, Болт)" />
+                    <input type="text" name="sku" th:value="${filterSku}" placeholder="Артикул" />
+                    <select name="stuffCategory">
+                        <option value="">Все категории</option>
+                        <option th:each="cat : ${T(com.example.warehouseApp.model.StuffCategory).values()}"
+                                th:value="${cat.name()}"
+                                th:text="${cat.label}"
+                                th:selected="${cat.name() == filterStuffCategory}">
+                        </option>
+                    </select>
+                    <select name="inventoryType">
+                        <option value="">Любой тип учёта</option>
+                        <option th:each="type : ${T(com.example.warehouseApp.model.InventoryType).values()}"
+                                th:value="${type.name()}"
+                                th:text="${type.label}"
+                                th:selected="${type.name() == filterInventoryType}">
+                        </option>
+                    </select>
+                    <select name="active">
+                        <option value="">Любой статус</option>
+                        <option value="true" th:selected="${filterActive == true}">Активен</option>
+                        <option value="false" th:selected="${filterActive == false}">Неактивен</option>
+                    </select>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="submit" class="btn btn-primary">Найти</button>
+                        <a th:href="@{/nomenclature}" class="btn" style="background:none; color:#6c757d; text-decoration:none; padding: 8px 16px;">Сброс</a>
+                    </div>
+                </form>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
+                       href="/nomenclature/form" class="btn btn-primary">+ Добавить позицию</a>
+                </div>
             </div>
         </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>SKU</th>
+                <th>Название</th>
+                <th>Категория</th>
+                <th>Ед. изм.</th>
+                <th>Тип учета</th>
+                <th>Мин. остаток</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${nomenclatureList}">
+                <td th:text="${item.id}"></td>
+                <td th:text="${item.sku}"></td>
+                <td th:text="${item.name}"></td>
+                <td th:text="${item.stuffCategoryLabel}"></td>
+                <td th:text="${item.unitOfMeasureLabel}"></td>
+                <td th:text="${item.inventoryTypeLabel}"></td>
+                <td>
+                    <span th:if="${item.minStock != null}"
+                          style="color: #2c3e50; font-weight: 500;">
+                        <th:block th:text="${#numbers.formatDecimal(item.minStock, 0, 1)}"></th:block>
+                    </span>
+                    <span th:if="${item.minStock == null}" style="color: #95a5a6;">—</span>
+                </td>
+                <td>
+                    <span th:classappend="${item.active} ? 'status-active' : 'status-inactive'"
+                          class="status-badge"
+                          th:text="${item.active} ? 'Активен' : 'Неактивен'">
+                    </span>
+                </td>
+                <td>
+                    <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
+                       th:href="@{/nomenclature/form(id=${item.id})}"
+                       class="btn"
+                       style="background:none; color:#3498db; text-decoration:underline; padding:0; margin-right: 8px;">
+                        Редактировать
+                    </a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(nomenclatureList)}">
+                <td colspan="8" style="text-align:center; color:#7f8c8d;">Список пуст</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/nomenclature(page=${currentPage - 1}, size=${pageSize},
+           name=${filterName}, sku=${filterSku},
+           stuffCategory=${filterStuffCategory},
+           inventoryType=${filterInventoryType},
+           active=${filterActive})}">
+                ← Назад
+            </a>
+
+            <a th:if="${currentPage < totalPages - 1}"
+               th:href="@{/nomenclature(page=${currentPage + 1}, size=${pageSize},
+           name=${filterName}, sku=${filterSku},
+           stuffCategory=${filterStuffCategory},
+           inventoryType=${filterInventoryType},
+           active=${filterActive})}">
+                Вперед →
+            </a>
+        </div>
+
+        <p style="color: #7f8c8d; margin-top: 10px;">
+            Всего элементов: <b th:text="${totalElements}"></b> | Страница: <b th:text="${currentPage + 1}"></b>
+        </p>
     </div>
+</div>
 
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>SKU</th>
-            <th>Название</th>
-            <th>Категория</th>
-            <th>Ед. изм.</th>
-            <th>Тип учета</th>
-            <th>Мин. остаток</th>
-            <th>Статус</th>
-            <th>Действия</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="item : ${nomenclatureList}">
-            <td th:text="${item.id}"></td>
-            <td th:text="${item.sku}"></td>
-            <td th:text="${item.name}"></td>
-            <td th:text="${item.stuffCategoryLabel}"></td>
-            <td th:text="${item.unitOfMeasureLabel}"></td>
-            <td th:text="${item.inventoryTypeLabel}"></td>
-            <td>
-            <span th:if="${item.minStock != null}"
-                  style="color: #2c3e50; font-weight: 500;">
-                <th:block th:text="${#numbers.formatDecimal(item.minStock, 0, 1)}"></th:block>
-            </span>
-                <span th:if="${item.minStock == null}" style="color: #95a5a6;">—</span>
-            </td>
-            <td>
-                <span th:classappend="${item.active} ? 'status-active' : 'status-inactive'"
-                      class="status-badge"
-                      th:text="${item.active} ? 'Активен' : 'Неактивен'">
-                </span>
-            </td>
-            <td>
-                <a th:href="@{/nomenclature/form(id=${item.id})}"
-                   class="btn btn-sm"
-                   style="background:none; color:#3498db; text-decoration:underline; padding:0; margin-right: 8px;">
-                    Редактировать
-                </a>
-            </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(nomenclatureList)}">
-            <td colspan="8" style="text-align:center; color:#7f8c8d;">Список пуст</td>
-        </tr>
-        </tbody>
-    </table>
-
-    <div class="pagination" th:if="${totalPages > 1}">
-        <a th:if="${currentPage > 0}"
-           th:href="@{/nomenclature(page=${currentPage - 1}, size=${pageSize},
-       name=${filterName}, sku=${filterSku},
-       stuffCategory=${filterStuffCategory},
-       inventoryType=${filterInventoryType},
-       active=${filterActive})}">
-            ← Назад
-        </a>
-
-        <a th:if="${currentPage < totalPages - 1}"
-           th:href="@{/nomenclature(page=${currentPage + 1}, size=${pageSize},
-       name=${filterName}, sku=${filterSku},
-       stuffCategory=${filterStuffCategory},
-       inventoryType=${filterInventoryType},
-       active=${filterActive})}">
-            Вперед →
-        </a>
-    </div>
-
-    <p style="color: #7f8c8d; margin-top: 10px;">
-        Всего элементов: <b th:text="${totalElements}"></b> | Страница: <b th:text="${currentPage + 1}"></b>
-    </p>
+<div sec:authorize="!hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')" class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для просмотра списка номенклатуры.</p>
+    <a th:href="@{/}" class="btn" style="
+        background-color: #95a5a6; color: white; margin-top:10px; display:inline-block; padding:10px 20px; text-decoration:none;">
+        Вернуться на главную
+    </a>
 </div>
 
 </body>

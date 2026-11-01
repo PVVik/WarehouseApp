@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.inventory;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.WarehouseDto;
 import com.example.warehouseApp.dto.inventory.InventoryCheckDtoResponse;
 import com.example.warehouseApp.dto.inventory.InventoryDiscrepancyActDto;
@@ -12,8 +13,8 @@ import com.example.warehouseApp.mapper.InventoryLineMapper;
 import com.example.warehouseApp.mapper.WarehouseMapper;
 import com.example.warehouseApp.model.*;
 import com.example.warehouseApp.repository.*;
-import com.example.warehouseApp.security.CurrentUserProvider;
 import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.service.domain.AuthContextService;
 import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ public class InventoryService {
     private final InventoryCheckRepository inventoryCheckRepository;
     private final InventoryLineRepository inventoryLineRepository;
     private final BaseService<WarehouseDto> warehouseService;
-    private final CurrentUserProvider currentUserProvider;
+    private final AuthContextService authContextService;
     private final StockBalanceService stockBalanceService;
     private final InventoryDiscrepancyRepository inventoryDiscrepancyRepository;
     private final DiscrepancyLineRepository discrepancyLineRepository;
@@ -42,6 +43,7 @@ public class InventoryService {
     private final ReceiptDocumentRepository receiptDocumentRepository;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = InventoryCheck.class)
     public InventoryCheckDtoResponse createCheck(Long warehouseId) {
         WarehouseDto warehouse = warehouseService.getById(warehouseId);
 
@@ -68,6 +70,7 @@ public class InventoryService {
     }
 
     @Transactional
+    @LogAudit(action = "UPDATE", entityType = InventoryCheck.class)
     public void updateActualQty(Long lineId, BigDecimal actualQty) {
         if (actualQty == null || actualQty.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("actualQty не может быть null или отрицательным");
@@ -94,6 +97,7 @@ public class InventoryService {
     }
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = InventoryDiscrepancyAct.class)
     public InventoryDiscrepancyActDto completeCheck(Long checkId) {
         InventoryCheck check = getAndValidateCheck(checkId);
 
@@ -143,6 +147,7 @@ public class InventoryService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @LogAudit(action = "UPDATE", entityType = InventoryDiscrepancyAct.class)
     public void settleDiscrepancies(Long actId) {
         InventoryDiscrepancyAct act = inventoryDiscrepancyRepository.findById(actId)
                 .orElseThrow(() -> new NotFoundException("Акт не найден"));
@@ -150,31 +155,31 @@ public class InventoryService {
         if (act.getStatus() == DocumentStatus.COMPLETED) {
             return;
         }
+
         LocalDate now = LocalDate.now();
 
-        for (DiscrepancyLine line : act.getLines()) {
-            switch (line.getType()) {
-                case WRITE_OFF:
-                    WriteOffDocument wf = new WriteOffDocument();
-                    wf.setAct(act);
-                    wf.setQuantity(line.getDifference());
-                    wf.setStatus(DocumentStatus.DRAFT);
-                    wf.setCreatedAt(now);
-                    wf.setUpdatedAt(now);
-                    writeOffDocumentRepository.save(wf);
-                    break;
-                case RECEIPT:
-                    ReceiptDocument rf = new ReceiptDocument();
-                    rf.setAct(act);
-                    rf.setQuantity(line.getDifference());
-                    rf.setStatus(DocumentStatus.DRAFT);
-                    rf.setCreatedAt(now);
-                    rf.setUpdatedAt(now);
-                    receiptDocumentRepository.save(rf);
-                    break;
-                default:
-                    break;
-            }
+        boolean hasWriteOff = act.getLines().stream()
+                .anyMatch(l -> l.getType() == DiscrepancyType.WRITE_OFF);
+
+        boolean hasReceipt = act.getLines().stream()
+                .anyMatch(l -> l.getType() == DiscrepancyType.RECEIPT);
+
+        if (hasWriteOff) {
+            WriteOffDocument wf = new WriteOffDocument();
+            wf.setAct(act);
+            wf.setStatus(DocumentStatus.DRAFT);
+            wf.setCreatedAt(now);
+            wf.setUpdatedAt(now);
+            writeOffDocumentRepository.save(wf);
+        }
+
+        if (hasReceipt) {
+            ReceiptDocument rf = new ReceiptDocument();
+            rf.setAct(act);
+            rf.setStatus(DocumentStatus.DRAFT);
+            rf.setCreatedAt(now);
+            rf.setUpdatedAt(now);
+            receiptDocumentRepository.save(rf);
         }
 
         act.setStatus(DocumentStatus.COMPLETED);
@@ -195,9 +200,21 @@ public class InventoryService {
         return InventoryDiscrepancyActMapper.toDto(act);
     }
 
+    public WriteOffDocument findWriteOffDocumentByActId(Long actId) {
+        var act = inventoryDiscrepancyRepository.findById(actId)
+                .orElseThrow(() -> new NotFoundException("Акт не найден"));
+        return writeOffDocumentRepository.findByAct(act).orElse(null);
+    }
+
+    public ReceiptDocument findReceiptDocumentByActId(Long actId) {
+        var act = inventoryDiscrepancyRepository.findById(actId)
+                .orElseThrow(() -> new NotFoundException("Акт не найден"));
+        return receiptDocumentRepository.findByAct(act).orElse(null);
+    }
+
     private InventoryCheck createInventoryCheckEntity(WarehouseDto warehouse) {
         Warehouse checkWarehouse = WarehouseMapper.mapToEntityWithId(warehouse);
-        Long currentUserId = currentUserProvider.getCurrentUserId();
+        Long currentUserId = authContextService.getCurrentUserId();
 
         return new InventoryCheck(checkWarehouse, LocalDate.now(), DocumentStatus.DRAFT, currentUserId);
     }
@@ -263,7 +280,7 @@ public class InventoryService {
         InventoryDiscrepancyAct act = new InventoryDiscrepancyAct();
         act.setCreatedAt(LocalDate.now());
         act.setCheck(check);
-        act.setCreatedBy(currentUserProvider.getCurrentUserId());
+        act.setCreatedBy(authContextService.getCurrentUserId());
         act.setStatus(DocumentStatus.DRAFT);
         return act;
     }

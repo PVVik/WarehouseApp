@@ -42,12 +42,9 @@ public class MovementDtoWriteOff {
 
     private LocalDate date;
 
-    @NotNull(message = "Id сотрудника обязателен к указанию")
-    private Long userId;
-
     public MovementDtoWriteOff(Long id, MovementType movementType, Long nomenclatureId, BigDecimal quantity,
                                Long warehouseFrom, Long storageLocationId, String notes, String number,
-                               LocalDate date, Long userId) {
+                               LocalDate date) {
         this.id = id;
         this.movementType = movementType;
         this.nomenclatureId = nomenclatureId;
@@ -57,6 +54,5 @@ public class MovementDtoWriteOff {
         this.notes = notes;
         this.number = number;
         this.date = date;
-        this.userId = userId;
     }
 }

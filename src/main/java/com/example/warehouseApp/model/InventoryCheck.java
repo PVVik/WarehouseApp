@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of = {"id"})
 @ToString
 @NoArgsConstructor
-public class InventoryCheck {
+public class InventoryCheck implements EntityWithId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,5 +40,9 @@ public class InventoryCheck {
         this.checkDate = checkDate;
         this.status = status;
         this.userId = userId;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

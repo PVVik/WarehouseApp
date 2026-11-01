@@ -3,7 +3,6 @@ package com.example.warehouseApp.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -14,7 +13,7 @@ import java.time.LocalDate;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class WriteOffDocument {
+public class WriteOffDocument implements EntityWithId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,9 +26,6 @@ public class WriteOffDocument {
     @Column(name = "reason", nullable = false)
     private String reason;
 
-    @Column(name = "quantity")
-    private BigDecimal quantity;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private DocumentStatus status;
@@ -39,4 +35,7 @@ public class WriteOffDocument {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDate updatedAt;
+
+    @Column(name = "completed_by", nullable = false)
+    private Long completedBy;
 }

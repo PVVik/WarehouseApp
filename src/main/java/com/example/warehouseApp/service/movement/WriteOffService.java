@@ -1,7 +1,9 @@
 package com.example.warehouseApp.service.movement;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.dto.movement.MovementDtoWriteOff;
+import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.exception.ValidationException;
 import com.example.warehouseApp.mapper.*;
 import com.example.warehouseApp.model.ItemStatus;
@@ -10,6 +12,7 @@ import com.example.warehouseApp.model.MovementType;
 import com.example.warehouseApp.repository.MovementRepository;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.batch.BatchService;
+import com.example.warehouseApp.service.domain.AuthContextService;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
@@ -33,9 +36,12 @@ public class WriteOffService {
     private final BatchService batchService;
     private final SerialItemService serialItemService;
     private final DocumentNumberService documentNumberService;
+    private final AuthContextService authContextService;
 
     @Transactional
+    @LogAudit(action = "CREATE", entityType = Movement.class)
     public MovementDtoWriteOff createWriteOff(MovementDtoWriteOff movementDtoWriteOff) {
+        log.info(movementDtoWriteOff.toString());
         var nomenclature = nomenclatureService.getById(movementDtoWriteOff.getNomenclatureId());
         var warehouse = warehouseService.getById(movementDtoWriteOff.getWarehouseFrom());
         var storageLocation = storageLocationService.getById(movementDtoWriteOff.getStorageLocationId());
@@ -46,13 +52,19 @@ public class WriteOffService {
                 ? serialItemService.getById(movementDtoWriteOff.getSerialItemId())
                 : null;
 
-        stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
+        if (movementDtoWriteOff.getBatchId() != null) {
+            stockBalanceService.checkBatchExistsAndPositiveQuantity(movementDtoWriteOff.getBatchId(),
+                    movementDtoWriteOff.getQuantity());
+        } else {
+            stockBalanceService.checkNomenclatureExistsOnWarehouseAndPositiveQuantity(nomenclature, warehouse);
+        }
         checkQuantitySerialItem(serialItem, movementDtoWriteOff.getQuantity());
 
         var updatedSerialItem = updateSerialItemStatus(serialItem);
 
         var movement = WriteOffMapper.mapToEntity(movementDtoWriteOff);
         setFieldsToEntity(movement, nomenclature, warehouse, storageLocation, batch, updatedSerialItem);
+        movement.setUserId(authContextService.getCurrentUserId());
 
         var newMovement = movementRepository.save(movement);
 
@@ -65,6 +77,13 @@ public class WriteOffService {
         log.info("Оформили списание с id и номером документа {} и {}", newMovementDto.getId(), newMovementDto.getNumber());
 
         return newMovementDto;
+    }
+
+    public MovementDtoWriteOff getById(Long id) {
+        var mov = movementRepository.findById(id).orElseThrow(() ->
+                new NotFoundException(String.format("Не найдено списания с id %d", id)));
+
+        return WriteOffMapper.mapToDto(mov);
     }
 
     private void checkQuantitySerialItem(SerialItemDto serialItem, BigDecimal quantity) {

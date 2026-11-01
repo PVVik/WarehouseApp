@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Партии — WarehouseApp</title>
@@ -18,55 +19,99 @@
         .pagination { margin-top: 20px; display: flex; gap: 5px; flex-wrap: wrap; }
         .pagination a, .pagination span { padding: 8px 12px; border: 1px solid #ddd; text-decoration: none; color: #333; border-radius: 4px; }
         .pagination .active { background-color: #3498db; color: white; border-color: #3498db; }
+
+        .status-warning { color: #e74c3c; font-weight: bold; }
+        .stock-value { font-weight: 600; }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="toolbar">
-        <div>
-            <h1>Партии</h1>
-            <p style="color:#7f8c8d;">Номенклатура ID: <b th:text="${nomenclatureId}"></b></p>
+
+<div sec:authorize="hasAnyRole('VIEWER','ADMIN','STOREKEEPER')">
+    <div class="container">
+        <div class="toolbar">
+            <div>
+                <h1>Партии</h1>
+                <p style="color:#7f8c8d;">Номенклатура ID: <b th:text="${nomenclatureId}"></b></p>
+            </div>
+            <a sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')"
+               th:href="@{/batch/create(nomenclatureId=${nomenclatureId})}"
+               class="btn btn-primary">+ Создать партию</a>
+            <a href="/nomenclature" class="btn btn-primary">← Назад к номенклатуре</a>
         </div>
-        <a href="/nomenclature" class="btn btn-primary">← Назад к номенклатуре</a>
-    </div>
 
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Номер партии</th>
-            <th>Дата производства</th>
-            <th>Срок годности</th>
-            <th>Поставщик</th>
-            <th>Сертификат</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="batch : ${batches}">
-            <td th:text="${batch.id}"></td>
-            <td th:text="${batch.batchNumber}"></td>
-            <td th:text="${#dates.format(batch.productionDate, 'yyyy-MM-dd')}"></td>
-            <td th:text="${#dates.format(batch.expiryDate, 'yyyy-MM-dd')}"></td>
-            <td th:text="${batch.supplierId}"></td>
-            <td th:text="${batch.certificateNumber}"></td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(batches)}">
-            <td colspan="6" style="text-align:center; color:#7f8c8d;">Партий нет</td>
-        </tr>
-        </tbody>
-    </table>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Номер партии</th>
+                <th>Дата производства</th>
+                <th>Срок годности</th>
+                <th>Поставщик</th>
+                <th>Сертификат</th>
+                <th>Остаток (шт)</th>
+                <th>Статус</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="batch : ${batches}">
+                <td th:text="${batch.id}"></td>
+                <td th:text="${batch.batchNumber}"></td>
 
-    <div class="pagination" th:if="${page.totalPages > 1}">
-        <a th:if="${page.number > 0}"
-           th:href="@{/batch/list(nomenclatureId=${nomenclatureId}, page=${page.number - 1}, size=${page.size})}">
-            ← Назад
-        </a>
-        <span class="active" th:text="${page.number + 1}"></span> из <span th:text="${page.totalPages}"></span>
-        <a th:if="${page.number < page.totalPages - 1}"
-           th:href="@{/batch/list(nomenclatureId=${nomenclatureId}, page=${page.number + 1}, size=${page.size})}">
-            Вперед →
-        </a>
+                <td th:text="${#dates.format(batch.productionDate, 'yyyy-MM-dd')}"></td>
+
+                <td>
+                    <span th:if="${batch.expiryDate != null and batch.productionDate != null and batch.expiryDate.before(batch.productionDate)}"
+                          class="status-warning">
+                        <span th:text="${#dates.format(batch.expiryDate, 'yyyy-MM-dd')}"></span> ⚠️ Срок < производства
+                    </span>
+                    <span th:unless="${batch.expiryDate != null and batch.productionDate != null and batch.expiryDate.before(batch.productionDate)}"
+                          th:text="${#dates.format(batch.expiryDate, 'yyyy-MM-dd')}">-</span>
+                </td>
+
+                <td>
+                    <span th:if="${batch.supplierId != null}">ID: <b th:text="${batch.supplierId}"></b>
+                    </span>
+                    <span th:unless="${batch.supplierId != null}" style="color:#999;">—</span>
+                </td>
+
+                <td th:if="${batch.certificateNumber != null}" th:text="${batch.certificateNumber}"></td>
+                <td th:unless="${batch.certificateNumber != null}">—</td>
+
+                <td class="stock-value" th:text="${batch.stockBalance != null ? batch.stockBalance : '0'}"></td>
+
+                <td>
+                    <span th:if="${batch.expiryDate != null and batch.expiryDate.before(#temporals.now())}" style="color:red; font-weight:bold;">Просрочена</span>
+                    <span th:if="${batch.expiryDate != null and !batch.expiryDate.before(#temporals.now()) and batch.expiryDate.getTime() - #temporals.now().getTime() < 7 * 24 * 60 * 60 * 1000}" style="color:orange; font-weight:bold;">Скоро истекает</span>
+                    <span th:if="${batch.expiryDate == null or (!batch.expiryDate.before(#temporals.now()) and batch.expiryDate.getTime() - #temporals.now().getTime() >= 7 * 24 * 60 * 60 * 1000)}" style="color:green;">В норме</span>
+                </td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(batches)}">
+                <td colspan="8" style="text-align:center; color:#7f8c8d;">Партий нет</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination" th:if="${page.totalPages > 1}">
+            <a th:if="${page.number > 0}"
+               th:href="@{/batch/list(nomenclatureId=${nomenclatureId}, page=${page.number - 1}, size=${page.size})}">
+                ← Назад
+            </a>
+            <span class="active" th:text="${page.number + 1}"></span> из <span th:text="${page.totalPages}"></span>
+            <a th:if="${page.number < page.totalPages - 1}"
+               th:href="@{/batch/list(nomenclatureId=${nomenclatureId}, page=${page.number + 1}, size=${page.size})}">
+                Вперед →
+            </a>
+        </div>
     </div>
 </div>
+
+<div sec:authorize="!hasAnyRole('VIEWER','ADMIN','STOREKEEPER')" style="text-align:center; padding:60px; background:#f8f9fa; border-radius:8px;">
+    <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+    <h2>Доступ запрещён</h2>
+    <p>У вас недостаточно прав для просмотра партий.</p>
+    <a th:href="@{/}" class="btn" style="background-color:#6c757d; color:white; margin-top:10px; padding:10px 20px; text-decoration:none;">Вернуться на главную</a>
+</div>
+
 </body>
 </html>

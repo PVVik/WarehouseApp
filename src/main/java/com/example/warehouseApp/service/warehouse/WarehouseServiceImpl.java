@@ -1,5 +1,6 @@
 package com.example.warehouseApp.service.warehouse;
 
+import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.WarehouseDto;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.mapper.WarehouseMapper;
@@ -25,6 +26,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     @Transactional
+    @LogAudit(action = "CREATE", entityType = Warehouse.class)
     public WarehouseDto create(WarehouseDto warehouseDto) {
         var warehouse = warehouseRepository.save(WarehouseMapper.mapToEntity(warehouseDto));
         log.info("Создали склад с id {}", warehouse.getId());
@@ -34,6 +36,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     @Transactional
+    @LogAudit(action = "UPDATE", entityType = Warehouse.class)
     public WarehouseDto update(WarehouseDto warehouseDto) {
         var warehouse = warehouseRepository.findById(warehouseDto.getId()).orElseThrow(() ->
                 new NotFoundException(String.format("Склад с id %d не найден", warehouseDto.getId())));
@@ -85,6 +88,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
+    @LogAudit(action = "DELETE", entityType = Warehouse.class)
     public void delete(long id) {
         var warehouse = warehouseRepository.findById(id).orElseThrow(() ->
                 new NotFoundException(String.format("Склад с id %d не найден", id)));

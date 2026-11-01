@@ -9,6 +9,7 @@ import com.example.warehouseApp.service.movement.WriteOffService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -24,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = WriteOffApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class WriteOffControllerTest {
 
     @Autowired
@@ -72,7 +74,7 @@ class WriteOffControllerTest {
 
         when(writeOffService.createWriteOff(any(MovementDtoWriteOff.class))).thenReturn(response);
 
-        mockMvc.perform(post("/writeoff/api")
+        mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -95,7 +97,7 @@ class WriteOffControllerTest {
                 "Причина списания", "Num", LocalDate.now(), VALID_USER_ID
         );
 
-        mockMvc.perform(post("/writeoff/api")
+        mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -111,7 +113,7 @@ class WriteOffControllerTest {
                 "Причина списания", "Num", LocalDate.now(), VALID_USER_ID
         );
 
-        mockMvc.perform(post("/writeoff/api")
+        mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -127,7 +129,7 @@ class WriteOffControllerTest {
                 "Причина списания", "Num", LocalDate.now(), VALID_USER_ID
         );
 
-        mockMvc.perform(post("/writeoff/api")
+        mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -143,7 +145,7 @@ class WriteOffControllerTest {
                 "Причина списания", "Num", LocalDate.now(), VALID_USER_ID
         );
 
-        mockMvc.perform(post("/writeoff/api")
+        mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -159,7 +161,7 @@ class WriteOffControllerTest {
                 "Причина списания", "Num", LocalDate.now(), VALID_USER_ID
         );
 
-        mockMvc.perform(post("/writeoff/api")
+        mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -175,7 +177,7 @@ class WriteOffControllerTest {
                 "", "Num", LocalDate.now(), VALID_USER_ID
         );
 
-        mockMvc.perform(post("/writeoff/api")
+        mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -191,9 +193,8 @@ class WriteOffControllerTest {
         request.setQuantity(BigDecimal.TEN);
         request.setWarehouseFrom(VALID_WAREHOUSE_FROM_ID);
         request.setStorageLocationId(VALID_STORAGE_LOCATION_ID);
-        request.setUserId(VALID_USER_ID);
 
-        mockMvc.perform(post("/writeoff/api")
+        mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -212,7 +213,7 @@ class WriteOffControllerTest {
         when(writeOffService.createWriteOff(any(MovementDtoWriteOff.class)))
                 .thenThrow(new NotFoundException("Номенклатура с id 999 не найдена"));
 
-        mockMvc.perform(post("/writeoff/api")
+        mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -231,7 +232,7 @@ class WriteOffControllerTest {
         when(writeOffService.createWriteOff(any(MovementDtoWriteOff.class)))
                 .thenThrow(new ValidationException("Для серийной единицы количество должно быть равно 1"));
 
-        mockMvc.perform(post("/writeoff/api")
+        mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -250,7 +251,7 @@ class WriteOffControllerTest {
         when(writeOffService.createWriteOff(any(MovementDtoWriteOff.class)))
                 .thenThrow(new IllegalStateException("Серийная единица не может быть списана: статус IN_USE"));
 
-        mockMvc.perform(post("/writeoff/api")
+        mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isInternalServerError());
@@ -274,7 +275,6 @@ class WriteOffControllerTest {
         dto.setNotes(notes);
         dto.setNumber(number);
         dto.setDate(date);
-        dto.setUserId(userId);
         return dto;
     }
 }

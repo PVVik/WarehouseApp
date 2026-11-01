@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Акт на списание № ' + ${document.number}">Акт на списание</title>
+    <style>
+        @media print {
+            body { font-family: Arial, sans-serif; padding: 10px; }
+            .header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { border: 1px solid #555; padding: 8px; vertical-align: top; }
+            th { background: #f0f0f0; }
+            .signature-area { margin-top: 40px; }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Акт на списание товарно-материальных ценностей</h1>
+    <p><strong>Организация:</strong> ООО «ННП»</p>
+    <p>
+        <strong>Склад:</strong> <span th:text="${warehouseName}"></span><br>
+        <strong>Дата:</strong> <span th:text="${documentDateFormatted}"></span><br>
+        <strong>№ документа:</strong> <span th:text="${document.number}"></span>
+    </p>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th style="width:5%;">№</th>
+        <th style="width:40%;">Наименование</th>
+        <th style="width:10%;">Ед.</th>
+        <th style="width:10%;">Кол-во</th>
+        <th style="width:15%;">Партия</th>
+        <th style="width:20%;">Серийный номер / Паспорт</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>1</td>
+        <td th:text="${nomenclatureName}"></td>
+        <td th:text="${unitName}"></td>
+        <td th:text="${document.quantity}"></td>
+
+        <td th:if="${batchDto != null}" th:text="${batchDto.batchNumber}">—</td>
+        <td th:unless="${batchDto != null}">—</td>
+
+        <td>
+            <div th:if="${serialItemDto != null}">
+                SN: <b th:text="${serialItemDto.serialNumber}"></b><br>
+                <small th:if="${serialItemDto.passportNumber != null}"
+                       th:text="'Паспорт: ' + ${serialItemDto.passportNumber}"></small>
+            </div>
+            <div th:unless="${serialItemDto != null}">—</div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div style="margin-top:30px;">
+    <p><strong>Причина списания:</strong></p>
+    <p style="border:1px dashed #999; padding:10px;"><span th:text="${document.notes}"></span></p>
+</div>
+
+<div class="signature-area">
+    <p>Списано комиссией:</p>
+    <div style="display:flex; gap:30px;">
+        <div style="flex:1">
+            <p>Председатель комиссии: _________________________ /ФИО/</p>
+            <p>Члены комиссии: _________________________ /ФИО/</p>
+        </div>
+        <div style="flex:1">
+            <p>Материально ответственное лицо: _________________________ /ФИО/</p>
+            <p>Бухгалтер: _________________________ /ФИО/</p>
+        </div>
+    </div>
+</div>
+
+<button type="button" class="btn" onclick="window.print()">>Распечатать</button>
+</body>
+</html>
