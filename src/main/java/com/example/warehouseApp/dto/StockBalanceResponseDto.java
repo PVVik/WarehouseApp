@@ -18,10 +18,10 @@ public class StockBalanceResponseDto {
     private BigDecimal quantity;
     private String uom;
 
-    public StockBalanceResponseDto(String sku, String warehouseName, String nomenclatureName, BigDecimal quantity, String uom) {
+    public StockBalanceResponseDto(String sku, String nomenclatureName, String warehouseName, BigDecimal quantity, String uom) {
         this.sku = sku;
-        this.warehouseName = warehouseName;
         this.nomenclatureName = nomenclatureName;
+        this.warehouseName = warehouseName;
         this.quantity = quantity;
         this.uom = uom;
     }

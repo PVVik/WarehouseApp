@@ -8,6 +8,7 @@ import com.example.warehouseApp.dto.documents.ReceiptDocumentResultDto;
 import com.example.warehouseApp.dto.documents.ReceiptLineBreakdownDto;
 import com.example.warehouseApp.dto.documents.WriteOffDocumentResultDto;
 import com.example.warehouseApp.dto.documents.WriteOffLineBreakdownDto;
+import com.example.warehouseApp.exception.BusinessException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.model.*;
 import com.example.warehouseApp.repository.InventoryDiscrepancyRepository;
@@ -76,19 +77,19 @@ public class DocumentService {
 
     private ReceiptDocumentResultDto processSingleReceipt(ReceiptDocument doc, Long currentUserId, String source) {
         if (!DocumentStatus.DRAFT.equals(doc.getStatus())) {
-            throw new IllegalStateException(
+            throw new BusinessException(
                     "Документ " + doc.getId() + " не в статусе DRAFT. Текущий статус: " + doc.getStatus());
         }
 
         var act = doc.getAct();
         if (act == null) {
-            throw new IllegalStateException("У документа " + doc.getId() + " нет связанного акта");
+            throw new BusinessException("У документа " + doc.getId() + " нет связанного акта");
         }
 
         var check = act.getCheck();
         var warehouse = (check != null) ? check.getWarehouse() : null;
         if (warehouse == null) {
-            throw new IllegalStateException("У акта нет склада");
+            throw new BusinessException("У акта нет склада");
         }
         Long warehouseId = warehouse.getId();
 
@@ -119,7 +120,7 @@ public class DocumentService {
                                       Long warehouseId) {
 
         if (act.getLines() == null) {
-            throw new IllegalStateException("В акте отсутствуют строки для оприходования");
+            throw new BusinessException("В акте отсутствуют строки для оприходования");
         }
 
         var lines = act.getLines().stream()
@@ -127,7 +128,7 @@ public class DocumentService {
                 .toList();
 
         if (lines.isEmpty()) {
-            throw new IllegalStateException("В акте нет строк типа RECEIPT для оприходования");
+            throw new BusinessException("В акте нет строк типа RECEIPT для оприходования");
         }
 
         WarehouseDto warehouseDto = warehouseService.getById(warehouseId);
@@ -140,7 +141,7 @@ public class DocumentService {
 
             Nomenclature nomenclature = line.getNomenclature();
             if (nomenclature == null) {
-                throw new IllegalStateException("В строке акта отсутствует номенклатура");
+                throw new BusinessException("В строке акта отсутствует номенклатура");
             }
             NomenclatureDto nomenclatureDto = nomenclatureService.getById(nomenclature.getId());
 
@@ -176,19 +177,19 @@ public class DocumentService {
 
     private WriteOffDocumentResultDto processSingleWriteOff(WriteOffDocument doc, Long currentUserId, String reason) {
         if (!DocumentStatus.DRAFT.equals(doc.getStatus())) {
-            throw new IllegalStateException(
+            throw new BusinessException(
                     "Документ " + doc.getId() + " не в статусе DRAFT. Текущий статус: " + doc.getStatus());
         }
 
         var act = doc.getAct();
         if (act == null) {
-            throw new IllegalStateException("У документа " + doc.getId() + " нет связанного акта");
+            throw new BusinessException("У документа " + doc.getId() + " нет связанного акта");
         }
 
         var check = act.getCheck();
         var warehouse = (check != null) ? check.getWarehouse() : null;
         if (warehouse == null) {
-            throw new IllegalStateException("У акта нет склада");
+            throw new BusinessException("У акта нет склада");
         }
         Long warehouseId = warehouse.getId();
 
@@ -206,7 +207,6 @@ public class DocumentService {
 
         return new WriteOffDocumentResultDto(
                 doc.getId(), doc.getStatus(),
-                // quantity убран
                 doc.getReason(),
                 doc.getUpdatedAt(),
                 doc.getCompletedBy(),
@@ -219,7 +219,7 @@ public class DocumentService {
                                        Long warehouseId) {
 
         if (act.getLines() == null) {
-            throw new IllegalStateException("В акте отсутствуют строки для списания");
+            throw new BusinessException("В акте отсутствуют строки для списания");
         }
 
         var lines = act.getLines().stream()
@@ -227,7 +227,7 @@ public class DocumentService {
                 .toList();
 
         if (lines.isEmpty()) {
-            throw new IllegalStateException("В акте нет строк типа WRITE_OFF для списания");
+            throw new BusinessException("В акте нет строк типа WRITE_OFF для списания");
         }
 
         for (DiscrepancyLine line : lines) {
@@ -241,7 +241,7 @@ public class DocumentService {
 
             Nomenclature nomenclature = line.getNomenclature();
             if (nomenclature == null) {
-                throw new IllegalStateException("В строке акта отсутствует номенклатура");
+                throw new BusinessException("В строке акта отсутствует номенклатура");
             }
 
             if (line.getBatch() != null) {
@@ -321,7 +321,7 @@ public class DocumentService {
         }
 
         if (left.compareTo(BigDecimal.ZERO) > 0) {
-            throw new IllegalStateException(
+            throw new BusinessException(
                     "Не хватило остатков для полного списания по номенклатуре " + nomenclature.getName());
         }
     }

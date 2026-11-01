@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InventoryDiscrepancyActDto {
+
     private Long id;
     private Long checkId;
     private String checkStatus;

@@ -40,12 +40,6 @@ public class ErrorHandler {
         return new ErrorResponse(ex.getMessage());
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(RuntimeException.class)
-    public ErrorResponse handleRuntimeException(RuntimeException ex) {
-        return new ErrorResponse(ex.getMessage());
-    }
-
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(BusinessException.class)
     public ErrorResponse handleBusinessException(BusinessException ex) {

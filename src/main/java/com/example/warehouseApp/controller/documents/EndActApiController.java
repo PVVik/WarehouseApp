@@ -18,10 +18,10 @@ public class EndActApiController {
 
     private final DocumentService documentService;
 
-    @PostMapping("/write-off/{actNumber}/complete")
-    public ResponseEntity<WriteOffDocumentResultDto> completeWriteOffByAct(@PathVariable Long actNumber,
+    @PostMapping("/write-off/{actId}/complete")
+    public ResponseEntity<WriteOffDocumentResultDto> completeWriteOffByAct(@PathVariable Long actId,
                                                                            @RequestParam String reason) {
-        var result = documentService.completeWriteOffByActId(actNumber, reason);
+        var result = documentService.completeWriteOffByActId(actId, reason);
 
         return ResponseEntity.ok(result);
     }

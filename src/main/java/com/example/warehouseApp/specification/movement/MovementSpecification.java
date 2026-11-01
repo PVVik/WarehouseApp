@@ -64,6 +64,9 @@ public class MovementSpecification implements Specification<Movement> {
                 Join<Movement, Warehouse> join = root.join("warehouseFrom", JoinType.LEFT);
                 return cb.equal(join.get("id"), wId);
 
+            case "number":
+                return cb.like(root.get("number"), "%" + value + "%");
+
             default:
                 return cb.equal(root.get(key), value);
         }
