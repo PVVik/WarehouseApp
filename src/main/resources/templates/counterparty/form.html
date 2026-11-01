@@ -7,18 +7,88 @@
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f4f6f9; }
         h1 { text-align: center; color: #2c3e50; margin-top: 40px; margin-bottom: 30px; }
-        .form-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
         .field { margin-bottom: 20px; }
-        .field label { display: block; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
-        .field input[type="text"], .field select { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        .field label {
+            display: block;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .field input[type="text"],
+        .field select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
         .field input[type="checkbox"] { width: auto; }
-        .error { color: #dc3545; font-size: 0.85rem; display: block; margin-top: 4px; }
-        .actions { margin-top: 30px; display: flex; gap: 10px; }
-        .btn { padding: 10px 20px; text-decoration: none; color: white; border-radius: 4px; font-size: 14px; border: none; cursor: pointer; display: inline-block; }
-        .btn-save { background-color: #28a745; }
-        .btn-back { background-color: #6c757d; }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 16px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            text-decoration: none;
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 600;
+            min-width: 130px;
+            text-align: center;
+            box-sizing: border-box;
+            flex: 1;
+        }
+
+        .btn-save { background-color: #3498db; }
+        .btn-save:hover { background-color: #2980b9; }
+
+        .btn-back { background-color: #95a5a6; }
+        .btn-back:hover { background-color: #5a6268; }
+
         .checkbox-field { display: flex; align-items: center; gap: 10px; }
         .checkbox-field label { margin-bottom: 0; }
+
+        .footer-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .footer-actions a {
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white !important;
+            text-decoration: none !important;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .footer-actions a:hover {
+            background-color: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -82,13 +152,6 @@
                 <a th:href="@{/counterparty}" class="btn btn-back">Отмена</a>
             </div>
         </form>
-
-        <a th:if="${from == 'movements'}"
-           th:href="@{/movements/counterparty/list}"
-           class="btn btn-back" style="margin-top:10px;">← Назад к выбору контрагента (в движениях)</a>
-        <a th:unless="${from == 'movements'}"
-           th:href="@{/counterparty}"
-           class="btn btn-back" style="margin-top:10px;">← Назад к списку контрагентов</a>
     </div>
 </div>
 

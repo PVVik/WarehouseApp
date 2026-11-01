@@ -18,9 +18,19 @@
             margin: 0 auto;
         }
 
-        h2 {
+        h1 {
             color: #2c3e50;
             margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .btn {
@@ -40,13 +50,59 @@
             background-color: #2980b9;
         }
 
-        .btn-outline {
-            background-color: transparent;
-            color: #333;
-            border: 1px solid #ccc;
+        .btn-add {
+            background-color: #3498db;
+            color: white;
         }
-        .btn-outline:hover {
-            background-color: #f0f0f0;
+        .btn-add:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-info {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-info:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-outline-secondary {
+            color: white;
+            border: 1px solid #6c757d;
+            background: #6c757d;
+        }
+        .btn-outline-secondary:hover {
+            background-color: #5a6268;
+        }
+        .actions-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            width: 220px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         table {
@@ -71,8 +127,26 @@
             background-color: #f1f1f1;
         }
 
-        .qty-col {
-            text-align: right;
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .bg-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .bg-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
         }
 
         .text-muted {
@@ -89,18 +163,30 @@
             border: 1px dashed #ccc;
             margin-top: 20px;
         }
+
+        .qty-col {
+            text-align: right;
+        }
     </style>
 </head>
 <body>
 
 <div sec:authorize="hasAnyRole('VIEWER','ADMIN','STOREKEEPER')">
     <div class="container">
-        <h2>📋 Инвентаризация №<span th:text="${check.id}">—</span></h2>
+        <h1>Инвентаризация №<span th:text="${check.id}">—</span></h1>
 
-        <p><strong>Склад:</strong> <span th:text="${check.warehouseId}">—</span></p>
-        <p><strong>Статус:</strong> <span th:text="${check.status}">—</span></p>
+        <div class="toolbar">
+            <a th:href="@{/inventory}" class="btn btn-outline-secondary">Назад</a>
+        </div>
 
-        <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p>
+            <strong>Склад:</strong> <span th:text="${check.warehouseId}">—</span>
+            &nbsp;&nbsp;
+            <strong>Статус:</strong>
+            <span class="status-badge"
+                  th:classappend="${#strings.equals(check.status, 'COMPLETED')} ? 'bg-success' : 'bg-warning'"
+                  th:text="${check.status}">—</span>
+        </p>
 
         <table>
             <thead>
@@ -124,33 +210,22 @@
             </tr>
             </tbody>
         </table>
-
-        <br>
-
-        <div>
-            <a sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')"
-               th:if="${check.status == 'IN_PROGRESS'}"
-               th:href="@{/inventory/{id}/lines(id=${check.id})}"
-               class="btn btn-outline">
-                ⬅️ Вернуться к вводу
+    </div>
+    <div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
+        <div class="actions-bar"
+             th:if="${#strings.equals(check.status, 'IN_PROGRESS')}">
+            <a th:href="@{/inventory/{id}/lines(id=${check.id})}"
+               class="btn btn-info action-btn">
+                Вернуться к вводу
             </a>
 
-            <form sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')"
-                  th:if="${check.status == 'IN_PROGRESS'}"
-                  th:action="@{/inventory/{id}/complete(id=${check.id})}"
+            <form th:action="@{/inventory/{id}/complete(id=${check.id})}"
                   method="post"
-                  onsubmit="return confirm('Вы уверены, что хотите завершить инвентаризацию?\nПосле этого нельзя будет менять фактические количества.');"
-                  style="display: inline;">
-                <button type="submit" class="btn btn-primary">
-                    ✅ Завершить инвентаризацию
+                  onsubmit="return confirm('Вы уверены, что хотите завершить инвентаризацию?\nПосле этого нельзя будет менять фактические количества.');">
+                <button type="submit" class="btn btn-primary action-btn">
+                    Завершить инвентаризацию
                 </button>
             </form>
-
-            <a th:href="@{/inventory}"
-               class="btn btn-outline"
-               style="margin-left: 10px;">
-                Отмена
-            </a>
         </div>
     </div>
 </div>

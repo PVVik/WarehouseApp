@@ -109,20 +109,25 @@
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
         }
         .btn {
-            display: inline-block;
-            padding: 10px 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+            width: 260px;
+            box-sizing: border-box;
             text-decoration: none;
             border-radius: 4px;
             font-weight: 600;
             cursor: pointer;
             border: none;
+            white-space: nowrap;
         }
         .btn-success {
-            background-color: #27ae60;
+            background-color: #3498db;
             color: white;
         }
         .btn-success:hover {
-            background-color: #219150;
+            background-color: #2980b9;
         }
         .btn-primary {
             background-color: #3498db;
@@ -132,9 +137,9 @@
             background-color: #2980b9;
         }
         .btn-outline-secondary {
-            background-color: transparent;
+            background-color: #6c757d;
             border: 1px solid #ccc;
-            color: #555;
+            color: white;
         }
         .btn-outline-secondary:hover {
             background-color: #f8f9fa;
@@ -142,6 +147,7 @@
         .button-group {
             display: flex;
             gap: 15px;
+            justify-content: center;
             margin-top: 30px;
         }
         .flash-message {

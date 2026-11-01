@@ -12,6 +12,7 @@
             padding: 20px;
             color: #333;
         }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -20,21 +21,25 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
+
         h2 {
             text-align: center;
             color: #2c3e50;
             margin-bottom: 30px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
         }
+
         th, td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #e0e0e0;
         }
+
         th {
             background-color: #f8f9fa;
             color: #444;
@@ -42,11 +47,22 @@
             text-transform: uppercase;
             font-size: 13px;
         }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
         .col-date { text-align: left; }
         .col-type { text-align: left; }
         .col-doc { text-align: left; }
         .col-name { text-align: left; }
         .col-qty { text-align: right; }
+
+        .report-meta {
+            margin-bottom: 15px;
+            color: #666;
+            font-size: 14px;
+        }
 
         .empty-message {
             text-align: center;
@@ -56,21 +72,48 @@
         }
 
         .btn {
-            display: inline-block;
-            padding: 10px 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 20px;
+            height: 44px;
+            box-sizing: border-box;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: 600;
+            font-family: inherit;
+            font-size: 0.95rem;
             cursor: pointer;
             border: none;
+            white-space: nowrap;
+            transition: background 0.2s;
         }
 
         .btn-primary {
             background-color: #3498db;
             color: white;
+            box-shadow: 0 2px 6px rgba(52, 152, 219, 0.35);
         }
         .btn-primary:hover {
             background-color: #2980b9;
+        }
+
+        .btn-back {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #7f8c8d;
+        }
+
+        .back-row {
+            margin-bottom: 20px;
+        }
+
+        .download-row {
+            margin-top: 30px;
+            text-align: center;
         }
 
         .access-denied-container {
@@ -89,13 +132,15 @@
 
 <div sec:authorize="hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')">
     <div class="container">
-        <a href="/report/movement-form" style="display:inline-block; margin-bottom:20px; color:#3498db; text-decoration:none; font-weight:600;">
-            ← Назад к выбору параметров
-        </a>
+        <div class="back-row">
+            <a th:href="@{/report/movement-form}" class="btn btn-back">
+                Назад
+            </a>
+        </div>
 
         <h2>Отчёт по движениям товаров</h2>
 
-        <div style="margin-bottom:15px; color:#666; font-size:14px;">
+        <div class="report-meta">
             Период: <b th:text="${#temporals.format(startDate, 'dd.MM.yyyy')}"></b> – <b th:text="${#temporals.format(endDate, 'dd.MM.yyyy')}"></b>
             <span>, Склад: <b th:text="${selectedWarehouseName}"></b></span>
         </div>
@@ -125,7 +170,7 @@
             </tbody>
         </table>
 
-        <p style="margin-top:30px; text-align:center;">
+        <p class="download-row">
             <a th:href="@{/report/download-movement(warehouseId=${selectedWarehouseId}, startDate=${startDate}, endDate=${endDate})}"
                class="btn btn-primary">
                 Скачать отчёт (CSV)
@@ -138,10 +183,7 @@
     <div class="access-denied-icon">🚫</div>
     <h2>Доступ запрещён</h2>
     <p>У вас недостаточно прав для просмотра отчёта по движениям товаров.</p>
-    <a th:href="@{/}" class="btn" style="
-        background-color: #95a5a6; color: white; margin-top:10px; display:inline-block; padding:10px 20px; text-decoration:none;">
-        Вернуться на главную
-    </a>
+    <a th:href="@{/}" class="btn btn-back" style="margin-top: 10px;">Вернуться на главную</a>
 </div>
 
 </body>

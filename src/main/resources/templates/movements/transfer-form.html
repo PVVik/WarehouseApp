@@ -3,7 +3,7 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Оформление перемещения - Складская система</title>
+    <title>Оформление перемещения — Складская система</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -12,7 +12,6 @@
             padding: 20px;
             color: #333;
         }
-
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -21,24 +20,9 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
-
-        h2 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #444;
-        }
-
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; }
         .form-control {
             width: 100%;
             padding: 10px 12px;
@@ -47,98 +31,67 @@
             font-size: 14px;
             box-sizing: border-box;
         }
-
         .form-control:focus {
             border-color: #3498db;
             outline: none;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
         }
-
         .btn {
             display: inline-block;
-            padding: 10px 20px;
+            padding: 10px 16px;
             text-decoration: none;
             border-radius: 4px;
             font-weight: 600;
             cursor: pointer;
             border: none;
+            white-space: nowrap;
+            box-sizing: border-box;
         }
-
-        .btn-success {
-            background-color: #27ae60;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #219150;
-        }
-
-        .btn-primary {
+        .btn-action {
             background-color: #3498db;
             color: white;
+            width: 180px;
+            text-align: center;
         }
-
-        .btn-primary:hover {
+        .btn-action:hover {
             background-color: #2980b9;
         }
-
-        .btn-outline-secondary {
-            background-color: transparent;
-            border: 1px solid #ccc;
-            color: #555;
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+            width: 180px;
+            text-align: center;
         }
-
-        .btn-outline-secondary:hover {
-            background-color: #f8f9fa;
+        .btn-back:hover {
+            background-color: #5a6268;
         }
-
-        .input-with-button {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .input-with-button .form-control {
-            flex: 1;
-        }
-
+        .input-with-button { display: flex; gap: 10px; align-items: center; }
+        .input-with-button .form-control { flex: 1; }
         .button-group {
             display: flex;
             gap: 15px;
             margin-top: 30px;
+            justify-content: center;
         }
-
-        .required::after {
-            content: " *";
-            color: #e74c3c;
-        }
-
-        .flash-message {
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-        }
-
-        .flash-success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .flash-error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
+        .required::after { content: " *"; color: #e74c3c; }
+        .flash-message { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .flash-success { background-color: #d4edda; color: #155724; }
+        .flash-error { background-color: #f8d7da; color: #721c24; }
         .info-box {
             padding: 15px;
             background-color: #f8f9fa;
             border-radius: 6px;
             margin-bottom: 20px;
         }
-
-        .warning-text {
-            color: #c0392b;
-            font-size: 0.9em;
+        .access-denied-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .access-denied-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
         }
     </style>
 </head>
@@ -163,7 +116,7 @@
                            th:value="${selectedNomenclatureId}">
 
                     <a th:href="@{/movements/nomenclature/list(fromOperation='TRANSFER', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName})}"
-                       class="btn btn-primary">Найти</a>
+                       class="btn btn-action">Найти</a>
                 </div>
                 <small style="color: #7f8c8d;">Выберите позицию из справочника.</small>
             </div>
@@ -178,7 +131,7 @@
                            th:value="${selectedWarehouseFromId}">
 
                     <a th:href="@{/movements/warehouse/list(fromOperation='TRANSFER', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, inventoryType=${selectedInventoryType})}"
-                       class="btn btn-primary">Найти</a>
+                       class="btn btn-action">Найти</a>
                 </div>
                 <small style="color: #7f8c8d;">Склад, с которого перемещаем товар.</small>
             </div>
@@ -192,10 +145,9 @@
                     <input type="hidden" id="warehouseTo" name="warehouseTo"
                            th:value="${selectedWarehouseToId}">
                     <a th:href="@{/movements/warehouse/list(fromOperation='TRANSFER-TO', nomenclatureId=${selectedNomenclatureId}, nomenclatureName=${selectedNomenclatureName}, inventoryType=${selectedInventoryType}, warehouseFromId=${selectedWarehouseFromId}, warehouseFromName=${selectedWarehouseFromName})}"
-                       class="btn btn-primary">Найти</a>
+                       class="btn btn-action">Найти</a>
                 </div>
-                <small style="color: #7f8c8d;">Склад, на который перемещаем товар. Не может совпадать со складом
-                    «откуда».</small>
+                <small style="color: #7f8c8d;">Склад, на который перемещаем товар. Не может совпадать со складом «откуда».</small>
             </div>
 
             <div class="form-group"
@@ -220,8 +172,7 @@
                             th:text="${serial.serialNumber + ' (статус: ' + serial.status + ')'}">
                     </option>
                 </select>
-                <small class="text-muted">Выберите конкретный серийный номер оборудования. Для серийного учёта
-                    количество всегда 1.</small>
+                <small class="text-muted">Выберите конкретный серийный номер оборудования. Для серийного учёта количество всегда 1.</small>
             </div>
 
             <div class="form-group">
@@ -238,7 +189,6 @@
                     <span th:if="${#lists.isEmpty(storageLocations)}">Для выбранной номенклатуры на этом складе остатков нет.</span>
                 </small>
             </div>
-
 
             <div class="form-group">
                 <label for="quantity" class="required">Количество</label>
@@ -259,22 +209,21 @@
             </div>
 
             <div class="button-group">
-                <button type="submit" class="btn btn-success">Оформить перемещение</button>
-                <a th:href="@{/movements}" class="btn btn-outline-secondary">Отмена</a>
+                <button type="submit" class="btn btn-action">Оформить трансфер</button>
+                <a th:href="@{/movements}" class="btn btn-back">Отмена</a>
             </div>
         </form>
     </div>
 </div>
 
-<div sec:authorize="!hasAnyRole('ADMIN','STOREKEEPER')" class="access-denied-container"
-     style="text-align:center; padding:60px; background:#f8f9fa; border-radius:8px;">
-    <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+<div sec:authorize="!hasAnyRole('ADMIN','STOREKEEPER')" class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
     <h2>Доступ запрещён</h2>
-    <p>У вас недостаточно прав для оформления перемещения. Эта операция доступна только администраторам и
-        кладовщикам.</p>
+    <p>У вас недостаточно прав для оформления перемещения. Эта операция доступна только администраторам и кладовщикам.</p>
     <a th:href="@{/}" class="btn"
-       style="background-color:#95a5a6; color:white; margin-top:10px; display:inline-block; padding:10px 20px; text-decoration:none;">Вернуться
-        на главную</a>
+       style="background-color:#95a5a6; color:white; margin-top:10px; display:inline-block; padding:10px 16px; text-decoration:none;">
+        Вернуться на главную
+    </a>
 </div>
 
 <script>

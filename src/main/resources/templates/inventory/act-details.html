@@ -26,10 +26,15 @@
             border-bottom: 1px solid #eee;
             padding-bottom: 10px;
         }
+
         .btn {
-            padding: 12px 20px;
-            width: 240px;
+            padding: 0 20px;
+            width: 260px;
+            height: 44px;
             box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1;
             text-decoration: none;
             border-radius: 4px;
             font-weight: 600;
@@ -42,7 +47,6 @@
             color: white;
             background-color: #3498db;
             white-space: nowrap;
-            font-size: 14px;
             flex-shrink: 0;
             transition: background 0.2s;
         }
@@ -81,6 +85,22 @@
             margin-top: 30px;
             padding-top: 20px;
             border-top: 1px solid #eee;
+        }
+
+        .actions-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .actions-container form {
+            margin: 0;
+            display: contents;
         }
         .status-block {
             margin-top: 20px;
@@ -127,7 +147,7 @@
             </small>
         </h4>
 
-        <a href="/inventory" class="btn btn-back">← Назад к инвентаризациям</a>
+        <a href="/inventory" class="btn btn-back">Назад</a>
 
         <div th:if="${successMessage}"
              style="padding: 10px; background: #d4edda; color: #155724; margin-bottom: 15px; border-radius: 4px;">
@@ -201,38 +221,35 @@
                 </button>
             </form>
 
-            <div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
-                <th:block th:if="${act.status.name() == 'COMPLETED'}">
-                    <a th:if="${isWriteOffCompleted}"
-                       th:href="@{/end-act/write-off/{actId}/print(actId=${act.id})}"
-                       class="btn" target="_blank">
-                        Распечатать акт списания
-                    </a>
+            <a sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')"
+               th:if="${act.status.name() == 'COMPLETED' and isWriteOffCompleted}"
+               th:href="@{/end-act/write-off/{actId}/print(actId=${act.id})}"
+               class="btn" target="_blank">
+                Распечатать акт списания
+            </a>
 
-                    <a th:if="${isWriteOffRequired and !isWriteOffCompleted}"
-                       th:href="@{/end-act/write-off/{actId}(actId=${act.id})}"
-                       class="btn">
-                        Провести списание
-                    </a>
-                </th:block>
-            </div>
+            <a sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')"
+               th:if="${act.status.name() == 'COMPLETED' and isWriteOffRequired and !isWriteOffCompleted}"
+               th:href="@{/end-act/write-off/{actId}(actId=${act.id})}"
+               class="btn">
+                Провести списание
+            </a>
 
-            <div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER','PURCHASER')">
-                <th:block th:if="${act.status.name() == 'COMPLETED'}">
-                    <a th:if="${isReceiptRequired and !isReceiptCompleted}"
-                       th:href="@{/end-act/receipt/{actId}(actId=${act.id})}"
-                       class="btn">
-                        Провести оприходование
-                    </a>
+            <a sec:authorize="hasAnyRole('ADMIN','STOREKEEPER','PURCHASER')"
+               th:if="${act.status.name() == 'COMPLETED' and isReceiptRequired and !isReceiptCompleted}"
+               th:href="@{/end-act/receipt/{actId}(actId=${act.id})}"
+               class="btn">
+                Провести оприходование
+            </a>
 
-                    <a th:if="${isReceiptCompleted}"
-                       th:href="@{/end-act/receipt/{actId}/print(actId=${act.id})}"
-                       class="btn" target="_blank">
-                        Распечатать акт оприходования
-                    </a>
-                </th:block>
-            </div>
+            <a sec:authorize="hasAnyRole('ADMIN','STOREKEEPER','PURCHASER')"
+               th:if="${act.status.name() == 'COMPLETED' and isReceiptCompleted}"
+               th:href="@{/end-act/receipt/{actId}/print(actId=${act.id})}"
+               class="btn" target="_blank">
+                Распечатать акт оприходования
+            </a>
         </div>
+
 
         <div class="status-block">
             <span class="completed-badge">COMPLETED</span>
