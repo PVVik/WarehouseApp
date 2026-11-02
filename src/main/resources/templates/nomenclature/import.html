@@ -143,12 +143,12 @@
               enctype="multipart/form-data">
 
             <div class="upload-field">
-                <label for="file">CSV-файл со складами</label>
+                <label for="file">CSV-файл с номенклатурой</label>
                 <input type="file" id="file" name="file" accept=".csv" required>
             </div>
 
             <button type="submit" class="btn btn-primary btn-wide">
-                Загрузить склады
+                Загрузить номенклатуру
             </button>
         </form>
     </div>
@@ -157,7 +157,7 @@
 <div sec:authorize="!hasRole('ADMIN')" class="access-denied-container">
     <div class="access-denied-icon">🚫</div>
     <h2>Доступ запрещён</h2>
-    <p>У вас недостаточно прав для импорта складов из файлов.</p>
+    <p>У вас недостаточно прав для импорта номенклатуры из файлов.</p>
     <a th:href="@{/}" class="btn btn-back" style="margin-top: 10px;">Вернуться на главную</a>
 </div>
 

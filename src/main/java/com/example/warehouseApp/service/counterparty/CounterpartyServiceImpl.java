@@ -6,8 +6,9 @@ import com.example.warehouseApp.exception.AlreadyExistsException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.mapper.CounterpartyMapper;
 import com.example.warehouseApp.model.Counterparty;
+import com.example.warehouseApp.parser.counterparty.CounterpartyCsvRow;
+import com.example.warehouseApp.parser.counterparty.CounterpartyImportResult;
 import com.example.warehouseApp.repository.CounterpartyRepository;
-import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.specification.counterparty.CounterpartySpecificationBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,12 +18,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CounterpartyServiceImpl implements BaseService<CounterpartyDto> {
+public class CounterpartyServiceImpl implements CounterpartyService {
 
     private final CounterpartyRepository counterpartyRepository;
 
@@ -99,6 +102,33 @@ public class CounterpartyServiceImpl implements BaseService<CounterpartyDto> {
         counterpartyRepository.deleteById(counterparty.getId());
     }
 
+    @Override
+    @Transactional
+    public CounterpartyImportResult importAll(List<CounterpartyCsvRow> rows) {
+        int created = 0;
+        int updated = 0;
+
+        for (CounterpartyCsvRow row : rows) {
+            Optional<Counterparty> existing = counterpartyRepository.findByInn(row.inn());
+
+            if (existing.isPresent()) {
+                Counterparty c = existing.get();
+                c.setName(row.name());
+                c.setKpp(row.kpp());
+                c.setCounterpartyType(row.type());
+                c.setPhone(row.phone());
+                c.setContact(row.contact());
+                c.setActive(true);
+                updated++;
+            } else {
+                counterpartyRepository.save(new Counterparty(row.name(), row.inn(), row.kpp(),
+                        row.type(), row.phone(), row.contact(), true));
+                created++;
+            }
+        }
+        return new CounterpartyImportResult(created, updated);
+    }
+
     private void checkUniqueInn(String inn) {
         if (counterpartyRepository.existsByInn(inn)) {
             log.warn("Проверка на уникальность ИНН {} провалилась", inn);
@@ -112,4 +142,5 @@ public class CounterpartyServiceImpl implements BaseService<CounterpartyDto> {
             throw new NotFoundException(String.format("Контрагента с id %s не существует", id));
         });
     }
+
 }
