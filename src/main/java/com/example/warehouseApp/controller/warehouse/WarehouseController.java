@@ -1,9 +1,8 @@
 package com.example.warehouseApp.controller.warehouse;
 
 import com.example.warehouseApp.dto.WarehouseDto;
-import com.example.warehouseApp.parser.WarehouseCsvParser;
-import com.example.warehouseApp.parser.WarehouseImportResult;
-import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.parser.warehouse.WarehouseCsvParser;
+import com.example.warehouseApp.parser.warehouse.WarehouseImportResult;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
 import com.example.warehouseApp.service.warehouse.WarehouseService;
 import jakarta.validation.Valid;
@@ -55,24 +54,24 @@ public class WarehouseController {
         return "warehouses/list";
     }
 
-    @GetMapping("/import")
+    @GetMapping("/import.html")
     @PreAuthorize("hasRole('ADMIN')")
     public String importForm() {
-        return "warehouses/import";
+        return "warehouses/import.html";
     }
 
-    @PostMapping("/import")
+    @PostMapping("/import.html")
     @PreAuthorize("hasRole('ADMIN')")
     public String importCsv(@RequestParam("file") MultipartFile file,
                             RedirectAttributes redirectAttributes) {
 
         if (file == null || file.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Выберите файл для загрузки");
-            return "redirect:/warehouses/import";
+            return "redirect:/warehouses/import.html";
         }
         if (!file.getOriginalFilename().toLowerCase().endsWith(".csv")) {
             redirectAttributes.addFlashAttribute("error", "Поддерживаются только файлы .csv");
-            return "redirect:/warehouses/import";
+            return "redirect:/warehouses/import.html";
         }
 
         WarehouseCsvParser.ParseResult parsed;
@@ -81,13 +80,13 @@ public class WarehouseController {
         } catch (IOException e) {
             log.error("Не удалось прочитать файл импорта складов", e);
             redirectAttributes.addFlashAttribute("error", "Не удалось прочитать файл. Попробуйте ещё раз");
-            return "redirect:/warehouses/import";
+            return "redirect:/warehouses/import.html";
         }
 
         if (parsed.rows().isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Не удалось импортировать ни одной строки: "
                     + String.join("; ", parsed.errors()));
-            return "redirect:/warehouses/import";
+            return "redirect:/warehouses/import.html";
         }
 
         WarehouseImportResult result = warehouseService.importAll(parsed.rows());

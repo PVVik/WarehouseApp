@@ -1,4 +1,4 @@
-package com.example.warehouseApp.parser;
+package com.example.warehouseApp.parser.warehouse;
 
 import com.example.warehouseApp.model.WarehouseType;
 import org.springframework.stereotype.Service;
@@ -114,20 +114,6 @@ public class WarehouseCsvParser {
         throw new IllegalArgumentException("Неизвестный тип склада: «" + raw
                 + "». Ожидался «Центральный» или «Удаленный»");
     }
-
-    private Integer firstIndex(Map<String, Integer> header, String... candidates) {
-        for (String c : candidates) {
-            if (header.containsKey(c)) {
-                return header.get(c);
-            }
-        }
-        return null;
-    }
-
-    private String cell(String[] cells, int idx) {
-        return idx < cells.length ? cells[idx].trim() : "";
-    }
-
 }
 
 final class ColumnMapping {

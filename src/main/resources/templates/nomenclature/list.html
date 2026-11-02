@@ -23,12 +23,19 @@
             margin-bottom: 20px;
         }
 
+
         .toolbar-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
             flex-wrap: nowrap;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
         .btn {
@@ -43,6 +50,11 @@
             white-space: nowrap;
             box-sizing: border-box;
             display: inline-block;
+        }
+
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
         }
 
         .btn-primary {
@@ -192,11 +204,20 @@
         <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
 
-        <div class="toolbar-top">
-            <a th:href="@{/}" class="btn btn-gray">← Назад к операциям</a>
 
-            <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
-               href="/nomenclature/form" class="btn btn-primary">+ Добавить позицию</a>
+        <div class="toolbar-top">
+            <a th:href="@{/}" class="btn btn-gray">Назад</a>
+
+            <div class="toolbar-actions">
+                <a sec:authorize="hasRole('ADMIN')"
+                   th:href="@{/nomenclature/import}" class="btn btn-gray">
+                    Импорт из CSV
+                </a>
+                <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
+                   href="/nomenclature/form" class="btn btn-primary">
+                    Добавить позицию
+                </a>
+            </div>
         </div>
 
         <form th:action="@{/nomenclature}" method="get" class="filter-row">

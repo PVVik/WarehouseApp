@@ -1,4 +1,4 @@
-package com.example.warehouseApp.parser;
+package com.example.warehouseApp.parser.warehouse;
 
 import com.example.warehouseApp.model.WarehouseType;
 

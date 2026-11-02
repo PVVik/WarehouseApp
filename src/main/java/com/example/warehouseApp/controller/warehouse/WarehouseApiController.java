@@ -1,9 +1,8 @@
 package com.example.warehouseApp.controller.warehouse;
 
 import com.example.warehouseApp.dto.WarehouseDto;
-import com.example.warehouseApp.parser.WarehouseCsvParser;
-import com.example.warehouseApp.parser.WarehouseImportResult;
-import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.parser.warehouse.WarehouseCsvParser;
+import com.example.warehouseApp.parser.warehouse.WarehouseImportResult;
 import com.example.warehouseApp.service.warehouse.WarehouseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +50,7 @@ public class WarehouseApiController {
         return warehouseService.create(warehouseDto);
     }
 
-    @PostMapping("/import")
+    @PostMapping("/import.html")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> importCsvApi(@RequestParam("file") MultipartFile file) {
 

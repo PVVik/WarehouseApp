@@ -6,6 +6,8 @@ import com.example.warehouseApp.exception.AlreadyExistsException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.mapper.NomenclatureMapper;
 import com.example.warehouseApp.model.Nomenclature;
+import com.example.warehouseApp.parser.nomenclature.NomenclatureCsvRow;
+import com.example.warehouseApp.parser.nomenclature.NomenclatureImportResult;
 import com.example.warehouseApp.repository.NomenclatureRepository;
 import com.example.warehouseApp.specification.nomenclature.NomenclatureSpecificationsBuilder;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -106,6 +111,38 @@ public class NomenclatureServiceImpl implements NomenclatureService {
         });
 
         return NomenclatureMapper.mapToDto(nomenclature);
+    }
+
+    @Override
+    @Transactional
+    @LogAudit(action = "CREATE", entityType = Nomenclature.class)
+    public NomenclatureImportResult importAll(List<NomenclatureCsvRow> rows) {
+        int created = 0;
+        int updated = 0;
+
+        for (NomenclatureCsvRow row : rows) {
+            Optional<Nomenclature> existing = nomenclatureRepository.findBySku(row.sku());
+
+            if (existing.isPresent()) {
+                Nomenclature n = existing.get();
+                n.setName(row.name());
+                n.setStuffCategory(row.category());
+                n.setUnitOfMeasure(row.unit());
+                n.setInventoryType(row.type());
+                if (row.minStock() != null) {
+                    n.setMinStock(row.minStock());
+                }
+                n.setActive(true);
+                updated++;
+            } else {
+                Nomenclature n = new Nomenclature(row.name(), row.sku(), row.category(),
+                        row.unit(), row.type(), true);
+                n.setMinStock(row.minStock());
+                nomenclatureRepository.save(n);
+                created++;
+            }
+        }
+        return new NomenclatureImportResult(created, updated);
     }
 
     private void checkUniqueSku(String sku) {
