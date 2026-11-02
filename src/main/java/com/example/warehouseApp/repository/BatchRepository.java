@@ -39,4 +39,6 @@ public interface BatchRepository extends JpaRepository<Batch, Long>, JpaSpecific
     long countByExpiryDateBetween(LocalDate from, LocalDate to);
 
     Optional<Batch> findByBatchNumberAndNomenclatureId(String batchNumber, Long nomenclatureId);
+
+    Optional<Batch> findByBatchNumberIgnoreCase(String butchNumber);
 }

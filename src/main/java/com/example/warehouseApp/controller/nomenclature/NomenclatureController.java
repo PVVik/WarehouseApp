@@ -1,9 +1,8 @@
 package com.example.warehouseApp.controller.nomenclature;
 
 import com.example.warehouseApp.dto.NomenclatureDto;
+import com.example.warehouseApp.parser.ImportResult;
 import com.example.warehouseApp.parser.nomenclature.NomenclatureCsvParser;
-import com.example.warehouseApp.parser.nomenclature.NomenclatureImportResult;
-import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.nomenclature.NomenclatureService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +60,7 @@ public class NomenclatureController {
             return "redirect:/nomenclature/import";
         }
 
-        NomenclatureImportResult result = nomenclatureService.importAll(parsed.rows());
+        ImportResult result = nomenclatureService.importAll(parsed.rows());
 
         String summary = "Создано позиций: " + result.created()
                 + ", обновлено: " + result.updated() + ".";

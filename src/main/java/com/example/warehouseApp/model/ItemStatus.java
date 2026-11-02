@@ -1,6 +1,9 @@
 package com.example.warehouseApp.model;
 
-public enum ItemStatus {
+import lombok.Getter;
+
+@Getter
+public enum ItemStatus implements LabeledEnum {
 
     IN_STOCK("На складе"),
     IN_USE("В эксплуатации"),
@@ -8,13 +11,9 @@ public enum ItemStatus {
     WRITTEN_OFF("Списан"),
     IN_TRANSIT("В перемещении");
 
-    private final String displayName;
+    private final String label;
 
-    ItemStatus(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public String getDisplayName() {
-        return displayName;
+    ItemStatus(String label) {
+        this.label = label;
     }
 }

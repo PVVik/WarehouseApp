@@ -6,8 +6,8 @@ import com.example.warehouseApp.exception.BusinessException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.mapper.WarehouseMapper;
 import com.example.warehouseApp.model.Warehouse;
+import com.example.warehouseApp.parser.ImportResult;
 import com.example.warehouseApp.parser.warehouse.WarehouseCsvRow;
-import com.example.warehouseApp.parser.warehouse.WarehouseImportResult;
 import com.example.warehouseApp.repository.WarehouseRepository;
 import com.example.warehouseApp.specification.warehouse.WarehouseSpecificationBuilder;
 import lombok.RequiredArgsConstructor;
@@ -121,7 +121,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Transactional
     @Override
     @LogAudit(action = "CREATE", entityType = Warehouse.class)
-    public WarehouseImportResult importAll(List<WarehouseCsvRow> rows) {
+    public ImportResult importAll(List<WarehouseCsvRow> rows) {
         int created = 0;
         int updated = 0;
         LocalDateTime now = LocalDateTime.now();
@@ -145,6 +145,6 @@ public class WarehouseServiceImpl implements WarehouseService {
                 log.info("Создали склад с названием {}", w.getName());
             }
         }
-        return new WarehouseImportResult(created, updated);
+        return new ImportResult(created, updated);
     }
 }

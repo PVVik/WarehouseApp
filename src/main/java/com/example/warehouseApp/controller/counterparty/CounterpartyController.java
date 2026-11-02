@@ -3,8 +3,7 @@ package com.example.warehouseApp.controller.counterparty;
 import com.example.warehouseApp.dto.CounterpartyDto;
 import com.example.warehouseApp.model.CounterpartyType;
 import com.example.warehouseApp.parser.counterparty.CounterpartyCsvParser;
-import com.example.warehouseApp.parser.counterparty.CounterpartyImportResult;
-import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.parser.ImportResult;
 import com.example.warehouseApp.service.counterparty.CounterpartyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +61,7 @@ public class CounterpartyController {
             return "redirect:/counterparty/import";
         }
 
-        CounterpartyImportResult result = counterpartyService.importAll(parsed.rows());
+        ImportResult result = counterpartyService.importAll(parsed.rows());
 
         String summary = "Создано контрагентов: " + result.created()
                 + ", обновлено: " + result.updated() + ".";

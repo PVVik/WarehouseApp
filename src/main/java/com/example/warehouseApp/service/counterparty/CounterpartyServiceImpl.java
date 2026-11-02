@@ -6,8 +6,8 @@ import com.example.warehouseApp.exception.AlreadyExistsException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.mapper.CounterpartyMapper;
 import com.example.warehouseApp.model.Counterparty;
+import com.example.warehouseApp.parser.ImportResult;
 import com.example.warehouseApp.parser.counterparty.CounterpartyCsvRow;
-import com.example.warehouseApp.parser.counterparty.CounterpartyImportResult;
 import com.example.warehouseApp.repository.CounterpartyRepository;
 import com.example.warehouseApp.specification.counterparty.CounterpartySpecificationBuilder;
 import lombok.RequiredArgsConstructor;
@@ -104,7 +104,7 @@ public class CounterpartyServiceImpl implements CounterpartyService {
 
     @Override
     @Transactional
-    public CounterpartyImportResult importAll(List<CounterpartyCsvRow> rows) {
+    public ImportResult importAll(List<CounterpartyCsvRow> rows) {
         int created = 0;
         int updated = 0;
 
@@ -126,7 +126,7 @@ public class CounterpartyServiceImpl implements CounterpartyService {
                 created++;
             }
         }
-        return new CounterpartyImportResult(created, updated);
+        return new ImportResult(created, updated);
     }
 
     private void checkUniqueInn(String inn) {

@@ -13,4 +13,6 @@ public interface SerialItemRepository extends JpaRepository<SerialItem, Long>, J
     List<SerialItem> findAllByNomenclatureIdAndStatus(Long nomenclatureId, ItemStatus status);
 
     Optional<SerialItem> findBySerialNumber(String serialNumber);
+
+    Optional<SerialItem> findBySerialNumberIgnoreCase(String serialNumber);
 }

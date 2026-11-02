@@ -9,10 +9,11 @@ import com.example.warehouseApp.mapper.NomenclatureMapper;
 import com.example.warehouseApp.mapper.SerialItemMapper;
 import com.example.warehouseApp.model.ItemStatus;
 import com.example.warehouseApp.model.SerialItem;
+import com.example.warehouseApp.parser.ImportResult;
+import com.example.warehouseApp.parser.serialItem.SerialItemCsvRow;
 import com.example.warehouseApp.repository.SerialItemRepository;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.batch.BatchService;
-import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import com.example.warehouseApp.specification.serialItem.SerialItemSpecificationBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -143,6 +144,33 @@ public class SerialItemServiceImpl implements SerialItemService {
     @Override
     public Optional<SerialItem> findBySerialNumber(String serialNumber) {
         return serialItemRepository.findBySerialNumber(serialNumber);
+    }
+
+    @Override
+    @Transactional
+    public ImportResult importAll(List<SerialItemCsvRow> rows) {
+        int created = 0;
+        int updated = 0;
+
+        for (SerialItemCsvRow row : rows) {
+            Optional<SerialItem> existing = serialItemRepository.findBySerialNumberIgnoreCase(row.serialNumber());
+
+            if (existing.isPresent()) {
+                SerialItem s = existing.get();
+                s.setNomenclature(row.nomenclature());
+                s.setStatus(row.status());
+                s.setPassportNumber(row.passportNumber());
+                if (row.notes() != null) {
+                    s.setNotes(row.notes());
+                }
+                updated++;
+            } else {
+                serialItemRepository.save(new SerialItem(row.serialNumber(), row.status(),
+                        row.passportNumber(), row.notes()));
+                created++;
+            }
+        }
+        return new ImportResult(created, updated);
     }
 
     private SerialItem getEntityById(long id) {

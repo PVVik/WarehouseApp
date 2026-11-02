@@ -2,8 +2,7 @@ package com.example.warehouseApp.controller.counterparty;
 
 import com.example.warehouseApp.dto.CounterpartyDto;
 import com.example.warehouseApp.parser.counterparty.CounterpartyCsvParser;
-import com.example.warehouseApp.parser.counterparty.CounterpartyImportResult;
-import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.parser.ImportResult;
 import com.example.warehouseApp.service.counterparty.CounterpartyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +48,7 @@ public class CounterpartyApiController {
                     "errors", parsed.errors()));
         }
 
-        CounterpartyImportResult result = counterpartyService.importAll(parsed.rows());
+        ImportResult result = counterpartyService.importAll(parsed.rows());
 
         var body = new LinkedHashMap<String, Object>();
         body.put("created", result.created());

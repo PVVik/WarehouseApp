@@ -1,8 +1,8 @@
 package com.example.warehouseApp.controller.warehouse;
 
 import com.example.warehouseApp.dto.WarehouseDto;
+import com.example.warehouseApp.parser.ImportResult;
 import com.example.warehouseApp.parser.warehouse.WarehouseCsvParser;
-import com.example.warehouseApp.parser.warehouse.WarehouseImportResult;
 import com.example.warehouseApp.service.warehouse.WarehouseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -73,7 +73,7 @@ public class WarehouseApiController {
                     "errors", parsed.errors()));
         }
 
-        WarehouseImportResult result = warehouseService.importAll(parsed.rows());
+        ImportResult result = warehouseService.importAll(parsed.rows());
 
         var body = new LinkedHashMap<String, Object>();
         body.put("created", result.created());

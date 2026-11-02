@@ -6,8 +6,8 @@ import com.example.warehouseApp.exception.AlreadyExistsException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.mapper.NomenclatureMapper;
 import com.example.warehouseApp.model.Nomenclature;
+import com.example.warehouseApp.parser.ImportResult;
 import com.example.warehouseApp.parser.nomenclature.NomenclatureCsvRow;
-import com.example.warehouseApp.parser.nomenclature.NomenclatureImportResult;
 import com.example.warehouseApp.repository.NomenclatureRepository;
 import com.example.warehouseApp.specification.nomenclature.NomenclatureSpecificationsBuilder;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -116,7 +115,7 @@ public class NomenclatureServiceImpl implements NomenclatureService {
     @Override
     @Transactional
     @LogAudit(action = "CREATE", entityType = Nomenclature.class)
-    public NomenclatureImportResult importAll(List<NomenclatureCsvRow> rows) {
+    public ImportResult importAll(List<NomenclatureCsvRow> rows) {
         int created = 0;
         int updated = 0;
 
@@ -142,7 +141,7 @@ public class NomenclatureServiceImpl implements NomenclatureService {
                 created++;
             }
         }
-        return new NomenclatureImportResult(created, updated);
+        return new ImportResult(created, updated);
     }
 
     private void checkUniqueSku(String sku) {
