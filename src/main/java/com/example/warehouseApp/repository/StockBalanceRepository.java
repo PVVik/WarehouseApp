@@ -82,5 +82,6 @@ public interface StockBalanceRepository extends JpaRepository<StockBalance, Long
             """)
     List<NonLiquidProjection> findNonLiquidReport(Long warehouseId);
 
-
+    Optional<StockBalance> findByNomenclatureIdAndWarehouseIdAndBatchIdAndSerialItemId(
+            Long nomenclatureId, Long warehouseId, Long batchId, Long serialItemId);
 }

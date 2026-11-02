@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface WarehouseRepository extends JpaRepository<Warehouse, Long>, JpaSpecificationExecutor<Warehouse> {
 
     Optional<Warehouse> findByName(String name);
+
+    Optional<Warehouse> findByNameIgnoreCase(String name);
 }
