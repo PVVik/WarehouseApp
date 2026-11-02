@@ -1,8 +1,11 @@
 package com.example.warehouseApp.controller.warehouse;
 
 import com.example.warehouseApp.dto.WarehouseDto;
+import com.example.warehouseApp.parser.WarehouseCsvParser;
+import com.example.warehouseApp.parser.WarehouseImportResult;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
+import com.example.warehouseApp.service.warehouse.WarehouseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +16,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.io.IOException;
 
 @Controller
 @RequestMapping("/warehouse")
@@ -21,8 +27,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Slf4j
 public class WarehouseController {
 
-    private final BaseService<WarehouseDto> warehouseService;
+    private final WarehouseService warehouseService;
     private final StorageLocationService storageLocationService;
+    private final WarehouseCsvParser warehouseCsvParser;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
@@ -46,6 +53,55 @@ public class WarehouseController {
         model.addAttribute("filterName", name != null ? name : "");
 
         return "warehouses/list";
+    }
+
+    @GetMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String importForm() {
+        return "warehouses/import";
+    }
+
+    @PostMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String importCsv(@RequestParam("file") MultipartFile file,
+                            RedirectAttributes redirectAttributes) {
+
+        if (file == null || file.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Выберите файл для загрузки");
+            return "redirect:/warehouses/import";
+        }
+        if (!file.getOriginalFilename().toLowerCase().endsWith(".csv")) {
+            redirectAttributes.addFlashAttribute("error", "Поддерживаются только файлы .csv");
+            return "redirect:/warehouses/import";
+        }
+
+        WarehouseCsvParser.ParseResult parsed;
+        try {
+            parsed = warehouseCsvParser.parse(file);
+        } catch (IOException e) {
+            log.error("Не удалось прочитать файл импорта складов", e);
+            redirectAttributes.addFlashAttribute("error", "Не удалось прочитать файл. Попробуйте ещё раз");
+            return "redirect:/warehouses/import";
+        }
+
+        if (parsed.rows().isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Не удалось импортировать ни одной строки: "
+                    + String.join("; ", parsed.errors()));
+            return "redirect:/warehouses/import";
+        }
+
+        WarehouseImportResult result = warehouseService.importAll(parsed.rows());
+
+        String summary = "Создано складов: " + result.created()
+                + ", обновлено: " + result.updated() + ".";
+        if (parsed.hasErrors()) {
+            summary += " Пропущено строк с ошибками: " + parsed.errors().size() + ". "
+                    + String.join("; ", parsed.errors());
+            redirectAttributes.addFlashAttribute("error", summary);
+        } else {
+            redirectAttributes.addFlashAttribute("message", summary);
+        }
+        return "redirect:/warehouse";
     }
 
     @GetMapping("/new")
@@ -141,6 +197,13 @@ public class WarehouseController {
         return "warehouses/view";
     }
 
+    @GetMapping("/{id}/locations/bulk")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
+    public String bulkLocationsForm(@PathVariable Long id, Model model) {
+        model.addAttribute("warehouse", warehouseService.getById(id));
+        return "warehouses/bulk-locations";
+    }
+
     @PostMapping("/{id}/locations/bulk")
     @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
     public String bulkLocationsCreate(@PathVariable Long id,
@@ -159,12 +222,4 @@ public class WarehouseController {
         redirectAttributes.addFlashAttribute("message", result.message());
         return "redirect:/warehouse/" + id;
     }
-
-    @GetMapping("/{id}/locations/bulk")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER')")
-    public String bulkLocationsForm(@PathVariable Long id, Model model) {
-        model.addAttribute("warehouse", warehouseService.getById(id));
-        return "warehouses/bulk-locations";
-    }
-
 }

@@ -174,7 +174,7 @@
 </head>
 <body>
 <div class="top-controls">
-    <a th:href="@{/}" class="btn btn-back">← Назад</a>
+    <a th:href="@{/}" class="btn btn-back">Назад</a>
 </div>
 
 <h1>Склады</h1>
@@ -185,7 +185,8 @@
     <a th:href="@{/warehouse}" class="btn btn-reset">Сбросить</a>
 
     <div sec:authorize="hasAnyRole('ADMIN')" style="margin-left: auto;">
-        <a th:href="@{/warehouse/new}" class="btn btn-primary">+ Добавить склад</a>
+        <a th:href="@{/warehouse/new}" class="btn btn-primary">Добавить склад</a>
+        <a th:href="@{/warehouse/import}" class="btn btn-back">Импорт из CSV</a>
     </div>
 </form>
 
