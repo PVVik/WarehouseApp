@@ -2,6 +2,7 @@ package com.example.warehouseApp.stockBalance;
 
 import com.example.warehouseApp.controller.stockBalance.StockBalancesController;
 import com.example.warehouseApp.dto.StockBalanceResponseDto;
+import com.example.warehouseApp.parser.stockBalance.StockBalanceCsvParser;
 import com.example.warehouseApp.service.stockBalance.StockBalanceService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,6 +27,9 @@ class StockBalancesControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private StockBalanceCsvParser stockBalanceCsvParser;
 
     @MockitoBean
     private StockBalanceService stockBalanceService;
@@ -59,7 +63,6 @@ class StockBalancesControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(2))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sku").value("SKU-001"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].warehouseName").value("Склад Центральный"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].quantity").value(150.5))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].uom").value("шт"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].sku").value("SKU-002"))

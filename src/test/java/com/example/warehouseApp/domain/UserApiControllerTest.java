@@ -1,6 +1,5 @@
 package com.example.warehouseApp.domain;
 
-
 import com.example.warehouseApp.controller.domain.UserApiController;
 import com.example.warehouseApp.dto.domain.CreateUserRequest;
 import com.example.warehouseApp.exception.BusinessException;
@@ -20,7 +19,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 @WebMvcTest(controllers = UserApiController.class)
 @AutoConfigureMockMvc(addFilters = false)

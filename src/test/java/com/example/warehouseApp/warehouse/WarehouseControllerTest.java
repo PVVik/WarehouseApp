@@ -4,8 +4,10 @@ import com.example.warehouseApp.controller.warehouse.WarehouseApiController;
 import com.example.warehouseApp.dto.WarehouseDto;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.model.WarehouseType;
+import com.example.warehouseApp.parser.warehouse.WarehouseCsvParser;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.storageLocation.StorageLocationService;
+import com.example.warehouseApp.service.warehouse.WarehouseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,10 @@ class WarehouseControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private BaseService<WarehouseDto> warehouseService;
+    private WarehouseCsvParser warehouseCsvParser;
+
+    @MockitoBean
+    private WarehouseService warehouseService;
 
     @MockitoBean
     private StorageLocationService storageLocationService;

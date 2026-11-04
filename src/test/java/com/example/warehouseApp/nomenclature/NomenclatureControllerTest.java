@@ -6,7 +6,9 @@ import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.model.InventoryType;
 import com.example.warehouseApp.model.StuffCategory;
 import com.example.warehouseApp.model.UnitOfMeasure;
+import com.example.warehouseApp.parser.nomenclature.NomenclatureCsvParser;
 import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.service.nomenclature.NomenclatureService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +38,10 @@ class NomenclatureControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private BaseService<NomenclatureDto> nomenclatureService;
+    private NomenclatureCsvParser nomenclatureCsvParser;
+
+    @MockitoBean
+    private NomenclatureService nomenclatureService;
 
     @Autowired
     private ObjectMapper objectMapper;

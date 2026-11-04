@@ -2,6 +2,7 @@ package com.example.warehouseApp.movement.writeoff;
 
 import com.example.warehouseApp.controller.movement.writeOff.WriteOffApiController;
 import com.example.warehouseApp.dto.movement.MovementDtoWriteOff;
+import com.example.warehouseApp.exception.BusinessException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.exception.ValidationException;
 import com.example.warehouseApp.model.MovementType;
@@ -249,12 +250,12 @@ class WriteOffControllerTest {
         );
 
         when(writeOffService.createWriteOff(any(MovementDtoWriteOff.class)))
-                .thenThrow(new IllegalStateException("Серийная единица не может быть списана: статус IN_USE"));
+                .thenThrow(new BusinessException("Серийная единица не может быть списана: статус IN_USE"));
 
         mockMvc.perform(post("/api/writeoff")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isConflict());
 
         verify(writeOffService).createWriteOff(any(MovementDtoWriteOff.class));
     }

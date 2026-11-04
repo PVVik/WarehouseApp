@@ -3,6 +3,7 @@ package com.example.warehouseApp.batch;
 import com.example.warehouseApp.controller.batch.BatchApiController;
 import com.example.warehouseApp.dto.BatchDto;
 import com.example.warehouseApp.exception.NotFoundException;
+import com.example.warehouseApp.parser.batch.BatchCsvParser;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.service.batch.BatchService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,6 +33,9 @@ class BatchApiControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private BatchCsvParser batchCsvParser;
 
     @Autowired
     private ObjectMapper objectMapper;

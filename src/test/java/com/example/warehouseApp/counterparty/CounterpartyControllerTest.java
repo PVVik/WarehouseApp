@@ -5,7 +5,9 @@ import com.example.warehouseApp.dto.CounterpartyDto;
 import com.example.warehouseApp.exception.AlreadyExistsException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.model.CounterpartyType;
+import com.example.warehouseApp.parser.counterparty.CounterpartyCsvParser;
 import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.service.counterparty.CounterpartyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +40,10 @@ class CounterpartyControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private BaseService<CounterpartyDto> counterpartyService;
+    private CounterpartyCsvParser counterpartyCsvParser;
+
+    @MockitoBean
+    private CounterpartyService counterpartyService;
 
     private CounterpartyDto buildDto(Long id, String name, String inn, String kpp,
                                      CounterpartyType type, String phone, String contact, boolean isActive) {

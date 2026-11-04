@@ -3,6 +3,7 @@ package com.example.warehouseApp.service.movement;
 import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.*;
 import com.example.warehouseApp.dto.movement.MovementDtoIssue;
+import com.example.warehouseApp.exception.BusinessException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.exception.ValidationException;
 import com.example.warehouseApp.mapper.*;
@@ -92,9 +93,9 @@ public class IssueService {
     private SerialItemDto updateSerialItemStatus(SerialItemDto serialItem) {
         if (serialItem != null) {
             if (serialItem.getStatus() != ItemStatus.IN_STOCK) {
-                log.warn("Ошибка при попытке списать единицу, статус единицы {}", serialItem.getStatus().getDisplayName());
-                throw new IllegalStateException(String.format("Серийная единица %d не может быть списана, статус — %s",
-                        serialItem.getId(), serialItem.getStatus().getDisplayName()));
+                log.warn("Ошибка при попытке списать единицу, статус единицы {}", serialItem.getStatus().getLabel());
+                throw new BusinessException(String.format("Серийная единица %d не может быть списана, статус — %s",
+                        serialItem.getId(), serialItem.getStatus().getLabel()));
             }
             serialItem.setStatus(ItemStatus.IN_USE);
             serialItem = serialItemService.update(serialItem);

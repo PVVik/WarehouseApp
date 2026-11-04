@@ -21,7 +21,7 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/api/**")
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").authenticated()
 
                         .requestMatchers(HttpMethod.POST, "/api/end-act/write-off/**").hasAnyRole("ADMIN", "STOREKEEPER")
 

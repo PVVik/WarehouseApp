@@ -16,14 +16,14 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/stock-balances")
 @RequiredArgsConstructor
 public class StockBalancesController {
 
     private final StockBalanceService stockBalanceService;
     private final StockBalanceCsvParser stockBalanceCsvParser;
 
-    @GetMapping("/stock-balances")
+    @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")
     public List<StockBalanceResponseDto> getStockBalances(@RequestParam(required = false) Long warehouseId) {
         return stockBalanceService.getBalances(warehouseId);

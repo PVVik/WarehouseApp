@@ -3,6 +3,7 @@ package com.example.warehouseApp.serialItem;
 import com.example.warehouseApp.controller.serialItem.SerialItemApiController;
 import com.example.warehouseApp.dto.SerialItemDto;
 import com.example.warehouseApp.model.ItemStatus;
+import com.example.warehouseApp.parser.serialItem.SerialItemCsvParser;
 import com.example.warehouseApp.service.serialItem.SerialItemService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,9 @@ public class SerialItemApiControllerTest {
 
     @MockitoBean
     private SerialItemService serialItemService;
+
+    @MockitoBean
+    private SerialItemCsvParser serialItemCsvParser;
 
     @Autowired
     private MockMvc mockMvc;
