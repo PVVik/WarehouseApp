@@ -10,5 +10,7 @@ public interface NomenclatureRepository extends JpaRepository<Nomenclature, Long
 
     Optional<Nomenclature> findBySku(String sku);
 
+    Optional<Nomenclature> findBySkuIgnoreCase(String sku);
+
     boolean existsBySku(String sku);
 }

@@ -3,7 +3,7 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Отчёт по неликвидам</title>
+    <title>Отчёт по неликвидам — Складская система</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -16,67 +16,46 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
-        }
-
-        h1, h2 {
-            color: #2c3e50;
-            margin-bottom: 25px;
-        }
-
-        .filter-panel {
             background: white;
+            padding: 40px;
             border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 30px;
-            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
 
-        .form-group {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        label {
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin: 30px 0;
             font-weight: 600;
-            color: #555;
-            white-space: nowrap;
         }
 
-        select {
-            padding: 10px 12px;
-            min-width: 280px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-            background-color: white;
-        }
-
-        select:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        .back-row {
+            margin-bottom: 20px;
         }
 
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 20px;
+            height: 40px;
+            box-sizing: border-box;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: 600;
+            font-family: inherit;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.2s ease;
-            padding: 10px 20px;
             border: none;
-            font-size: 14px;
+            white-space: nowrap;
+            transition: background 0.2s;
         }
 
         .btn-primary {
             background-color: #3498db;
             color: white;
+            box-shadow: 0 2px 6px rgba(52, 152, 219, 0.35);
         }
         .btn-primary:hover {
             background-color: #2980b9;
@@ -98,65 +77,121 @@
             background-color: #7f8c8d;
         }
 
+        .filter-panel {
+            background: #f8f9fa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        select {
+            padding: 0 12px;
+            min-width: 280px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: #2c3e50;
+            background-color: white;
+            box-sizing: border-box;
+            height: 40px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .download-row {
+            display: flex;
+            align-items: flex-end;
+            margin-left: auto;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             margin-top: 10px;
         }
 
         th, td {
+            padding: 12px 15px;
+            text-align: left;
             border-bottom: 1px solid #e0e0e0;
-            padding: 14px 16px;
         }
 
         th {
             background-color: #f8f9fa;
-            color: #555;
-            font-weight: 700;
+            color: #2c3e50;
+            font-weight: 600;
             text-transform: uppercase;
             font-size: 0.85rem;
-            letter-spacing: 0.5px;
-            text-align: left;
         }
 
         td {
             color: #444;
-            vertical-align: middle;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
         }
 
         .text-right {
             text-align: right;
         }
 
+        .mono {
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
         .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.85rem;
             display: inline-block;
-            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         .badge-critical {
-            background-color: #ffebee;
-            color: #c62828;
-            border: 1px solid #ffcdd2;
+            background-color: #fadbd8;
+            color: #c0392b;
         }
 
         .badge-warning {
-            background-color: #fff3e0;
-            color: #ef6c00;
-            border: 1px solid #ffe0b2;
+            background-color: #fdebd0;
+            color: #d35400;
         }
 
         .badge-normal {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #c8e6c9;
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-style: italic;
         }
 
         .access-denied-container {
@@ -175,13 +210,15 @@
 
 <div sec:authorize="hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')">
     <div class="container">
-        <a th:href="@{/analytics}" class="btn btn-back" style="margin-bottom: 20px;">
-            ← Назад к аналитике
-        </a>
+        <div class="back-row">
+            <a th:href="@{/analytics}" class="btn btn-back">
+                Назад
+            </a>
+        </div>
 
         <form th:action="@{/report/nonliquid}" method="get" class="filter-panel">
             <div class="form-group">
-                <label for="warehouseId">Склад:</label>
+                <label for="warehouseId">Склад</label>
                 <select id="warehouseId" name="warehouseId" required>
                     <option value="" th:selected="${selectedWarehouseId == null}">-- Выберите склад --</option>
                     <option th:each="wh : ${warehouses}"
@@ -194,15 +231,17 @@
 
             <button type="submit" class="btn btn-primary">Сформировать отчёт</button>
 
-            <a th:if="${selectedWarehouseId != null}"
-               th:href="@{/api/reports/nonliquid/csv(warehouseId=${selectedWarehouseId})}"
-               class="btn btn-success"
-               style="margin-left: auto;">
-                Скачать отчёт (CSV)
-            </a>
+            <div class="download-row">
+                <a th:if="${selectedWarehouseId != null}"
+                   th:href="@{/api/reports/nonliquid/csv(warehouseId=${selectedWarehouseId})}"
+                   class="btn btn-success">
+                    Скачать отчёт (CSV)
+                </a>
+            </div>
         </form>
 
-        <h2>Отчёт по неликвидам
+        <h2>
+            Отчёт по неликвидам
             <th:block th:if="${selectedWarehouseId != null}">
                 (склад №<span th:text="${selectedWarehouseId}"></span>)
             </th:block>
@@ -211,7 +250,7 @@
         <table>
             <thead>
             <tr>
-                <th style="width: 110px;">Статус</th>
+                <th style="width: 130px;">Статус</th>
                 <th>Номенклатура</th>
                 <th class="text-right">SKU</th>
                 <th class="text-right">Партия</th>
@@ -229,18 +268,17 @@
                     </span>
                 </td>
                 <td th:text="${row.nomenclatureName}"></td>
-                <td class="text-right" th:text="${row.sku}"></td>
-                <td class="text-right" th:text="${row.batchNumber != null ? row.batchNumber : '-'}" style="font-family: monospace; color: #666;"></td>
+                <td class="text-right mono" th:text="${row.sku}"></td>
+                <td class="text-right mono"
+                    th:text="${row.batchNumber != null ? row.batchNumber : '-'}"></td>
                 <td class="text-right" th:text="${row.currentStock.stripTrailingZeros().toPlainString()}"></td>
-                <td class="text-right" th:text="${row.minThreshold != null ? row.minThreshold.stripTrailingZeros().toPlainString() : '-' }"></td>
+                <td class="text-right" th:text="${row.minThreshold != null ? row.minThreshold.stripTrailingZeros().toPlainString() : '-'}"></td>
                 <td class="text-right" th:text="${row.daysWithoutMovement}"></td>
                 <td class="text-right" th:text="${row.isCritical ? 'Да' : 'Нет'}"></td>
             </tr>
 
             <tr th:if="${#lists.isEmpty(nonliquidList)}">
-                <td colspan="8" style="text-align: center; padding: 40px; color: #7f8c8d; border: none; background-color: #fafafa;">
-                    Нет позиций, попадающих под критерии неликвида на выбранном складе
-                </td>
+                <td colspan="8" class="empty-message">Нет позиций, попадающих под критерии неликвида на выбранном складе</td>
             </tr>
             </tbody>
         </table>
@@ -251,7 +289,7 @@
     <div class="access-denied-icon">🚫</div>
     <h2>Доступ запрещён</h2>
     <p>У вас недостаточно прав для просмотра отчёта по неликвидам.</p>
-    <a th:href="@{/}" class="btn btn-back" style="margin-top:10px;">Вернуться на главную</a>
+    <a th:href="@{/}" class="btn btn-back" style="margin-top: 10px;">Вернуться на главную</a>
 </div>
 
 </body>

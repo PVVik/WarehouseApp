@@ -27,7 +27,8 @@
         .top-controls {
             display: flex;
             justify-content: flex-start;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            padding-top: 10px;
         }
 
         .btn-back {
@@ -61,8 +62,8 @@
 
         .actions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
             margin-top: 20px;
         }
 
@@ -73,6 +74,10 @@
             padding: 30px;
             text-align: center;
             transition: transform 0.2s, box-shadow 0.2s;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .action-card:hover {
@@ -86,6 +91,17 @@
             font-size: 1.2rem;
         }
 
+        .action-card p {
+            color: #7f8c8d;
+            margin: 0 0 25px 0;
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .card-actions {
+            width: 100%;
+        }
+
         .btn {
             display: inline-block;
             padding: 12px 24px;
@@ -94,6 +110,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .btn-primary {
@@ -105,21 +123,13 @@
             background-color: #2980b9;
         }
 
-        .btn-secondary {
-            background-color: #bdc3c7;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background-color: #95a5a6;
-            color: white;
-        }
-
         .btn-disabled {
             background-color: #e0e0e0;
             color: #999;
             cursor: not-allowed;
             text-decoration: none;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .access-denied-container {
@@ -128,6 +138,7 @@
             background: #f8f9fa;
             border-radius: 8px;
         }
+
         .access-denied-icon {
             font-size: 48px;
             margin-bottom: 12px;
@@ -139,7 +150,7 @@
 <div sec:authorize="hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')">
     <div class="container">
         <div class="top-controls">
-            <a href="/" class="btn-back">← Назад к операциям</a>
+            <a href="/" class="btn-back">Назад</a>
         </div>
 
         <h1>Выберите тип движения запасов</h1>
@@ -147,38 +158,46 @@
         <div class="actions-grid">
             <div class="action-card">
                 <h2>Приход</h2>
-                <p style="color: #7f8c8d; margin-bottom: 20px;">Поступление товара от поставщика на склад.</p>
-                <a href="/movements/receipt/form" class="btn btn-primary">Оформить приход</a>
+                <p>Поступление товара от поставщика на склад.</p>
+                <div class="card-actions">
+                    <a href="/movements/receipt/form" class="btn btn-primary">Оформить приход</a>
+                </div>
             </div>
 
             <div class="action-card">
                 <h2>Расход</h2>
-                <p style="color: #7f8c8d; margin-bottom: 20px;">Отгрузка товара клиенту или использование в производстве.</p>
-                <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
-                   href="/movements/issue/form"
-                   class="btn btn-primary">Оформить расход</a>
-                <span sec:authorize="!hasAnyRole('ADMIN', 'STOREKEEPER')"
-                      class="btn btn-disabled">Нет прав на расход</span>
+                <p>Отгрузка товара клиенту или использование в производстве.</p>
+                <div class="card-actions">
+                    <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
+                       href="/movements/issue/form"
+                       class="btn btn-primary">Оформить расход</a>
+                    <span sec:authorize="!hasAnyRole('ADMIN', 'STOREKEEPER')"
+                          class="btn btn-disabled">Нет прав на расход</span>
+                </div>
             </div>
 
             <div class="action-card">
                 <h2>Списание</h2>
-                <p style="color: #7f8c8d; margin-bottom: 20px;">Списание товара по причине порчи, истечения срока годности и т.д.</p>
-                <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
-                   href="/movements/write-off/form"
-                   class="btn btn-primary">Оформить списание</a>
-                <span sec:authorize="!hasAnyRole('ADMIN', 'STOREKEEPER')"
-                      class="btn btn-disabled">Нет прав на списание</span>
+                <p>Списание товара по причине порчи, истечения срока годности и т.д.</p>
+                <div class="card-actions">
+                    <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
+                       href="/movements/write-off/form"
+                       class="btn btn-primary">Оформить списание</a>
+                    <span sec:authorize="!hasAnyRole('ADMIN', 'STOREKEEPER')"
+                          class="btn btn-disabled">Нет прав на списание</span>
+                </div>
             </div>
 
             <div class="action-card">
                 <h2>Между складами</h2>
-                <p style="color: #7f8c8d; margin-bottom: 20px;">Перемещение товара с одного склада на другой.</p>
-                <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
-                   href="/movements/transfer/form"
-                   class="btn btn-primary">Оформить перемещение</a>
-                <span sec:authorize="!hasAnyRole('ADMIN', 'STOREKEEPER')"
-                      class="btn btn-disabled">Нет прав на перемещение</span>
+                <p>Перемещение товара с одного склада на другой.</p>
+                <div class="card-actions">
+                    <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
+                       href="/movements/transfer/form"
+                       class="btn btn-primary">Оформить трансфер</a>
+                    <span sec:authorize="!hasAnyRole('ADMIN', 'STOREKEEPER')"
+                          class="btn btn-disabled">Нет прав на перемещение</span>
+                </div>
             </div>
         </div>
     </div>

@@ -3,7 +3,7 @@ package com.example.warehouseApp.model;
 import lombok.Getter;
 
 @Getter
-public enum InventoryType {
+public enum InventoryType implements LabeledEnum {
     BATCH("Партионный"),
     SERIAL("Серийный"),
     QUANTITY("Количественный");

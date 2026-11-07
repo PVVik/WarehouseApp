@@ -5,39 +5,162 @@
     <meta charset="UTF-8">
     <title>Выбор контрагента</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 1200px; margin: 0 auto; background-color: #f4f6f9; }
-        h1 { text-align: center; color: #2c3e50; margin-top: 20px; margin-bottom: 10px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f5f5f5; }
-        tr:hover { background-color: #fafafa; }
+        .toolbar {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
 
-        .active { color: green; font-weight: bold; }
-        .inactive { color: #999; font-weight: bold; }
+        .search-block {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+            flex: 1;
+            min-width: 0;
+        }
 
-        .btn { padding: 6px 14px; text-decoration: none; color: white; border-radius: 4px; font-size: 14px; display: inline-block; border: none; cursor: pointer; }
-        .btn-select { background-color: #2ecc71; }
-        .btn-create { background-color: #28a745; display: inline-block; margin-top: 10px; padding: 8px 16px; }
-        .btn-back { background-color: #6c757d; }
-        .btn-warning { background-color: #f39c12; color: white; }
-        .btn-success { background-color: #27ae60; color: white; }
-        .btn-secondary { background-color: #95a5a6; color: white; }
+        .filter-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            align-items: end;
+            flex: 1;
+        }
 
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-        .search-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .search-form input[type="text"] { padding: 8px 10px; width: 180px; border: 1px solid #ddd; border-radius: 4px; }
-        .search-form button { padding: 8px 16px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .search-form a { padding: 8px 14px; background-color: #95a5a6; color: white; border-radius: 4px; text-decoration: none; font-size: 14px; }
+        input[type="text"], select {
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
 
-        .pagination { display: flex; gap: 8px; margin-top: 20px; align-items: center; flex-wrap: wrap; }
-        .pagination a, .pagination span { padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333; background: white; }
-        .pagination .active { background-color: #3498db; color: white; border-color: #3498db; }
+        .btn {
+            height: 38px;
+            padding: 0 16px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            white-space: nowrap;
+        }
 
-        .alert { padding: 12px 20px; border-radius: 4px; margin-top: 15px; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .not-found { text-align: center; padding: 20px; color: #7f8c8d; }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-action {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-action:hover {
+            background-color: #2980b9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 14px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .pagination a, .pagination span {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: #333;
+            border-radius: 4px;
+        }
+        .pagination .active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .status-active { background-color: #d4edda; color: #155724; }
+        .status-inactive { background-color: #f8d7da; color: #721c24; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .not-found {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
 
         .access-denied-container {
             text-align: center;
@@ -54,123 +177,132 @@
 <body>
 
 <div sec:authorize="hasAnyRole('ADMIN','STOREKEEPER')">
-    <h1>Выберите контрагента</h1>
+    <div class="container">
+        <h1>Выберите контрагента</h1>
 
-    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <div class="top-bar">
-        <form class="search-form" th:action="@{/movements/counterparty/list}" method="get">
-            <input type="hidden" name="nomenclatureId" th:value="${nomenclatureId}">
-            <input type="hidden" name="nomenclatureName" th:value="${nomenclatureName}">
-            <input type="hidden" name="inventoryType" th:value="${inventoryType}">
-            <input type="hidden" name="fromOperation" th:value="${fromOperation}">
+        <div class="toolbar">
+            <div class="search-block">
+                <form th:action="@{/movements/counterparty/list}" method="get" class="filter-form">
+                    <input type="hidden" name="nomenclatureId" th:value="${nomenclatureId}">
+                    <input type="hidden" name="nomenclatureName" th:value="${nomenclatureName}">
+                    <input type="hidden" name="inventoryType" th:value="${inventoryType}">
+                    <input type="hidden" name="fromOperation" th:value="${fromOperation}">
 
-            <input type="text" name="name" th:value="${filterName}" placeholder="Название контрагента"/>
-            <button type="submit">Найти</button>
-            <a th:href="@{/movements/counterparty/list(nomenclatureId=${nomenclatureId}, nomenclatureName=${nomenclatureName}, inventoryType=${inventoryType}, fromOperation=${fromOperation})}">Сбросить</a>
-            <a th:if="${fromOperation == 'RECEIPT'}"
-               th:href="@{/movements/receipt/form}"
-               class="btn btn-back">Назад к приходу</a>
-            <a th:if="${fromOperation == 'ISSUE'}"
-               th:href="@{/movements/issue/form}"
-               class="btn btn-back">Назад к расходу</a>
-            <a th:if="${fromOperation == 'TRANSFER'}"
-               th:href="@{/movements/transfer/form}"
-               class="btn btn-back">Назад к перемещению</a>
-        </form>
-    </div>
+                    <input type="text" name="name" th:value="${filterName}" placeholder="Название контрагента" />
 
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Название</th>
-            <th>ИНН</th>
-            <th>Тип</th>
-            <th>Статус</th>
-            <th>Действие</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="c : ${counterparties}">
-            <td th:text="${c.id}"></td>
-            <td th:text="${c.name}"></td>
-            <td th:text="${c.inn}"></td>
-            <td th:text="${c.counterpartyTypeLabel}"></td>
-            <td>
-                <span th:if="${c.isActive}" class="active">Активен</span>
-                <span th:unless="${c.isActive}" class="inactive">Неактивен</span>
-            </td>
-            <td>
-                <a th:if="${fromOperation == 'ISSUE'}"
-                   th:href="@{/movements/issue/form(
-                       nomenclatureId=${nomenclatureId},
-                       nomenclatureName=${nomenclatureName},
-                       customerId=${c.id},
-                       customerName=${c.name},
-                       inventoryType=${inventoryType}
-                   )}"
-                   class="btn btn-warning">Выбрать для расхода</a>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="submit" class="btn btn-primary">Найти</button>
 
-                <a th:if="${fromOperation == 'RECEIPT' or fromOperation == null}"
-                   th:href="@{/movements/receipt/form(
-                       nomenclatureId=${nomenclatureId},
-                       nomenclatureName=${nomenclatureName},
-                       counterpartyId=${c.id},
-                       counterpartyName=${c.name},
-                       inventoryType=${inventoryType}
-                   )}"
-                   class="btn btn-success">Выбрать для прихода</a>
-            </td>
-        </tr>
+                        <a th:if="${fromOperation == 'RECEIPT'}"
+                           th:href="@{/movements/receipt/form}"
+                           class="btn btn-back">Назад</a>
+                        <a th:if="${fromOperation == 'ISSUE'}"
+                           th:href="@{/movements/issue/form}"
+                           class="btn btn-back">Назад</a>
+                        <a th:if="${fromOperation == 'TRANSFER'}"
+                           th:href="@{/movements/transfer/form}"
+                           class="btn btn-back">Назад</a>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-        <tr th:if="${searchPerformed and #lists.isEmpty(counterparties)}">
-            <td colspan="6" class="not-found">
-                По запросу «<b th:text="${filterName}"></b>» ничего не найдено.
-                <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'')')}"
-                   th:href="@{/counterparty/create(from='movements', name=${filterName})}"
-                   class="btn btn-create">Создать контрагента</a>
-                <span th:unless="${#authorization.expression('hasAnyRole(''ADMIN'')')}">
-                    Чтобы добавить контрагента, обратитесь к администратору.
-                </span>
-            </td>
-        </tr>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>ИНН</th>
+                <th>Тип</th>
+                <th>Статус</th>
+                <th>Действие</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${searchPerformed and #lists.isEmpty(counterparties)}">
+                <td colspan="6" class="not-found">
+                    По запросу «<b th:text="${filterName}"></b>» ничего не найдено.
+                    <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'')')}"
+                       th:href="@{/counterparty/create(from='movements', name=${filterName})}"
+                       class="btn btn-action" style="margin-left: 10px;">Создать контрагента</a>
+                    <span th:unless="${#authorization.expression('hasAnyRole(''ADMIN'')')}">
+                        Чтобы добавить контрагента, обратитесь к администратору.
+                    </span>
+                </td>
+            </tr>
 
-        <tr th:if="${not searchPerformed and #lists.isEmpty(counterparties)}">
-            <td colspan="6" class="not-found">Контрагентов пока нет.
-                <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'')')}"
-                   th:href="@{/counterparty/create(from='movements')}"
-                   class="btn btn-create">Создать первого контрагента</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+            <tr th:if="${not searchPerformed and #lists.isEmpty(counterparties)}">
+                <td colspan="6" class="not-found">Контрагентов пока нет.
+                    <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'')')}"
+                       th:href="@{/counterparty/create(from='movements')}"
+                       class="btn btn-action" style="margin-left: 10px;">Создать первого контрагента</a>
+                </td>
+            </tr>
 
-    <div class="pagination" th:if="${totalPages > 1}">
-        <a th:if="${currentPage > 0}"
-           th:href="@{/movements/counterparty/list(
-               page=${currentPage - 1},
-               size=${pageSize},
-               name=${filterName},
-               nomenclatureId=${nomenclatureId},
-               nomenclatureName=${nomenclatureName},
-               inventoryType=${inventoryType},
-               fromOperation=${fromOperation}
-           )}">← Назад</a>
+            <tr th:each="c : ${counterparties}">
+                <td th:text="${c.id}"></td>
+                <td th:text="${c.name}"></td>
+                <td th:text="${c.inn}"></td>
+                <td th:text="${c.counterpartyTypeLabel}"></td>
+                <td>
+                    <span th:classappend="${c.isActive} ? 'status-active' : 'status-inactive'"
+                          class="status-badge"
+                          th:text="${c.isActive} ? 'Активен' : 'Неактивен'">
+                    </span>
+                </td>
+                <td>
+                    <a th:if="${fromOperation == 'ISSUE'}"
+                       th:href="@{/movements/issue/form(
+                           nomenclatureId=${nomenclatureId},
+                           nomenclatureName=${nomenclatureName},
+                           customerId=${c.id},
+                           customerName=${c.name},
+                           inventoryType=${inventoryType}
+                       )}"
+                       class="btn btn-action">Выбрать для расхода</a>
 
-        <span class="active">Стр. <span th:text="${currentPage + 1}"></span> из <span th:text="${totalPages}"></span></span>
+                    <a th:if="${fromOperation == 'RECEIPT' or fromOperation == null}"
+                       th:href="@{/movements/receipt/form(
+                           nomenclatureId=${nomenclatureId},
+                           nomenclatureName=${nomenclatureName},
+                           counterpartyId=${c.id},
+                           counterpartyName=${c.name},
+                           inventoryType=${inventoryType}
+                       )}"
+                       class="btn btn-action">Выбрать для прихода</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
-        <a th:if="${currentPage < totalPages - 1}"
-           th:href="@{/movements/counterparty/list(
-               page=${currentPage + 1},
-               size=${pageSize},
-               name=${filterName},
-               nomenclatureId=${nomenclatureId},
-               nomenclatureName=${nomenclatureName},
-               inventoryType=${inventoryType},
-               fromOperation=${fromOperation}
-           )}">Вперёд →</a>
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/movements/counterparty/list(
+                   page=${currentPage - 1},
+                   size=${pageSize},
+                   name=${filterName},
+                   nomenclatureId=${nomenclatureId},
+                   nomenclatureName=${nomenclatureName},
+                   inventoryType=${inventoryType},
+                   fromOperation=${fromOperation}
+               )}">← Назад</a>
+
+            <span class="active">Стр. <span th:text="${currentPage + 1}"></span> из <span th:text="${totalPages}"></span></span>
+
+            <a th:if="${currentPage < totalPages - 1}"
+               th:href="@{/movements/counterparty/list(
+                   page=${currentPage + 1},
+                   size=${pageSize},
+                   name=${filterName},
+                   nomenclatureId=${nomenclatureId},
+                   nomenclatureName=${nomenclatureName},
+                   inventoryType=${inventoryType},
+                   fromOperation=${fromOperation}
+               )}">Вперёд →</a>
+        </div>
     </div>
 </div>
 
@@ -179,7 +311,7 @@
     <h2>Доступ запрещён</h2>
     <p>У вас недостаточно прав для выбора контрагента.</p>
     <a th:href="@{/}" class="btn" style="
-        background-color: #95a5a6; color: white; margin-top:10px; display:inline-block; padding:10px 20px; text-decoration:none;">
+        background-color: #95a5a6; color: white; margin-top:10px; display:inline-flex; align-items:center; justify-content:center; height:38px; padding:0 16px; text-decoration:none; border:none; border-radius:4px;">
         Вернуться на главную
     </a>
 </div>

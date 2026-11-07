@@ -3,7 +3,7 @@ package com.example.warehouseApp.model;
 import lombok.Getter;
 
 @Getter
-public enum StuffCategory {
+public enum StuffCategory implements LabeledEnum {
     MATERIAL("Материал"),
     EQUIPMENT("Оборудование"),
     TOOL("Инструмент"),

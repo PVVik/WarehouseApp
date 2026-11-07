@@ -7,7 +7,10 @@ import com.example.warehouseApp.exception.ValidationException;
 import com.example.warehouseApp.mapper.*;
 import com.example.warehouseApp.model.MovementType;
 import com.example.warehouseApp.model.StockBalance;
+import com.example.warehouseApp.parser.ImportResult;
+import com.example.warehouseApp.parser.stockBalance.StockBalanceCsvRow;
 import com.example.warehouseApp.repository.StockBalanceRepository;
+import com.example.warehouseApp.repository.StorageLocationRepository;
 import com.example.warehouseApp.service.BaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,46 @@ public class StockBalanceService {
 
     private final StockBalanceRepository stockBalanceRepository;
     private final BaseService<WarehouseDto> warehouseService;
+    private final StorageLocationRepository storageLocationRepository;
+
+    @Transactional
+    public ImportResult importAll(List<StockBalanceCsvRow> rows) {
+        int created = 0;
+        int updated = 0;
+
+        for (StockBalanceCsvRow row : rows) {
+            Optional<StockBalance> existing = stockBalanceRepository
+                    .findByNomenclatureIdAndWarehouseIdAndBatchIdAndSerialItemId(
+                            row.nomenclature().getId(),
+                            row.warehouse().getId(),
+                            row.batch() != null ? row.batch().getId() : null,
+                            row.serialItem() != null ? row.serialItem().getId() : null);
+
+            if (existing.isPresent()) {
+                existing.get().setQuantity(existing.get().getQuantity().add(row.quantity()));
+                if (row.storageLocation() != null) {
+                    existing.get().setStorageLocation(row.storageLocation());
+                }
+                updated++;
+            } else {
+                StockBalance balance = new StockBalance();
+                balance.setNomenclature(row.nomenclature());
+                balance.setBatch(row.batch());
+                balance.setSerialItem(row.serialItem());
+                balance.setWarehouse(row.warehouse());
+                balance.setStorageLocation(row.storageLocation());
+                balance.setQuantity(row.quantity());
+                stockBalanceRepository.save(balance);
+                created++;
+            }
+
+            if (row.storageLocation() != null && !row.storageLocation().isUsed()) {
+                row.storageLocation().setUsed(true);
+                storageLocationRepository.save(row.storageLocation());
+            }
+        }
+        return new ImportResult(created, updated);
+    }
 
     @Transactional
     @LogAudit(action = "CREATE", entityType = StockBalance.class)

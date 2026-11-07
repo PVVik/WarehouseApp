@@ -10,6 +10,7 @@
             background-color: #f4f6f9;
             margin: 0;
             padding: 0 20px;
+            color: #333;
         }
 
         .container {
@@ -17,8 +18,17 @@
             margin: 0 auto;
         }
 
-        h1, h2 {
+        h1 {
             color: #2c3e50;
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+            text-align: center;
         }
 
         .form-wrapper {
@@ -27,17 +37,31 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             padding: 40px;
             max-width: 600px;
-            margin: 40px auto;
+            margin: 0 auto 40px;
+        }
+
+        .form-intro {
+            color: #7f8c8d;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
         label {
-            display: block;
-            margin-bottom: 6px;
-            color: #555;
+            text-align: center;
+            color: #2c3e50;
             font-weight: 500;
             font-size: 0.95rem;
         }
@@ -45,11 +69,14 @@
         input[type="date"], select {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
             box-sizing: border-box;
             font-family: inherit;
-            color: #333;
+            font-size: 1rem;
+            color: #2c3e50;
+            text-align: center;
+            text-align-last: center;
         }
 
         input[type="date"]:focus, select:focus {
@@ -59,43 +86,51 @@
         }
 
         .actions {
-            margin-top: 2rem;
+            margin-top: 10px;
             display: flex;
-            gap: 15px;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .btn {
-            display: inline-block;
-            padding: 10px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            height: 44px;
+            padding: 0 20px;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: 600;
+            font-family: inherit;
+            font-size: 0.95rem;
             cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .btn-primary {
             background-color: #3498db;
             color: white;
+            box-shadow: 0 2px 6px rgba(52, 152, 219, 0.35);
         }
 
         .btn-primary:hover {
             background-color: #2980b9;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
+            transform: translateY(-1px);
         }
 
         .btn-secondary {
             background-color: #ecf0f1;
             color: #2c3e50;
-            border: 1px solid #bdc3c7;
         }
 
         .btn-secondary:hover {
             background-color: #bdc3c7;
             color: #fff;
-        }
-
-        .page-header {
-            margin-bottom: 30px;
         }
 
         .access-denied-container {
@@ -119,7 +154,7 @@
         </div>
 
         <div class="form-wrapper">
-            <p class="text-muted" style="color: #7f8c8d; margin-bottom: 25px; line-height: 1.5;">
+            <p class="form-intro">
                 Укажите период и склад. Данные сначала отобразятся на экране — затем их можно будет скачать в CSV.
             </p>
 
@@ -145,7 +180,6 @@
 
                 <div class="actions">
                     <button type="submit" class="btn btn-primary">Показать отчёт</button>
-
                     <a th:href="@{/analytics}" class="btn btn-secondary">Отмена</a>
                 </div>
             </form>
@@ -157,10 +191,7 @@
     <div class="access-denied-icon">🚫</div>
     <h2>Доступ запрещён</h2>
     <p>У вас недостаточно прав для формирования отчёта по движениям товаров.</p>
-    <a th:href="@{/}" class="btn" style="
-        background-color: #95a5a6; color: white; margin-top:10px; display:inline-block; padding:10px 20px; text-decoration:none;">
-        Вернуться на главную
-    </a>
+    <a th:href="@{/}" class="btn btn-secondary" style="width: auto; padding: 0 24px; margin-top: 10px;">Вернуться на главную</a>
 </div>
 
 </body>

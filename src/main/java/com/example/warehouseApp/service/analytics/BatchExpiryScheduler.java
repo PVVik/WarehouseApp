@@ -10,7 +10,7 @@ public class BatchExpiryScheduler {
 
     private final ExpiryCheckService expiryCheckService;
 
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(fixedRate = 50000)
     public void dailyExpiryCheck() {
         expiryCheckService.checkExpiringBatches();
         expiryCheckService.checkExpiredBatches();

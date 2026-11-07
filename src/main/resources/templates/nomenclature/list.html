@@ -19,51 +19,91 @@
 
         h1 {
             color: #2c3e50;
+            text-align: center;
             margin-bottom: 20px;
         }
 
-        .toolbar {
-            margin-bottom: 20px;
+
+        .toolbar-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: nowrap;
         }
 
-        .toolbar-left {
+        .toolbar-actions {
             display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .filter-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 10px;
-            align-items: end;
+            align-items: center;
         }
 
         .btn {
-            padding: 8px 16px;
+            padding: 0 16px;
             text-decoration: none;
             border-radius: 4px;
             font-weight: 600;
             cursor: pointer;
             border: none;
+            height: 36px;
+            line-height: 36px;
+            white-space: nowrap;
+            box-sizing: border-box;
+            display: inline-block;
         }
 
-        .btn-primary { background-color: #3498db; color: white; }
-        .btn-primary:hover { background-color: #2980b9; }
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+        }
 
-        .btn-success { background-color: #2ecc71; color: white; }
-        .btn-danger { background-color: #e74c3c; color: white; }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-gray {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+        }
+        .btn-gray:hover {
+            background-color: #7f8c8d;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: nowrap;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .filter-field {
+            flex: 1 1 120px;
+            min-width: 120px;
+        }
 
         input[type="text"], select {
-            padding: 8px;
+            width: 100%;
+            padding: 8px 12px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            width: 100%;
+            box-sizing: border-box;
+            height: 36px;
+            font-size: 14px;
+        }
+
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+        .btn-reset:hover {
+            background-color: #5a6268;
         }
 
         table {
@@ -164,51 +204,50 @@
         <div th:if="${successMessage}" class="flash-message flash-success" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="flash-message flash-error" th:text="${errorMessage}"></div>
 
-        <div class="toolbar">
-            <div class="toolbar-left">
-                <a th:href="@{/}" class="btn btn-primary">← Назад к операциям</a>
-                <div>
-                    <h2>Список позиций</h2>
-                </div>
-            </div>
 
-            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
-                <form th:action="@{/nomenclature}" method="get" class="filter-form">
-                    <input type="text" name="name" th:value="${filterName}" placeholder="Название (например, Болт)" />
-                    <input type="text" name="sku" th:value="${filterSku}" placeholder="Артикул" />
-                    <select name="stuffCategory">
-                        <option value="">Все категории</option>
-                        <option th:each="cat : ${T(com.example.warehouseApp.model.StuffCategory).values()}"
-                                th:value="${cat.name()}"
-                                th:text="${cat.label}"
-                                th:selected="${cat.name() == filterStuffCategory}">
-                        </option>
-                    </select>
-                    <select name="inventoryType">
-                        <option value="">Любой тип учёта</option>
-                        <option th:each="type : ${T(com.example.warehouseApp.model.InventoryType).values()}"
-                                th:value="${type.name()}"
-                                th:text="${type.label}"
-                                th:selected="${type.name() == filterInventoryType}">
-                        </option>
-                    </select>
-                    <select name="active">
-                        <option value="">Любой статус</option>
-                        <option value="true" th:selected="${filterActive == true}">Активен</option>
-                        <option value="false" th:selected="${filterActive == false}">Неактивен</option>
-                    </select>
-                    <div style="display: flex; gap: 8px;">
-                        <button type="submit" class="btn btn-primary">Найти</button>
-                        <a th:href="@{/nomenclature}" class="btn" style="background:none; color:#6c757d; text-decoration:none; padding: 8px 16px;">Сброс</a>
-                    </div>
-                </form>
+        <div class="toolbar-top">
+            <a th:href="@{/}" class="btn btn-gray">Назад</a>
 
-                <div style="display: flex; justify-content: flex-end;">
-                    <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
-                       href="/nomenclature/form" class="btn btn-primary">+ Добавить позицию</a>
-                </div>
+            <div class="toolbar-actions">
+                <a sec:authorize="hasRole('ADMIN')"
+                   th:href="@{/nomenclature/import}" class="btn btn-gray">
+                    Импорт из CSV
+                </a>
+                <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
+                   href="/nomenclature/form" class="btn btn-primary">
+                    Добавить позицию
+                </a>
             </div>
         </div>
+
+        <form th:action="@{/nomenclature}" method="get" class="filter-row">
+            <input type="text" name="name" th:value="${filterName}" placeholder="Название" class="filter-field"/>
+            <input type="text" name="sku" th:value="${filterSku}" placeholder="Артикул" class="filter-field"/>
+            <select name="stuffCategory" class="filter-field">
+                <option value="">Все категории</option>
+                <option th:each="cat : ${T(com.example.warehouseApp.model.StuffCategory).values()}"
+                        th:value="${cat.name()}"
+                        th:text="${cat.label}"
+                        th:selected="${cat.name() == filterStuffCategory}">
+                </option>
+            </select>
+            <select name="inventoryType" class="filter-field">
+                <option value="">Тип учёта</option>
+                <option th:each="type : ${T(com.example.warehouseApp.model.InventoryType).values()}"
+                        th:value="${type.name()}"
+                        th:text="${type.label}"
+                        th:selected="${type.name() == filterInventoryType}">
+                </option>
+            </select>
+            <select name="active" class="filter-field">
+                <option value="">Статус</option>
+                <option value="true" th:selected="${filterActive == true}">Активен</option>
+                <option value="false" th:selected="${filterActive == false}">Неактивен</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary" style="width: auto;">Найти</button>
+            <a th:href="@{/nomenclature}" class="btn btn-reset" style="width: auto;">Сброс</a>
+        </form>
 
         <table>
             <thead>
@@ -248,8 +287,8 @@
                 <td>
                     <a sec:authorize="hasAnyRole('ADMIN', 'STOREKEEPER')"
                        th:href="@{/nomenclature/form(id=${item.id})}"
-                       class="btn"
-                       style="background:none; color:#3498db; text-decoration:underline; padding:0; margin-right: 8px;">
+                       class="btn btn-primary"
+                       style="padding: 0 12px; text-decoration: none;">
                         Редактировать
                     </a>
                 </td>
@@ -298,3 +337,4 @@
 
 </body>
 </html>
+

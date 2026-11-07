@@ -11,6 +11,9 @@ import com.example.warehouseApp.mapper.BatchMapper;
 import com.example.warehouseApp.mapper.CounterpartyMapper;
 import com.example.warehouseApp.mapper.NomenclatureMapper;
 import com.example.warehouseApp.model.Batch;
+import com.example.warehouseApp.model.BatchStatus;
+import com.example.warehouseApp.parser.ImportResult;
+import com.example.warehouseApp.parser.batch.BatchCsvRow;
 import com.example.warehouseApp.repository.BatchRepository;
 import com.example.warehouseApp.service.BaseService;
 import com.example.warehouseApp.specification.batch.BatchSpecificationBuilder;
@@ -130,13 +133,41 @@ public class BatchServiceImpl implements BatchService {
         return batchRepository.findByBatchNumberAndNomenclatureId(batchNumber, nomenclatureId);
     }
 
+    @Transactional
+    @Override
+    @LogAudit(action = "CREATE", entityType = Batch.class)
+    public ImportResult importAll(List<BatchCsvRow> rows) {
+        int created = 0;
+        int updated = 0;
+
+        for (BatchCsvRow row : rows) {
+            Optional<Batch> existing = batchRepository.findByBatchNumberIgnoreCase(row.batchNumber());
+
+            if (existing.isPresent()) {
+                Batch b = existing.get();
+                b.setNomenclature(row.nomenclature());
+                b.setSupplier(row.supplier());
+                b.setProductionDate(row.productionDate());
+                b.setExpiryDate(row.expiryDate());
+                b.setStatus(BatchStatus.ACTIVE);
+                updated++;
+            } else {
+                Batch b = new Batch(row.nomenclature(), row.batchNumber(), row.supplier(),
+                        row.productionDate(), row.expiryDate());
+                b.setStatus(BatchStatus.ACTIVE);
+                batchRepository.save(b);
+                created++;
+            }
+        }
+        return new ImportResult(created, updated);
+    }
+
     private Batch getEntityById(long id) {
         return batchRepository.findById(id).orElseGet(() -> {
             log.warn("Не нашли партию по id {}", id);
             throw new NotFoundException(String.format("Партия с id %d не найдена", id));
         });
     }
-
 
     private void validDate(BatchDto batchDto) {
         if (batchDto.getProductionDate() != null && batchDto.getProductionDate().isAfter(LocalDate.now())) {

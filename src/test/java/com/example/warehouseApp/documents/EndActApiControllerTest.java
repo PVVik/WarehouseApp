@@ -3,6 +3,7 @@ package com.example.warehouseApp.documents;
 import com.example.warehouseApp.controller.documents.EndActApiController;
 import com.example.warehouseApp.dto.documents.ReceiptDocumentResultDto;
 import com.example.warehouseApp.dto.documents.WriteOffDocumentResultDto;
+import com.example.warehouseApp.exception.BusinessException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.model.DocumentStatus;
 import com.example.warehouseApp.service.documents.DocumentService;
@@ -104,11 +105,11 @@ public class EndActApiControllerTest {
     @Test
     void completeWriteOffByAct_shouldHandleIllegalState() throws Exception {
         when(documentService.completeWriteOffByActId(anyLong(), anyString()))
-                .thenThrow(new IllegalStateException("Документ не в статусе DRAFT"));
+                .thenThrow(new BusinessException("Документ не в статусе DRAFT"));
 
         mockMvc.perform(post("/api/end-act/write-off/{actNumber}/complete", actId)
                         .param("reason", reason))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isConflict());
     }
 }
 

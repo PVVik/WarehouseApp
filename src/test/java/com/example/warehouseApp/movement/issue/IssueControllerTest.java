@@ -2,6 +2,7 @@ package com.example.warehouseApp.movement.issue;
 
 import com.example.warehouseApp.controller.movement.issue.IssueApiController;
 import com.example.warehouseApp.dto.movement.MovementDtoIssue;
+import com.example.warehouseApp.exception.BusinessException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.model.MovementType;
 import com.example.warehouseApp.service.movement.IssueService;
@@ -159,12 +160,12 @@ class IssueControllerTest {
         request.setSerialItemId(99L);
 
         when(issueService.createIssue(any(MovementDtoIssue.class)))
-                .thenThrow(new IllegalStateException("Серийная единица не может быть списана, статус — IN_USE"));
+                .thenThrow(new BusinessException("Серийная единица не может быть списана, статус — IN_USE"));
 
         mockMvc.perform(post("/api/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isConflict());
 
         verify(issueService).createIssue(any(MovementDtoIssue.class));
     }

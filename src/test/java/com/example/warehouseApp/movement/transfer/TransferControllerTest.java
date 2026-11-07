@@ -2,6 +2,7 @@ package com.example.warehouseApp.movement.transfer;
 
 import com.example.warehouseApp.controller.movement.transfer.TransferApiController;
 import com.example.warehouseApp.dto.movement.MovementDtoTransfer;
+import com.example.warehouseApp.exception.BusinessException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.exception.ValidationException;
 import com.example.warehouseApp.model.MovementType;
@@ -220,12 +221,12 @@ class TransferControllerTest {
         request.setSerialItemId(99L);
 
         when(transferService.createTransfer(any(MovementDtoTransfer.class)))
-                .thenThrow(new IllegalStateException("Серийная единица не может быть списана, статус — IN_USE"));
+                .thenThrow(new BusinessException("Серийная единица не может быть списана, статус — IN_USE"));
 
         mockMvc.perform(post("/api/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isConflict());
 
         verify(transferService).createTransfer(any(MovementDtoTransfer.class));
     }

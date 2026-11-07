@@ -2,9 +2,12 @@ package com.example.warehouseApp.service.warehouse;
 
 import com.example.warehouseApp.domain.LogAudit;
 import com.example.warehouseApp.dto.WarehouseDto;
+import com.example.warehouseApp.exception.BusinessException;
 import com.example.warehouseApp.exception.NotFoundException;
 import com.example.warehouseApp.mapper.WarehouseMapper;
 import com.example.warehouseApp.model.Warehouse;
+import com.example.warehouseApp.parser.ImportResult;
+import com.example.warehouseApp.parser.warehouse.WarehouseCsvRow;
 import com.example.warehouseApp.repository.WarehouseRepository;
 import com.example.warehouseApp.specification.warehouse.WarehouseSpecificationBuilder;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -28,6 +34,9 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Transactional
     @LogAudit(action = "CREATE", entityType = Warehouse.class)
     public WarehouseDto create(WarehouseDto warehouseDto) {
+        if (warehouseRepository.findByName(warehouseDto.getName()).isPresent()) {
+            throw new BusinessException(String.format("Склад с названием %s уже существует", warehouseDto.getName()));
+        }
         var warehouse = warehouseRepository.save(WarehouseMapper.mapToEntity(warehouseDto));
         log.info("Создали склад с id {}", warehouse.getId());
 
@@ -107,5 +116,35 @@ public class WarehouseServiceImpl implements WarehouseService {
         log.info("Вернули склад по названию {}", name);
 
         return WarehouseMapper.mapToDto(warehouse);
+    }
+
+    @Transactional
+    @Override
+    @LogAudit(action = "CREATE", entityType = Warehouse.class)
+    public ImportResult importAll(List<WarehouseCsvRow> rows) {
+        int created = 0;
+        int updated = 0;
+        LocalDateTime now = LocalDateTime.now();
+
+        for (WarehouseCsvRow row : rows) {
+            Optional<Warehouse> existing = warehouseRepository.findByName(row.name());
+
+            if (existing.isPresent()) {
+                Warehouse w = existing.get();
+                w.setAddress(row.address());
+                w.setType(row.type());
+                w.setActive(true);
+                w.setUpdatedAt(now);
+                updated++;
+                log.info("Обновили существующий склад с id {}", w.getId());
+            } else {
+                Warehouse w = new Warehouse(row.name(), row.address(), row.type(),
+                        true, now, now);
+                warehouseRepository.save(w);
+                created++;
+                log.info("Создали склад с названием {}", w.getName());
+            }
+        }
+        return new ImportResult(created, updated);
     }
 }

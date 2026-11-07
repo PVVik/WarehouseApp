@@ -3,7 +3,7 @@ package com.example.warehouseApp.model;
 import lombok.Getter;
 
 @Getter
-public enum CounterpartyType {
+public enum CounterpartyType implements LabeledEnum {
 
     SUPPLIER("Поставщик"),
     CUSTOMER("Заказчик");

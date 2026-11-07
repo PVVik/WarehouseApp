@@ -3,7 +3,7 @@ package com.example.warehouseApp.model;
 import lombok.Getter;
 
 @Getter
-public enum UnitOfMeasure {
+public enum UnitOfMeasure implements LabeledEnum {
 
     METER("Метр"),
     LITER("Литр"),

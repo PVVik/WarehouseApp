@@ -3,113 +3,176 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Отчёт по оборачиваемости (ABC)</title>
+    <title>Отчёт по оборачиваемости (ABC) — Складская система</title>
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        h2 small {
+            font-weight: normal;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+        }
+
+        .back-row {
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 20px;
+            height: 44px;
+            box-sizing: border-box;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: inherit;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+            box-shadow: 0 2px 6px rgba(52, 152, 219, 0.35);
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-back {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #7f8c8d;
+        }
+
         .filter-panel {
             background: #f8f9fa;
-            padding: 15px;
+            border: 1px solid #eee;
             border-radius: 8px;
+            padding: 20px;
             display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
+            align-items: flex-end;
+            gap: 20px;
             flex-wrap: wrap;
-            border: 1px solid #ddd;
+            margin-bottom: 30px;
         }
 
         .form-group {
             display: flex;
-            align-items: center;
-            gap: 5px;
+            flex-direction: column;
+            gap: 6px;
         }
 
         label {
             font-weight: 600;
-            color: #333;
+            color: #2c3e50;
+            font-size: 0.9rem;
         }
 
-        input[type="number"], input[type="date"] {
-            padding: 6px 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
+        input[type="number"], input[type="date"], select {
+            padding: 9px 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: #2c3e50;
+            background-color: white;
+            box-sizing: border-box;
+            height: 40px;
         }
 
         select {
-            padding: 6px 10px;
             min-width: 220px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
         }
 
-        .submit-btn {
-            padding: 8px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
 
-        .submit-btn:hover {
-            background-color: #0056b3;
+        .filter-panel .btn-primary {
+            height: 40px;
         }
 
-        .download-btn {
-            padding: 7px 18px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .back-btn {
-            display: inline-block;
-            padding: 8px 16px;
-            background-color: #f0f0f0;
-            color: #333;
-            text-decoration: none;
-            border-radius: 4px;
-            border: 1px solid #ccc;
+        .download-row {
+            margin-top: 10px;
+            display: flex;
+            justify-content: flex-start;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px 12px;
+            padding: 12px;
             text-align: left;
+            border-bottom: 1px solid #e0e0e0;
         }
 
         th {
-            background-color: #f4f4f4;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 13px;
         }
 
-        .badge-a {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 4px 8px;
-            border-radius: 4px;
+        tr:hover {
+            background-color: #f1f1f1;
         }
 
-        .badge-b {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
+        .text-end { text-align: right; }
 
-        .badge-c {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 4px 8px;
-            border-radius: 4px;
+        .badge-a, .badge-b, .badge-c {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge-a { background-color: #d4edda; color: #155724; }
+        .badge-b { background-color: #fff3cd; color: #856404; }
+        .badge-c { background-color: #f8d7da; color: #721c24; }
+
+        .empty-message {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-style: italic;
         }
 
         .access-denied-container {
@@ -127,118 +190,106 @@
 <body>
 
 <div sec:authorize="hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')">
-    <div style="margin-bottom: 15px;">
-        <a href="/analytics" class="back-btn">← Назад</a>
+    <div class="container">
+        <div class="back-row">
+            <a th:href="@{/analytics}" class="btn btn-back">
+                ← Назад
+            </a>
+        </div>
+
+        <h2>
+            Отчёт по оборачиваемости и ABC-анализу
+            <th:block th:if="${selectedWarehouseId != null}">
+                (склад №<span th:text="${selectedWarehouseId}"></span>)
+            </th:block>
+            <br>
+            <small>
+                Период:
+                <span th:text="${#temporals.format(selectedStart, 'dd.MM.yyyy')}"></span>
+                –
+                <span th:text="${#temporals.format(selectedEnd, 'dd.MM.yyyy')}"></span>
+            </small>
+        </h2>
+
+        <form th:action="@{/report/turnover}" method="get" class="filter-panel">
+            <div class="form-group">
+                <label for="warehouseId">Склад</label>
+                <select id="warehouseId" name="warehouseId">
+                    <option value="" th:selected="${selectedWarehouseId == null}">-- Все склады --</option>
+                    <option th:each="wh : ${warehouses}"
+                            th:value="${wh.id}"
+                            th:text="${wh.name}"
+                            th:selected="${selectedWarehouseId != null and selectedWarehouseId == wh.id}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="start">С</label>
+                <input type="date" id="start" name="start"
+                       th:value="${#temporals.format(selectedStart, 'yyyy-MM-dd')}"
+                       required/>
+            </div>
+
+            <div class="form-group">
+                <label for="end">По</label>
+                <input type="date" id="end" name="end"
+                       th:value="${#temporals.format(selectedEnd, 'yyyy-MM-dd')}"
+                       required/>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сформировать отчёт</button>
+
+            <div class="download-row">
+                <button type="button" class="btn btn-primary download-btn"
+                        onclick="downloadCsv()">
+                    📥 Скачать отчёт (CSV)
+                </button>
+            </div>
+        </form>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Группа ABC</th>
+                <th>Номенклатура</th>
+                <th class="text-end">Расход (шт)</th>
+                <th class="text-end">Ср. мес. расход (шт)</th>
+                <th class="text-end">Сумма расхода (руб)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row : ${turnoverList}">
+                <td>
+                    <span th:class="'badge-' + ${row.group.toLowerCase()}">
+                        <strong th:text="${row.group}"></strong>
+                    </span>
+                </td>
+                <td th:text="${row.nomenclatureName}"></td>
+
+                <td class="text-end"
+                    th:text="${row.totalQuantity != null ? row.totalQuantity : '—'}"></td>
+
+                <td class="text-end"
+                    th:text="${row.avgMonthlyQuantity != null ? row.avgMonthlyQuantity : '—'}"></td>
+
+                <td class="text-end"
+                    th:text="${row.totalAmount != null ? row.totalAmount + ' ₽' : '—'}"></td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(turnoverList)}">
+                <td colspan="5" class="empty-message">Нет данных за выбранный период</td>
+            </tr>
+            </tbody>
+        </table>
     </div>
-
-    <form th:action="@{/report/turnover}" method="get" class="filter-panel">
-        <div class="form-group">
-            <label for="warehouseId">Склад:</label>
-            <select id="warehouseId" name="warehouseId">
-                <option value="" th:selected="${selectedWarehouseId == null}">-- Все склады --</option>
-                <option th:each="wh : ${warehouses}"
-                        th:value="${wh.id}"
-                        th:text="${wh.name}"
-                        th:selected="${selectedWarehouseId != null and selectedWarehouseId == wh.id}">
-                </option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="start">С:</label>
-            <input type="date" id="start" name="start"
-                   th:value="${#temporals.format(selectedStart, 'yyyy-MM-dd')}"
-                   required/>
-        </div>
-
-        <div class="form-group">
-            <label for="end">По:</label>
-            <input type="date" id="end" name="end"
-                   th:value="${#temporals.format(selectedEnd, 'yyyy-MM-dd')}"
-                   required/>
-        </div>
-
-        <button type="submit" class="submit-btn">Сформировать отчёт</button>
-
-        <button type="button" class="download-btn"
-                onclick="downloadCsv()" style="margin-left: 10px;">
-            Скачать отчёт (CSV)
-        </button>
-    </form>
-
-    <h2>Отчёт по оборачиваемости и ABC-анализу
-        <th:block th:if="${selectedWarehouseId != null}">
-            (склад №<span th:text="${selectedWarehouseId}"></span>)
-        </th:block>
-        <br>
-        <small>Период:
-            <span th:text="${#temporals.format(selectedStart, 'dd.MM.yyyy')}"></span>
-            –
-            <span th:text="${#temporals.format(selectedEnd, 'dd.MM.yyyy')}"></span>
-        </small>
-    </h2>
-
-    <table>
-        <thead>
-        <tr style="background-color: #f8f9fa;">
-            <th style="width: 80px; padding: 8px; text-align: left;">Группа ABC</th>
-            <th style="padding: 8px; text-align: left;">Номенклатура</th>
-            <th style="padding: 8px; text-align: right;">Расход (шт)</th>
-            <th style="padding: 8px; text-align: right;">Ср. мес. расход (шт)</th>
-            <th style="padding: 8px; text-align: right;">Сумма расхода (руб)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="row : ${turnoverList}">
-            <td style="padding: 8px;">
-                <span th:class="'badge-' + ${row.group.toLowerCase()}"
-                      style="padding: 3px 6px; border-radius: 4px; font-weight: bold;">
-                    <strong th:text="${row.group}"></strong>
-                </span>
-            </td>
-            <td style="padding: 8px;" th:text="${row.nomenclatureName}"></td>
-
-            <td style="padding: 8px; text-align: right;">
-                <th:block th:if="${row.totalQuantity != null}">
-                    <span th:text="${row.totalQuantity}"></span>
-                </th:block>
-                <th:block th:unless="${row.totalQuantity != null}">—</th:block>
-            </td>
-
-            <td style="padding: 8px; text-align: right;">
-                <th:block th:if="${row.avgMonthlyQuantity != null}">
-                    <span th:text="${row.avgMonthlyQuantity}"></span>
-                </th:block>
-                <th:block th:unless="${row.avgMonthlyQuantity != null}">—</th:block>
-            </td>
-
-            <td style="padding: 8px; text-align: right;">
-                <th:block th:if="${row.totalAmount != null}">
-                    <span th:text="${row.totalAmount}"></span>&nbsp;₽
-                </th:block>
-                <th:block th:unless="${row.totalAmount != null}">—</th:block>
-            </td>
-        </tr>
-
-        <tr th:if="${#lists.isEmpty(turnoverList)}">
-            <td colspan="5" style="text-align: center; padding: 20px; color: #666;">
-                Нет данных за выбранный период
-            </td>
-        </tr>
-        </tbody>
-    </table>
 </div>
 
 <div sec:authorize="!hasAnyRole('VIEWER', 'ADMIN', 'STOREKEEPER')" class="access-denied-container">
     <div class="access-denied-icon">🚫</div>
     <h2>Доступ запрещён</h2>
     <p>У вас недостаточно прав для просмотра отчётов по оборачиваемости.</p>
-    <a th:href="@{/}" class="btn btn-primary" style="
-        padding: 9px 20px;
-        background-color: #3498db;
-        color: white;
-        border-radius: 4px;
-        text-decoration: none;">Вернуться на главную</a>
+    <a th:href="@{/}" class="btn btn-back" style="margin-top: 10px;">Вернуться на главную</a>
 </div>
 
 <script>

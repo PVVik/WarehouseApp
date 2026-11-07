@@ -1,7 +1,9 @@
 package com.example.warehouseApp.controller.nomenclature;
 
 import com.example.warehouseApp.dto.NomenclatureDto;
-import com.example.warehouseApp.service.BaseService;
+import com.example.warehouseApp.parser.ImportResult;
+import com.example.warehouseApp.parser.nomenclature.NomenclatureCsvParser;
+import com.example.warehouseApp.service.nomenclature.NomenclatureService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -11,14 +13,66 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.io.IOException;
 
 @Controller
 @RequestMapping("/nomenclature")
 @RequiredArgsConstructor
 public class NomenclatureController {
 
-    private final BaseService<NomenclatureDto> nomenclatureService;
+    private final NomenclatureService nomenclatureService;
+    private final NomenclatureCsvParser nomenclatureCsvParser;
+
+    @GetMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String importForm() {
+        return "nomenclature/import.html";
+    }
+
+    @PostMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String importCsv(@RequestParam("file") MultipartFile file,
+                            RedirectAttributes redirectAttributes) {
+
+        if (file == null || file.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Выберите файл для загрузки");
+            return "redirect:/nomenclature/import";
+        }
+        if (!file.getOriginalFilename().toLowerCase().endsWith(".csv")) {
+            redirectAttributes.addFlashAttribute("error", "Поддерживаются только файлы .csv");
+            return "redirect:/nomenclature/import";
+        }
+
+        NomenclatureCsvParser.ParseResult parsed;
+        try {
+            parsed = nomenclatureCsvParser.parse(file);
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("error", "Не удалось прочитать файл. Попробуйте ещё раз");
+            return "redirect:/nomenclature/import";
+        }
+
+        if (parsed.rows().isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Не удалось импортировать ни одной строки: "
+                    + String.join("; ", parsed.errors()));
+            return "redirect:/nomenclature/import";
+        }
+
+        ImportResult result = nomenclatureService.importAll(parsed.rows());
+
+        String summary = "Создано позиций: " + result.created()
+                + ", обновлено: " + result.updated() + ".";
+        if (parsed.hasErrors()) {
+            summary += " Пропущено строк с ошибками: " + parsed.errors().size() + ". "
+                    + String.join("; ", parsed.errors());
+            redirectAttributes.addFlashAttribute("error", summary);
+        } else {
+            redirectAttributes.addFlashAttribute("message", summary);
+        }
+        return "redirect:/nomenclature";
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STOREKEEPER', 'VIEWER')")

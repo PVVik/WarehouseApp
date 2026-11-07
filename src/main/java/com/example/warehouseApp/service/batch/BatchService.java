@@ -3,6 +3,8 @@ package com.example.warehouseApp.service.batch;
 import com.example.warehouseApp.dto.BatchDto;
 import com.example.warehouseApp.dto.BatchWithStockDto;
 import com.example.warehouseApp.model.Batch;
+import com.example.warehouseApp.parser.ImportResult;
+import com.example.warehouseApp.parser.batch.BatchCsvRow;
 import com.example.warehouseApp.service.BaseService;
 
 import java.util.List;
@@ -13,5 +15,7 @@ public interface BatchService extends BaseService<BatchDto> {
     List<BatchWithStockDto> getBatchesWithStockOnWarehouse(Long nomenclatureId, Long warehouseId);
 
     Optional<Batch> findByBatchNumberAndNomenclatureId(String batchNumber, Long nomenclatureId);
+
+    ImportResult importAll(List<BatchCsvRow> rows);
 
 }

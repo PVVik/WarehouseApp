@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface StorageLocationRepository extends JpaRepository<StorageLocation, Long>,
         JpaSpecificationExecutor<StorageLocation> {
@@ -27,5 +28,7 @@ public interface StorageLocationRepository extends JpaRepository<StorageLocation
             @Param("nomenclatureId") Long nomenclatureId,
             @Param("warehouseId") Long warehouseId
     );
+
+    Optional<StorageLocation> findByWarehouseIdAndCodeIgnoreCase(Long warehouseId, String code);
 
 }
